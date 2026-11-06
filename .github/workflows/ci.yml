@@ -1,0 +1,45 @@
+name: Python and Docker checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Test Python server and grading
+        run: python -m unittest discover -s tests -v
+      - name: Check frontend JavaScript
+        run: node --check frontend/app.js
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate Compose
+        run: docker compose config --quiet
+      - name: Build and start
+        run: docker compose up -d --build
+      - name: Check website and Python API
+        shell: bash
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8765/api/health; then break; fi
+            sleep 1
+          done
+          curl --fail http://127.0.0.1:8765/
+          curl --fail --silent http://127.0.0.1:8765/api/health | python -c "import json,sys; assert json.load(sys.stdin)['backend']=='python'"
+          curl --fail --silent -H 'Content-Type: application/json' -d '{"kind":"exam","answers":["<","7/8","36","162","247500"]}' http://127.0.0.1:8765/api/grade | python -c "import json,sys; assert json.load(sys.stdin)['score']==10"
+      - name: Logs
+        if: failure()
+        run: docker compose logs
+      - name: Stop containers
+        if: always()
+        run: docker compose down

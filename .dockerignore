@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+work
+__pycache__
+*.pyc
+*.jpg
+.env
+.env.*
+AGENTS.md
+docs
+tests
