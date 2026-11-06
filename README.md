@@ -32,7 +32,8 @@ Chỉ các tệp giao diện trong danh sách cho phép được phục vụ. RE
 ## GitHub
 .github/workflows/ci.yml kiểm thử Python 3.12/3.13, cú pháp JS và build/chạy Docker rồi kiểm tra website/API.
 Kho đích đã xác nhận: https://github.com/nguyenvietanhcre-ai/5b (public).
-Hiện mới lưu phiên bản Git cục bộ và cấu hình origin; chưa đưa mã lên. Kết nối GitHub bị từ chối quyền ghi (403), Git trên máy chưa đăng nhập. GitHub Actions chưa chạy. Sau khi cấp quyền/đăng nhập, dùng git push -u origin main và xem tab Actions.
+Đã đẩy source code lên nhánh main qua Git trên máy sau khi đăng nhập GitHub. Phiên bản source e3949a6 đã vượt qua kiểm thử Python/JS và Docker trên GitHub Actions: https://github.com/nguyenvietanhcre-ai/5b/actions/runs/42186397763.
+Cập nhật tiếp: git push origin main. Docker vẫn chưa chạy trực tiếp trên máy Windows này.
 
 ## Bộ nhớ cho phiên sau
 AGENTS.md hướng dẫn đọc docs/PROJECT_MEMORY.md và docs/SESSION_LOG.md lúc bắt đầu.

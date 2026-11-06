@@ -36,7 +36,7 @@ Dockerfile + compose.yaml package the demo; no auth/database yet.
 Server exposes explicit frontend files only, not internal project files.
 
 ## Environment / external state
-GitHub destination confirmed by user: https://github.com/nguyenvietanhcre-ai/5b (public). Connected GitHub read access verified; repository initially empty. Connector create_file failed with HTTP 403 Resource not accessible by integration. Local Git origin is configured. CLI push also failed because Git Credential Manager has no usable GitHub sign-in in noninteractive mode. No files uploaded; GitHub Actions not run. Local initial commit: 5749a47.
+GitHub: https://github.com/nguyenvietanhcre-ai/5b (public), branch main. User completed Git Credential Manager browser sign-in on 2026-11-06. CLI push succeeded; main at e3949a6b371d92e547390a0285d492608c271672 matched local HEAD after source upload. GitHub Actions run 42186397763 passed Python/JS and Docker checks. Earlier connector write 403 does not block authenticated CLI push. Use Git CLI for pushes; do not assume connector write permissions changed.
 Docker executable not found during inspection; local container build/run unverified.
 System python is an uninstalled Microsoft Store alias.
 Bundled Python 3.12.14 is usable for local verification; start-demo.ps1 locates it without committing a user-specific absolute path.

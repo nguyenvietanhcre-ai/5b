@@ -19,3 +19,11 @@
 - Connector write denied with HTTP 403 Resource not accessible by integration. CLI push could not authenticate; no remote changes. No GitHub Actions runs.
 - User action needed: enable content/workflow write access for the GitHub connection, or sign into Git on the machine; then push main and inspect CI. No passwords/tokens requested in chat.
 - Python demo remains available at http://127.0.0.1:8766. Local Docker unavailable.
+
+## 2026-11-06 — GitHub source upload completed
+- User explicitly requested uploading local source to GitHub.
+- User completed Git Credential Manager browser authentication.
+- Pushed main to origin; local and remote matched e3949a6b371d92e547390a0285d492608c271672.
+- GitHub Actions Python and Docker checks passed: https://github.com/nguyenvietanhcre-ai/5b/actions/runs/42186397763.
+- Updated README and durable project memory to remove the resolved CLI authentication blocker; these documentation updates are committed and pushed as a follow-up.
+- No skills created; previous skill proposals still await user confirmation.
