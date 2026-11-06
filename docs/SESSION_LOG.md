@@ -13,3 +13,9 @@
 - Docker not found; no local container run claimed. Browser recheck of this migration was blocked by a Windows app helper startup error; earlier demo visual checks remain valid only for the original UI.
 - GitHub connected; user selected public repo nguyenvietanhcre-ai/5b. Repo confirmed initially empty. Upload in progress; record resulting commit/CI outcome below.
 - Next: inspect GitHub CI after upload, confirm proposed skills, then real authentication/database/teacher workflows.
+
+### Final result of GitHub attempt
+- Created local Git commit 5749a47 and configured origin https://github.com/nguyenvietanhcre-ai/5b.git.
+- Connector write denied with HTTP 403 Resource not accessible by integration. CLI push could not authenticate; no remote changes. No GitHub Actions runs.
+- User action needed: enable content/workflow write access for the GitHub connection, or sign into Git on the machine; then push main and inspect CI. No passwords/tokens requested in chat.
+- Python demo remains available at http://127.0.0.1:8766. Local Docker unavailable.
