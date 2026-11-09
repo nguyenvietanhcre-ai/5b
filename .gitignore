@@ -7,3 +7,8 @@ work/
 !.env.example
 .DS_Store
 Thumbs.db
+
+# Detailed chat history stays local unless explicitly approved for publication.
+/docs/chat/*.md
+/docs/chat/*.json
+!/docs/chat/README.md

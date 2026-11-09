@@ -5,13 +5,19 @@ $candidates = @(
     (Join-Path $PSScriptRoot '.venv\Scripts\python.exe'),
     (Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe')
 )
-$pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+$pythonCommand = Get-Command python.exe -CommandType Application -ErrorAction SilentlyContinue
 if ($pythonCommand) { $candidates += $pythonCommand.Source }
 $selectedPython = $null
 foreach ($candidate in $candidates) {
-    if ($candidate -and (Test-Path -LiteralPath $candidate) -and $candidate -notlike '*\Microsoft\WindowsApps\python.exe') {
-        $selectedPython = $candidate
-        break
+    if (-not $candidate -or -not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
+    try {
+        & $candidate -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 12) else 1)' 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $selectedPython = $candidate
+            break
+        }
+    } catch {
+        # An unavailable Windows execution alias can fail before Python starts.
     }
 }
 if (-not $selectedPython) {

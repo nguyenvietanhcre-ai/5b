@@ -1,8 +1,12 @@
+name: mam-toan
 services:
   web:
-    build: .
+    image: mam-toan:local
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "127.0.0.1:8765:8000"
+      - "127.0.0.1:${MAM_TOAN_PORT:-8765}:8000"
     init: true
     restart: unless-stopped
     read_only: true
@@ -12,3 +16,8 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
