@@ -12,12 +12,32 @@ const modal=$('#modal');
 function showModal(html){$('#modal-body').innerHTML=html;if(!modal.open)modal.showModal();}
 $('#close-modal').onclick=()=>modal.close();
 modal.addEventListener('click',e=>{if(e.target===modal){const r=modal.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)modal.close();}});
-function updateAccount(){$('#account').textContent=data.name?'Lớp của '+String(data.name).split(' ').slice(-1)[0]+' ↗':'Vào lớp học ↗';}
+function updateAccount(){$('#account').textContent=data.name?'Lớp của '+String(data.name).split(' ').slice(-1)[0]+' ↗':'Đăng nhập';}
 function account(next){if(data.name){if(next)next();else location.hash='dashboard';return;}
 showModal('<div class="modal-mark" aria-hidden="true">🌱</div><span class="eyebrow">GÓC HỌC TẬP CỦA EM</span><h2 class="modal-title">Chào em, nhà thám hiểm!</h2><p class="modal-copy">Đặt tên để trải nghiệm lớp học 5BMath.</p><form id="name-form"><label for="student-name">Tên em là gì?</label><input class="name-input" id="student-name" placeholder="Ví dụ: Minh Anh" maxlength="40" autocomplete="given-name" required><button class="btn dark" type="submit">Bắt đầu trải nghiệm ↗</button></form><p class="modal-note">TÀI KHOẢN MINH HỌA • Không có mật khẩu. Tên và tiến độ chỉ lưu trong trình duyệt này. Chưa có đăng nhập thật hoặc phân quyền bảo vệ tài liệu.</p>');
 $('#name-form').onsubmit=e=>{e.preventDefault();const name=$('#student-name').value.trim();if(!name){$('#student-name').setCustomValidity('Em hãy nhập tên để tiếp tục.');$('#student-name').reportValidity();return;}data.name=name;save();updateAccount();modal.close();if(next)next();else location.hash='dashboard';};$('#student-name').oninput=e=>e.target.setCustomValidity('');
 }
-$('#account').onclick=()=>account();$('#menu').onclick=()=>{const open=$('nav').classList.toggle('open');$('#menu').setAttribute('aria-expanded',String(open));};
+const primaryNav = $('#primary-nav');
+const menuButton = $('#menu');
+function setMenu(open) {
+    primaryNav.classList.toggle('open', open);
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? 'Đóng menu' : 'Mở menu');
+}
+menuButton.onclick = () => setMenu(!primaryNav.classList.contains('open'));
+$('#account').onclick = () => {
+    setMenu(false);
+    account();
+};
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && primaryNav.classList.contains('open')) {
+        setMenu(false);
+        if (menuButton.offsetWidth) menuButton.focus();
+    }
+});
+document.addEventListener('click', event => {
+    if (!event.target.closest('.site-header')) setMenu(false);
+});
 const illustration=`<svg viewBox="20 24 540 428" role="img" aria-label="Linh vật mầm cây đọc sách trong Vườn Toán, cạnh dấu cộng và phân số một phần hai">
   <defs>
     <pattern id="garden-dots" width="23" height="23" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#809b58"/></pattern>
@@ -67,11 +87,17 @@ const activities=[
     ['exam','Góc luyện thi','Thử sức với đề luyện 15 phút.','<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>'],
     ['game','Chơi cùng toán','Xếp số và mở khóa thử thách mới.','<rect x="2" y="6" width="20" height="12" rx="5"/><path d="M6 12h5m-2.5-2.5v5m6.5-2.5h.01m3 0h.01"/>']
 ];
+const learningSteps = [
+    ['Khởi động', 'Làm một bài ngắn để tự xem mình đã nắm vững phần nào.'],
+    ['Học theo chủ đề', 'Đọc ví dụ minh họa và thử giải lại theo cách của em.'],
+    ['Luyện tập', 'Làm bài từ cơ bản đến vận dụng, xem lại những câu còn nhầm.'],
+    ['Tự kiểm tra', 'Thử sức với đề bấm giờ và chọn phần cần ôn tiếp.']
+];
 function home(){
     return `<div class="wrap">
-      <section class="hero">
+      <section class="hero home-anchor" id="home" aria-labelledby="home-heading" tabindex="-1">
         <div><span class="eyebrow pill"><span class="dot"></span>TOÁN LỚP 5 · KẾT NỐI TRI THỨC</span>
-          <h1>Gieo một mầm toán,<br><em>mở ngàn khám phá.</em></h1>
+          <h1 id="home-heading">Gieo một mầm toán,<br><em>mở ngàn khám phá.</em></h1>
           <p>Học chắc kiến thức, vui luyện tư duy và tự tin bước vào lớp 6.</p>
           <div class="actions">
             <a class="btn dark" href="#courses">Khám phá bài học <span aria-hidden="true">→</span></a>
@@ -80,14 +106,58 @@ function home(){
         </div>
         <div class="art">${illustration}</div>
       </section>
-      <section class="section" aria-labelledby="activity-heading">
-        <div class="section-head"><div><span class="eyebrow">GÓC HỌC TẬP</span><h2 id="activity-heading">Hôm nay học gì?</h2><p>Chọn một hoạt động để bắt đầu.</p></div></div>
+      <section class="section home-anchor" id="quy-trinh-hoc" aria-labelledby="process-heading" tabindex="-1">
+        <div class="section-head"><div><span class="eyebrow">Quy trình học</span><h2 id="process-heading">Bốn bước học Toán mỗi ngày</h2><p>Gợi ý cách tự học với các bài mẫu của 5BMath.</p></div></div>
+        <ol class="learning-steps">
+          ${learningSteps.map(([title, description], index) => `<li class="panel"><span class="step-number" aria-hidden="true">0${index + 1}</span><h3>${title}</h3><p>${description}</p></li>`).join('')}
+        </ol>
+      </section>
+      <section class="section home-anchor" id="chuong-trinh-hoc" aria-labelledby="program-heading" tabindex="-1">
+        <div class="section-head">
+          <div><span class="eyebrow">Chương trình học</span><h2 id="program-heading">Từ Toán lớp 5 đến luyện thi vào 6</h2><p>Khám phá bài nền tảng, chuyên đề nâng cao và đề luyện mẫu.</p></div>
+          <a class="text-link" href="#courses">Xem tất cả bài học ↗</a>
+        </div>
+        <div class="grid">${cards()}</div>
+      </section>
+      <section class="section home-anchor" id="tai-nguyen" aria-labelledby="resources-heading" tabindex="-1">
+        <div class="section-head">
+          <div><span class="eyebrow">Tài nguyên</span><h2 id="resources-heading">Góc học liệu và trò chơi</h2><p>Đọc bài mẫu, tải phiếu phần trăm hoặc luyện xếp số thập phân cùng Sóc.</p></div>
+          <button class="text-link" type="button" data-download>Tải phiếu bài tập ↗</button>
+        </div>
         <div class="activity-grid">${activities.map(([url,title,desc,icon])=>`<a class="activity" href="#${url}">
           <span class="activity-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></span>
           <span class="activity-arrow" aria-hidden="true">→</span><span class="activity-copy"><strong>${title}</strong><span>${desc}</span></span>
         </a>`).join('')}</div>
-      </section>`
-      + '<section class="benefits"><div class="benefit"><span>▤</span><div><b>Bám sát nền tảng</b><small>Định hướng Kết nối tri thức</small></div></div><div class="benefit"><span>✧</span><div><b>Khơi mở tư duy</b><small>Chuyên đề từ dễ đến khó</small></div></div><div class="benefit"><span>⚑</span><div><b>Tự tin vào lớp 6</b><small>Luyện tập theo mục tiêu</small></div></div><div class="benefit"><span>♧</span><div><b>Học vui, nhớ lâu</b><small>Trò chơi và hình minh họa</small></div></div></section><section class="section"><div class="section-head"><div><span class="eyebrow"><span class="dot"></span>KHU VƯỜN KIẾN THỨC</span><h2>Khám phá từng bài học</h2><p>Chọn một bài học nhỏ. Bắt đầu một bước tiến mới.</p></div><a class="text-link" href="#courses">Xem bài học ↗</a></div><div class="grid">'+cards()+'</div></section><section class="banner section"><div><span class="eyebrow">VỮNG LỚP 5 · TỰ TIN VÀO 6</span><h2>Đường đến mục tiêu lớn,<br>bắt đầu từ bước nhỏ.</h2><p>Hiểu kiến thức, luyện cách suy nghĩ, rồi thử sức. 5BMath đồng hành trên từng chặng đường.</p><a class="btn orange small" href="#dashboard">Khám phá lớp học ↗</a></div><div class="steps"><div class="step"><i>🌱</i>Vững nền tảng</div><span aria-hidden="true">→</span><div class="step"><i>✧</i>Luyện tư duy</div><span aria-hidden="true">→</span><div class="step"><i>⚑</i>Sẵn sàng vào 6</div></div></section></div>';
+      </section>
+      <section class="banner section home-anchor" id="thi-thu" aria-labelledby="exam-heading" tabindex="-1">
+        <div><span class="eyebrow">Thi Thử</span><h2 id="exam-heading">Thử sức với đề Toán vào lớp 6</h2><p>Đề mẫu tự biên soạn gồm 5 câu về số học, phần trăm và hình học. Xem điểm và lời giải sau khi nộp.</p><a class="btn orange small" href="#exam">Bắt đầu thi thử →</a></div>
+        <div class="steps">
+          <div class="step"><i>5</i>Câu hỏi</div>
+          <div class="step"><i>15</i>Phút</div>
+          <div class="step"><i>10</i>Điểm tối đa</div>
+        </div>
+      </section>
+      <section class="section home-anchor" id="tin-tuc" aria-labelledby="news-heading" tabindex="-1">
+        <div class="section-head"><div><span class="eyebrow">Tin Tức</span><h2 id="news-heading">Có gì mới ở Vườn Toán?</h2></div></div>
+        <article class="panel home-note">
+          <span class="tag">Bài viết mẫu</span>
+          <h3>Một mẹo nhỏ để so sánh số thập phân</h3>
+          <p>So sánh phần nguyên trước. Nếu bằng nhau, nhìn từng chữ số sau dấu phẩy từ trái sang phải. Thử áp dụng với 1,08 và 1,8 nhé!</p>
+          <a class="text-link" href="#lesson-decimal">Đọc bài học ↗</a>
+        </article>
+      </section>
+      <section class="section panel home-note home-anchor" id="tuyen-sinh" aria-labelledby="enrollment-heading" tabindex="-1">
+        <span class="eyebrow">Tuyển sinh</span>
+        <h2 id="enrollment-heading">Tìm hiểu lộ trình học cho con</h2>
+        <p>Lịch khai giảng và thông tin đăng ký đang được cập nhật. Trong thời gian này, phụ huynh có thể xem chương trình mẫu hoặc hỏi thêm qua Zalo.</p>
+        <a class="btn outline small" href="#chuong-trinh-hoc">Xem chương trình mẫu ↑</a>
+      </section>
+      <section class="section panel home-note home-anchor" id="tuyen-dung" aria-labelledby="careers-heading" tabindex="-1">
+        <span class="eyebrow">Tuyển dụng</span>
+        <h2 id="careers-heading">Đồng hành cùng 5BMath</h2>
+        <p>Thông tin vị trí, tiêu chí và cách ứng tuyển sẽ được đăng tại đây khi có đợt tuyển dụng.</p>
+      </section>
+    </div>`;
 }
 function coursePage(){return '<div class="wrap"><div class="page-head"><span class="eyebrow"><span class="dot"></span>HỌC MỖI NGÀY, LỚN MỖI NGÀY</span><h1 class="title">Khu vườn kiến thức</h1><p>Bắt đầu từ nền tảng, khám phá chuyên đề nâng cao và thử sức với những bài toán thú vị.</p></div><div class="filters" role="group" aria-label="Lọc bài học"><button class="filter active" data-filter="all">Tất cả bài học</button><button class="filter" data-filter="foundation">Nền tảng lớp 5</button><button class="filter" data-filter="advanced">Chuyên đề nâng cao</button><button class="filter" data-filter="exam">Luyện thi vào 6</button></div><div class="grid mb" id="course-list">'+cards()+'</div><div class="notice mb">Bộ học liệu mẫu tự biên soạn để duyệt trải nghiệm. Nội dung sẽ được đối chiếu đầy đủ với sách Kết nối tri thức trước khi mở khóa học chính thức.</div></div>';}
 function lessonPage(id){const percent=id==='percent';return '<div class="wrap"><div class="page-head"><div class="crumb"><a href="#courses">Bài học</a> / '+(percent?'Chuyên đề nâng cao':'Nền tảng lớp 5')+'</div><span class="tag '+(percent?'warm':'')+'">'+(percent?'NÂNG CAO':'NỀN TẢNG')+'</span><h1 class="title">'+(percent?'Hai lần thay đổi phần trăm':'So sánh số thập phân')+'</h1><p>'+(percent?'Đừng để hai con số giống nhau đánh lừa em!':'Cùng Thỏ và Sóc tìm hiểu bí quyết so sánh thật chính xác.')+'</p></div><div class="split"><article class="panel lesson">'+(percent?
@@ -137,5 +207,109 @@ document.querySelectorAll('[data-download]').forEach(b=>b.onclick=download);
 if($('#live-class'))$('#live-class').onclick=()=>showModal('<span class="eyebrow">BUỔI HỌC TRỰC TIẾP MẪU</span><h2 class="modal-title">45 phút khám phá phần trăm</h2><ol class="schedule"><li><b>5 phút:</b> Khởi động: tăng rồi giảm cùng tỉ lệ.</li><li><b>10 phút:</b> Giáo viên giải thích bằng sơ đồ giá tiền.</li><li><b>15 phút:</b> Học sinh tự làm và trình bày.</li><li><b>10 phút:</b> Chữa lỗi chọn sai giá trị gốc.</li><li><b>5 phút:</b> Câu hỏi cuối buổi, giao bài về nhà.</li></ol><div class="notice">Chưa có phòng Zoom/Meet thật. Liên kết sẽ chỉ hiển thị cho học sinh được cấp quyền khi triển khai hệ thống chính thức.</div>');
 if($('#submit-homework'))$('#submit-homework').onclick=()=>{const file=$('#homework-file').files[0];if(!file){toast('Em hãy chọn ảnh hoặc PDF trước nhé.');return;}if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type)){toast('Vui lòng chọn ảnh JPG, PNG, WebP hoặc PDF.');return;}if(file.size>10*1024*1024){toast('Tệp lớn hơn 10 MB. Em hãy chọn tệp nhỏ hơn.');return;}data.homework={name:file.name,date:new Date().toISOString()};save();$('#homework-status').textContent='Đã ghi nhận tên tệp: '+file.name+'. Chưa tải lên máy chủ hoặc gửi tới giáo viên.';toast('Đã ghi nhận bài nộp minh họa.');};
 }
-function render(){clearInterval(clock);let route=location.hash.slice(1)||'home';if(!['home','courses','lesson-decimal','lesson-percent','practice','exam','game','dashboard'].includes(route))route='home';$('#app').innerHTML=route==='home'?home():route==='courses'?coursePage():route.startsWith('lesson-')?lessonPage(route.slice(7)):route==='exam'?quizPage():route==='practice'?quizPage(true):route==='game'?gamePage():dashboard();document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('active',a.dataset.nav===(route.startsWith('lesson-')||route==='practice'?'courses':route)));$('nav').classList.remove('open');$('#menu').setAttribute('aria-expanded','false');updateAccount();bind(route);window.scrollTo(0,0);}
-window.addEventListener('hashchange',render);render();
+const pages = {
+    home, courses: coursePage,
+    'lesson-decimal': () => lessonPage('decimal'),
+    'lesson-percent': () => lessonPage('percent'),
+    practice: () => quizPage(true), exam: quizPage, game: gamePage, dashboard
+};
+const homeLinks = [...primaryNav.querySelectorAll('a')];
+let renderedRoute;
+
+function render(route = renderedRoute) {
+    clearInterval(clock);
+    $('#app').innerHTML = pages[route]();
+    if (route === renderedRoute) window.scrollTo({ top: 0, behavior: 'instant' });
+    renderedRoute = route;
+    updateAccount();
+    bind(route);
+}
+
+function navigate(focusAnchor = false) {
+    const fragment = location.hash.slice(1) || 'home';
+    const route = Object.hasOwn(pages, fragment) ? fragment : 'home';
+    if (route !== renderedRoute) render(route);
+    setMenu(false);
+    const section = route === 'home' && document.getElementById(fragment);
+    const anchor = section && section.classList.contains('home-anchor') ? section : null;
+    homeLinks.forEach(link => {
+        if (anchor && link.hash === '#' + anchor.id) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+    });
+    if (anchor && focusAnchor) anchor.focus({ preventScroll: true });
+    if (anchor && anchor.id !== 'home') anchor.scrollIntoView({ block: 'start' });
+    else window.scrollTo({ top: 0, behavior: route === 'home' ? 'auto' : 'instant' });
+}
+
+$('.site-header').addEventListener('click', event => {
+    const link = event.target.closest('a');
+    if (link && link.hash === (location.hash || '#home') &&
+        !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+        event.preventDefault();
+        navigate(true);
+    }
+});
+window.addEventListener('hashchange', () => navigate(true));
+navigate();
+
+const contactPanel = $('#contact-panel');
+const chatButton = $('#chat-toggle');
+const messengerButton = $('#messenger-toggle');
+const closeContactButton = $('#contact-close');
+let contactTrigger = null;
+
+function closeContact(restoreFocus = true) {
+    if (!contactTrigger) return;
+    contactPanel.hidden = true;
+    contactTrigger.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) contactTrigger.focus();
+    contactTrigger = null;
+}
+
+function toggleContact(button) {
+    if (contactTrigger === button) {
+        closeContact();
+        return;
+    }
+    closeContact(false);
+    contactTrigger = button;
+    const chat = button === chatButton;
+    $('#contact-title').textContent = chat ? 'Chat với 5BMath' : 'Messenger 5BMath';
+    $('#web-chat').hidden = !chat;
+    $('#messenger-info').hidden = chat;
+    contactPanel.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
+    closeContactButton.focus({ preventScroll: true });
+}
+
+chatButton.onclick = () => toggleContact(chatButton);
+messengerButton.onclick = () => toggleContact(messengerButton);
+closeContactButton.onclick = () => closeContact();
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && event.target.closest('.contact-dock')) closeContact();
+});
+document.addEventListener('click', event => {
+    if (!event.target.closest('.contact-dock')) closeContact(false);
+});
+
+const chatAnswers = {
+    learning: ['5BMath có bài mẫu về số thập phân và phần trăm, cùng các bài vận dụng chuẩn bị lên lớp 6.', '#chuong-trinh-hoc', 'Xem chương trình học'],
+    exam: ['Bạn có thể làm đề mẫu 5 câu trong 15 phút. Trang sẽ hiện điểm và lời giải sau khi nộp bài.', '#thi-thu', 'Xem mục Thi Thử'],
+    enrollment: ['Thông tin khai giảng đang được cập nhật. Phụ huynh có thể hỏi thêm qua nút Zalo bên dưới.', '#tuyen-sinh', 'Xem mục Tuyển sinh']
+};
+const chatLink = $('#chat-link');
+const topicButtons = [...document.querySelectorAll('[data-chat-topic]')];
+topicButtons.forEach(button => {
+    button.onclick = () => {
+        const [answer, href, label] = chatAnswers[button.dataset.chatTopic];
+        topicButtons.forEach(topic => topic.setAttribute('aria-pressed', String(topic === button)));
+        $('#chat-answer').textContent = answer;
+        chatLink.href = href;
+        chatLink.textContent = label + ' ↗';
+        chatLink.hidden = false;
+    };
+});
+chatLink.onclick = () => {
+    closeContact();
+    if (chatLink.hash === location.hash) navigate(true);
+};
