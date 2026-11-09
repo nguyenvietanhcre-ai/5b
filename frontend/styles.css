@@ -57,3 +57,12 @@
     html { scroll-behavior: auto; }
     .btn, .card, #toast { transition: none; }
 }
+
+.brand, .footer-brand { min-height: 44px; }
+.brand img, .footer-brand img { display: block; max-width: 100%; height: auto; }
+.brand img { width: 192px; }
+.footer-brand img { width: 144px; }
+
+@media (max-width: 820px) {
+    .brand img { width: clamp(120px, 39vw, 158px); }
+}

@@ -8,7 +8,8 @@ from .content import grade
 
 FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 ASSETS = {"/": "index.html", "/index.html": "index.html",
-          "/styles.css": "styles.css", "/app.js": "app.js"}
+          "/styles.css": "styles.css", "/app.js": "app.js",
+          "/5bmath-logo.svg": "5bmath-logo.svg", "/5bmath-icon.svg": "5bmath-icon.svg"}
 MAX_BODY = 16384
 
 class Handler(BaseHTTPRequestHandler):
@@ -32,7 +33,8 @@ class Handler(BaseHTTPRequestHandler):
         elif route in ASSETS:
             file = FRONTEND / ASSETS[route]
             try:
-                mime = {".js":"text/javascript", ".css":"text/css", ".html":"text/html"}[file.suffix]
+                mime = {".js":"text/javascript", ".css":"text/css", ".html":"text/html",
+                        ".svg":"image/svg+xml"}[file.suffix]
                 self.respond(200, file.read_bytes(), mime + "; charset=utf-8")
             except OSError:
                 self.json_response(500, {"error":"Frontend unavailable"})

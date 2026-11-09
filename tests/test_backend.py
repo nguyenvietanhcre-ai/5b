@@ -42,8 +42,11 @@ class HttpTests(unittest.TestCase):
     def test_health_frontend(self):
         with urlopen(self.base+"/api/health",timeout=5) as response:
             self.assertEqual(json.load(response)["backend"], "python")
-        for route, expected in [("/","Mầm"),("/app.js","submitQuiz"),("/styles.css",".hero")]:
+        for route, expected in [("/","5BMath"),("/app.js","submitQuiz"),("/styles.css",".hero"),
+                                ("/5bmath-logo.svg","5BMath"),("/5bmath-icon.svg","<svg")]:
             with self.subTest(route=route), urlopen(self.base+route,timeout=5) as response:
+                if route.endswith(".svg"):
+                    self.assertEqual(response.headers.get_content_type(), "image/svg+xml")
                 self.assertIn(expected, response.read().decode())
     def test_internal_files_not_served(self):
         for route in ["/README.md","/AGENTS.md","/backend/server.py","/../README.md","/%2e%2e/README.md","/.git/config"]:

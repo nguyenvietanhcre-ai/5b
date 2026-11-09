@@ -24,7 +24,7 @@ jobs:
       - name: Prepare static demo
         run: |
           mkdir _site
-          cp frontend/{index.html,styles.css,app.js} _site/
+          cp frontend/{index.html,styles.css,app.js,5bmath-logo.svg,5bmath-icon.svg} _site/
           sed -i 's/data-grading="server"/data-grading="browser"/' _site/index.html
           grep -q 'data-grading="browser"' _site/index.html
       - uses: actions/upload-pages-artifact@v4
