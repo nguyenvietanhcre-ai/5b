@@ -63,12 +63,12 @@ Python phục vụ giao diện và chấm bài qua POST /api/grade; GET /api/hea
 Chỉ các tệp giao diện trong danh sách cho phép được phục vụ. README, .git và tài liệu nội bộ không công khai.
 
 ## GitHub
-.github/workflows/pages.yml dựng bản thử công khai trên GitHub Pages từ ba tệp giao diện trong frontend/. Bản Pages chấm bài bằng JavaScript và lưu hồ sơ mẫu trong trình duyệt. Khi chạy bằng Python hoặc Docker, giao diện dùng API Python.
+[Mở bản thử Mầm Toán](https://nguyenvietanhcre-ai.github.io/5b/) trên điện thoại, máy tính bảng hoặc máy tính.
+.github/workflows/pages.yml dựng bản thử công khai từ ba tệp giao diện trong frontend/. Bản Pages chấm bài bằng JavaScript và lưu hồ sơ mẫu trong trình duyệt. Khi chạy bằng Python hoặc Docker, giao diện dùng API Python.
 .github/workflows/ci.yml kiểm thử Python 3.12/3.13, cú pháp JS và build/chạy Docker rồi kiểm tra website/API.
 Kho đích đã xác nhận: https://github.com/nguyenvietanhcre-ai/5b (public).
 Đã đẩy source code lên nhánh main qua Git trên máy sau khi đăng nhập GitHub. Phiên bản source e3949a6 đã vượt qua kiểm thử Python/JS và Docker trên GitHub Actions: https://github.com/nguyenvietanhcre-ai/5b/actions/runs/42186397763.
 Trong GitHub Desktop, mở kho cục bộ ở F:\ChatGPT Math Project. Nếu ứng dụng đang hiển thị bản sao 5b ở Documents\GitHub\5b, dùng File → Add local repository để thêm đúng thư mục trên ổ F. Xem thay đổi, commit các tệp cần thiết, rồi push lên origin khi có yêu cầu.
-Ngày 08/11/2026, GitHub Desktop đã mở kho trên ổ F và Git đã kiểm tra kết nối tới origin. Các sửa đổi cho bản chạy thử đang ở máy cục bộ.
 
 ## Bộ nhớ cho phiên sau
 AGENTS.md bắt buộc mọi phiên đọc docs/PROJECT_MEMORY.md, docs/SESSION_LOG.md và docs/chat/README.md lúc bắt đầu.
