@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'backend/server.py'
+      - 'scripts/*pages*'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -21,12 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: actions/configure-pages@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Prepare static demo
-        run: |
-          mkdir _site
-          cp frontend/{index.html,styles.css,app.js,5bmath-logo.svg,5bmath-icon.svg} _site/
-          sed -i 's/data-grading="server"/data-grading="browser"/' _site/index.html
-          grep -q 'data-grading="browser"' _site/index.html
+        run: node scripts/build-pages.cjs _site github
+      - name: Check indexable pages
+        run: python -m scripts.check_pages _site github
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

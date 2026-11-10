@@ -53,6 +53,17 @@ class HttpTests(unittest.TestCase):
             with self.subTest(route=route), self.assertRaises(HTTPError) as error:
                 urlopen(self.base+route,timeout=5)
             self.assertEqual(error.exception.code,404)
+    def test_clean_page_routes(self):
+        with urlopen(self.base + "/so-sanh-so-thap-phan?nguon=cu", timeout=5) as response:
+            self.assertEqual(response.geturl(), self.base + "/so-sanh-so-thap-phan/?nguon=cu")
+            html = response.read().decode()
+            self.assertIn('data-page="lesson-decimal" data-grading="server"', html)
+            self.assertIn('<base href="../">', html)
+        with urlopen(self.base + "/goc-hoc-tap/", timeout=5) as response:
+            self.assertIn('<meta name="robots" content="noindex">', response.read().decode())
+        with self.assertRaises(HTTPError) as error:
+            urlopen(self.base + "/so-sanh-so-thap-phan/khong-co/", timeout=5)
+        self.assertEqual(error.exception.code, 404)
     def test_grade_api(self):
         payload={"kind":"exam","answers":["<","7/8","36","162","247500"]}
         req=Request(self.base+"/api/grade",json.dumps(payload).encode(),{"Content-Type":"application/json"})

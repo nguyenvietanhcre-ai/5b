@@ -10,6 +10,15 @@ FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 ASSETS = {"/": "index.html", "/index.html": "index.html",
           "/styles.css": "styles.css", "/app.js": "app.js",
           "/5bmath-logo.svg": "5bmath-logo.svg", "/5bmath-icon.svg": "5bmath-icon.svg"}
+PAGES = {
+    "/bai-hoc-toan-lop-5/": "courses",
+    "/so-sanh-so-thap-phan/": "lesson-decimal",
+    "/hai-lan-thay-doi-phan-tram/": "lesson-percent",
+    "/luyen-tap-so-thap-phan/": "practice",
+    "/de-thi-thu-toan-vao-lop-6/": "exam",
+    "/tro-choi-xep-so-thap-phan/": "game",
+    "/goc-hoc-tap/": "dashboard",
+}
 MAX_BODY = 16384
 
 class Handler(BaseHTTPRequestHandler):
@@ -27,17 +36,30 @@ class Handler(BaseHTTPRequestHandler):
         self.respond(status, json.dumps(payload, ensure_ascii=False).encode(),
                      "application/json; charset=utf-8")
     def do_GET(self):
-        route = unquote(urlsplit(self.path).path)
+        url = urlsplit(self.path)
+        route = unquote(url.path)
         if route == "/api/health":
             self.json_response(200, {"status": "ok", "backend": "python", "mode": "demo"})
-        elif route in ASSETS:
-            file = FRONTEND / ASSETS[route]
+        elif route in ASSETS or route in PAGES:
+            page = PAGES.get(route)
+            file = FRONTEND / ("index.html" if page else ASSETS[route])
             try:
                 mime = {".js":"text/javascript", ".css":"text/css", ".html":"text/html",
                         ".svg":"image/svg+xml"}[file.suffix]
-                self.respond(200, file.read_bytes(), mime + "; charset=utf-8")
+                body = file.read_bytes()
+                if page:
+                    body = body.replace(b'<html lang="vi"', f'<html lang="vi" data-page="{page}"'.encode(), 1)
+                    body = body.replace(b"<head>", b'<head>\n    <base href="../">', 1)
+                    if page == "dashboard":
+                        body = body.replace(b"</head>", b'    <meta name="robots" content="noindex">\n</head>', 1)
+                self.respond(200, body, mime + "; charset=utf-8")
             except OSError:
                 self.json_response(500, {"error":"Frontend unavailable"})
+        elif route + "/" in PAGES:
+            self.send_response(308)
+            self.send_header("Location", route + "/" + ("?" + url.query if url.query else ""))
+            self.send_header("Content-Length", "0")
+            self.end_headers()
         else:
             self.json_response(404, {"error":"Not found"})
     def do_HEAD(self):
