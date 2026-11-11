@@ -1,0 +1,40 @@
+{
+  "mode": "built-in image_gen",
+  "createdAt": "2026-11-11",
+  "references": [
+    "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png#row0-col0",
+    "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png"
+  ],
+  "prompt": "Use case: stylized-concept. Asset type: transparent game animation sprite sheet, 4 rows by 4 columns, exactly 16 separate full-body poses of ONE identical bee character. Input image 1 is the character identity reference: ONLY the bee in TOP LEFT cell of the six-character board (ignore all sea creatures and text). Input image 2 is material/style reference only: 5BMath Mầm Sách and Cáo Nâu, warm matte soft clay/felt toy, brown eyes, apricot cheeks. Do not include sprout, book, fox or other creatures.\nCreate a clean production sprite atlas on TRUE transparent alpha, 2048x2048 square if possible. Exactly uniform 4x4 grid with no visible dividers, no text, no borders, generous transparent gutters. Each bee contained within its cell at same scale and viewpoint, facing three-quarter RIGHT. Body plump gold yellow with dark warm brown abdomen stripes, round joyful face and huge glossy brown eyes, round apricot cheeks, two brown antennae tipped gold, exactly SIX small brown legs (three each side), exactly FOUR translucent cream wings (two large upper and two smaller lower), no human arms, no stinger emphasis. Preserve shape/recognition from reference. Keep both wings per side visually separable and all appendages within each cell.\nRow 1 cols1-4: hover neutral smiling, wings raised; hover wings lowered; windup lean back with focused face and antennae forward; joyful lifted victory hover with cheerful eyes.\nRow 2 cols1-4: attack ready focused lean; quick forward flying dash legs tucked; forward flying strike with determined friendly expression; recover upright smile.\nRow 3 cols1-4: hurt reaction eyes briefly closed; small recoil backwards wings splayed; dazed head droop sad eyebrows; recover and blink.\nRow 4 cols1-4: defeat sad eyes and downturned mouth, wings droop; head lowers antennae droop; very sad looking down while seated low with all six legs; final quiet sad pose without injury.\nNo lighting effects, honey, trails, shadows, floor, labels or props baked in. Effects will be drawn by Canvas. NO checkerboard texture. Consistent warm soft 3D studio illumination, tactile felt clay texture. All 16 bees are the same character.",
+  "source": "poses.png",
+  "poseMap": {
+    "hover": [
+      0,
+      1
+    ],
+    "windup": [
+      2
+    ],
+    "victory": [
+      3
+    ],
+    "attack": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "hurt": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "defeat": [
+      12,
+      13,
+      14,
+      15
+    ]
+  }
+}

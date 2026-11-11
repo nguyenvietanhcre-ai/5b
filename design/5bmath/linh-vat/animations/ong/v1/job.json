@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "ong",
+  "variant": "v1",
+  "owner": "ong-01a1cb4d",
+  "createdAt": "2026-11-11T15:51:13.085Z",
+  "updatedAt": "2026-11-11T16:44:41.625Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "ong",
+    "name": "Ong",
+    "ultimateName": "Lục Giác Hoàng Kim",
+    "description": "Vo ve gọi đàn ong xếp thành đội hình tổ ong. Những ô lục giác vàng lần lượt sáng lên, khép quanh đối thủ rồi vỡ thành các giọt mật lấp lánh.",
+    "speciesType": "insect",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 0,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Ong vàng với vằn nâu ngang, hai râu, sáu chân nhỏ.",
+      "Hai đôi cánh trong mờ; cánh sau có thể nhỏ hơn nhưng không biến thành cánh chim.",
+      "Không thêm tay/chân/cánh thừa; không nhấn ngòi sắc hoặc gây vết chích."
+    ],
+    "beats": {
+      "windup": "Vo ve rung cánh, gọi đàn; vài ô lục giác hiện quanh ong.",
+      "decisive": "Đàn ong xếp đội hình, các ô lục giác lần lượt khóa quanh mục tiêu.",
+      "victory": "Lục giác vỡ thành giọt mật và sao; ong gốc lượn vui, đàn tan dần."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/ong.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1529676,
+      "webpBytes": 330526,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "c2f1287fdafe1543de723b50db53a1df844f0fc263331a528e90e0645276c5bc",
+      "bytes": 2661504
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "42fc220665b367e0524c6d8318a708b23ddf28356c1a382ccb82196a9b0ae6f9",
+      "bytes": 2050455
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "37cacd27c0588cb1143eee536a812c724cd8befd73d167dc1b350efea908888e",
+      "bytes": 1784936
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:43:45.931Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "ong-01a1cb4d",
+  "lastReleasedAt": "2026-11-11T16:44:41.625Z"
+}

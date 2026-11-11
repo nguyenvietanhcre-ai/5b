@@ -1,0 +1,17 @@
+/* The first WebP pose is the static fallback until the Canvas atlas is ready. */
+body.learning-mode .mascot-art.bee {
+  display:block; aspect-ratio:1; background-image:url('arena-art/bee/poses.webp');
+  background-size:400% 400%; background-position:0 0; background-repeat:no-repeat;
+}
+body.learning-mode .battle-pet.bee { --motion-image:none; }
+body.learning-mode .battle-pet.bee .motion-sprite { display:none !important; }
+body.learning-mode .battle-pet.bee > .mascot-art { visibility:visible; animation:none; }
+body.learning-mode .battle-pet.bee.bee-canvas-ready > .mascot-art { visibility:hidden; }
+body.learning-mode .battle-pet.bee .arena-bee-sprite { position:absolute; inset:0; display:block; width:100%; height:100%; pointer-events:none; }
+body.learning-mode .battle-pet.bee.bee-ultimate-hidden { visibility:hidden; }
+body.learning-mode .arena-bee-ultimate { position:absolute; inset:0; display:block; width:100%; height:100%; z-index:4; pointer-events:none; }
+body.learning-mode .illustrated-arena.bee-ultimate-active .energy-beam,
+body.learning-mode .illustrated-arena.bee-ultimate-active .spell-effect { display:none; }
+@media(prefers-reduced-motion:reduce) {
+  body.learning-mode .battle-pet.bee,body.learning-mode .battle-pet.bee * { animation:none !important; transition:none !important; }
+}

@@ -1,0 +1,606 @@
+{
+  "checks": [
+    "Actual mascot picker persists bee through API",
+    "Mascot chooser fits five desktop/tablet/mobile orientations",
+    "Battle fits five orientations; Canvas follows pet bounds, mobile ultimate screenshots"
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning-content.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-starfish.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-frames.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/platform-api.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-audio.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-poses.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/tiger-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/fox-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/eagle-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-lion.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/rabbit-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/owl-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/octopus-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/shark-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/mam-sach-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-dolphin.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-crab-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/horse-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-cat-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/staff.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/app.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-sparrow-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning-content.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-frames.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-starfish.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-audio.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/platform-api.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-poses.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/tiger-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/fox-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/eagle-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-lion.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/rabbit-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/shark-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-sparrow-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/owl-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-dolphin.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/octopus-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-cat-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/mam-sach-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/horse-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-crab-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/staff.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/app.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-art/bee/poses.webp",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning-content.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-starfish.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-frames.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/platform-api.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-audio.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/fox-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-poses.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/tiger-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/eagle-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-lion.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/rabbit-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/shark-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-sparrow-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/owl-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/mam-sach-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/octopus-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-cat-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-dolphin.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-crab-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/horse-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/app.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/staff.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-art/bee/poses.webp",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.css",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning-content.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-frames.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-starfish.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/platform-api.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-audio.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/bear-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/tiger-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/fox-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-poses.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi-renderer.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/butterfly-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-voi.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/eagle-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/rabbit-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-lion.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/owl-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/shark-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-sparrow-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-bee-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/octopus-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/mam-sach-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/learning.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-dolphin.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/horse-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-cat-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-crab-animation.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/staff.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/app.js",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:60071/arena-art/bee/poses.webp",
+      "status": 200
+    }
+  ],
+  "screens": [
+    "battle-ultimate-390x844.png",
+    "battle-ultimate-844x390.png"
+  ],
+  "started": "2026-11-11T16:41:13.341Z",
+  "base": "http://127.0.0.1:60071",
+  "battleViewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "stage": {
+        "x": 17,
+        "y": 292.390625,
+        "width": 356,
+        "height": 356
+      },
+      "pet": {
+        "width": 112.625,
+        "height": 112.625
+      },
+      "canvas": {
+        "width": 112.625,
+        "height": 112.625
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false,
+      "stage": {
+        "x": 82,
+        "y": 248.453125,
+        "width": 680,
+        "height": 680
+      },
+      "pet": {
+        "width": 216.3125,
+        "height": 216.3125
+      },
+      "canvas": {
+        "width": 216.3125,
+        "height": 216.3125
+      }
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false,
+      "stage": {
+        "x": 44,
+        "y": 245.171875,
+        "width": 680,
+        "height": 680
+      },
+      "pet": {
+        "width": 216.3125,
+        "height": 216.3125
+      },
+      "canvas": {
+        "width": 216.3125,
+        "height": 216.3125
+      }
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false,
+      "stage": {
+        "x": 262,
+        "y": 279.21875,
+        "width": 680,
+        "height": 680
+      },
+      "pet": {
+        "width": 216.3125,
+        "height": 216.3125
+      },
+      "canvas": {
+        "width": 216.3125,
+        "height": 216.3125
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false,
+      "stage": {
+        "x": 283,
+        "y": 293.3125,
+        "width": 622.140625,
+        "height": 622.140625
+      },
+      "pet": {
+        "width": 197.796875,
+        "height": 197.796875
+      },
+      "canvas": {
+        "width": 197.796875,
+        "height": 197.796875
+      }
+    }
+  ],
+  "success": true
+}

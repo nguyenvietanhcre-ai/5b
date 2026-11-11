@@ -1,0 +1,187 @@
+{
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "modes": [
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "ultimate",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "attack",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "hit",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "lose",
+          "controlMin": 44
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "modes": [
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "ultimate",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "attack",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "hit",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "lose",
+          "controlMin": 44
+        }
+      ]
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "modes": [
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "ultimate",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "attack",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "hit",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "lose",
+          "controlMin": 44
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "modes": [
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "ultimate",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "attack",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "hit",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "lose",
+          "controlMin": 44
+        }
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "modes": [
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "ultimate",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "attack",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "hit",
+          "controlMin": 44
+        },
+        {
+          "overflow": false,
+          "canvas": true,
+          "mode": "lose",
+          "controlMin": 44
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "controls": [
+    "mode dropdown and seek at 0.45s",
+    "0.5 speed advances about half realtime",
+    "pause holds frame",
+    "auto stop at 3.00s",
+    "reduced motion suppresses autostart"
+  ],
+  "exports": [
+    {
+      "mode": "attack",
+      "file": "design\\5bmath\\linh-vat\\animations\\ong\\v1\\exports\\attack.gif",
+      "frames": 90,
+      "durationMs": 3000,
+      "bytes": 752394
+    },
+    {
+      "mode": "hit",
+      "file": "design\\5bmath\\linh-vat\\animations\\ong\\v1\\exports\\hit.gif",
+      "frames": 90,
+      "durationMs": 3000,
+      "bytes": 646720
+    },
+    {
+      "mode": "lose",
+      "file": "design\\5bmath\\linh-vat\\animations\\ong\\v1\\exports\\lose.gif",
+      "frames": 90,
+      "durationMs": 3000,
+      "bytes": 963511
+    }
+  ],
+  "review": "Inspected qa/other-states.png contact sheet: attack flies toward fox and recovers; hurt recoils then recovers smiling; defeat descends with drooping antennae/wings and holds sad expression. Text clear, figures unclipped and atlas clean over garden.",
+  "status": "passed"
+}
