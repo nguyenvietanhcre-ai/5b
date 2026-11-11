@@ -1,0 +1,34 @@
+{
+  "beforeIntegrity": "ok",
+  "afterIntegrity": "ok",
+  "beforeFK": 0,
+  "afterFK": 0,
+  "starfishCatalog": 1,
+  "retained": {
+    "accounts": {
+      "before": 27,
+      "after": 27,
+      "missing": 0
+    },
+    "students": {
+      "before": 27,
+      "after": 27,
+      "missing": 0
+    },
+    "exams": {
+      "before": 20,
+      "after": 20,
+      "missing": 0
+    },
+    "questions": {
+      "before": 965,
+      "after": 965,
+      "missing": 0
+    },
+    "question_versions": {
+      "before": 965,
+      "after": 965,
+      "missing": 0
+    }
+  }
+}

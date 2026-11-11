@@ -1,0 +1,122 @@
+{
+  "width": 1261,
+  "height": 1247,
+  "cellW": 315.25,
+  "cellH": 311.75,
+  "hasAlpha": true,
+  "method": "Connected components across full source at alpha>=100 with 2px padding; complete silhouettes may cross nominal grid boundaries.",
+  "frames": [
+    {
+      "left": 24,
+      "top": 18,
+      "width": 271,
+      "height": 265,
+      "index": 0
+    },
+    {
+      "left": 333,
+      "top": 33,
+      "width": 260,
+      "height": 248,
+      "index": 1
+    },
+    {
+      "left": 650,
+      "top": 15,
+      "width": 279,
+      "height": 273,
+      "index": 2
+    },
+    {
+      "left": 967,
+      "top": 17,
+      "width": 274,
+      "height": 266,
+      "index": 3
+    },
+    {
+      "left": 23,
+      "top": 325,
+      "width": 269,
+      "height": 262,
+      "index": 4
+    },
+    {
+      "left": 353,
+      "top": 346,
+      "width": 253,
+      "height": 239,
+      "index": 5
+    },
+    {
+      "left": 651,
+      "top": 335,
+      "width": 266,
+      "height": 251,
+      "index": 6
+    },
+    {
+      "left": 967,
+      "top": 333,
+      "width": 269,
+      "height": 253,
+      "index": 7
+    },
+    {
+      "left": 23,
+      "top": 638,
+      "width": 270,
+      "height": 260,
+      "index": 8
+    },
+    {
+      "left": 339,
+      "top": 646,
+      "width": 262,
+      "height": 252,
+      "index": 9
+    },
+    {
+      "left": 656,
+      "top": 676,
+      "width": 252,
+      "height": 220,
+      "index": 10
+    },
+    {
+      "left": 967,
+      "top": 642,
+      "width": 271,
+      "height": 254,
+      "index": 11
+    },
+    {
+      "left": 23,
+      "top": 954,
+      "width": 266,
+      "height": 255,
+      "index": 12
+    },
+    {
+      "left": 340,
+      "top": 950,
+      "width": 265,
+      "height": 249,
+      "index": 13
+    },
+    {
+      "left": 650,
+      "top": 955,
+      "width": 268,
+      "height": 250,
+      "index": 14
+    },
+    {
+      "left": 966,
+      "top": 951,
+      "width": 273,
+      "height": 256,
+      "index": 15
+    }
+  ]
+}

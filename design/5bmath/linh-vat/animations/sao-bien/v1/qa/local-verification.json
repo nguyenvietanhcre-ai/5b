@@ -1,0 +1,85 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "checkedAt": "2026-11-11T16:42:31.817Z",
+  "assets": [
+    {
+      "file": "arena-starfish.js",
+      "status": 200,
+      "bytes": 16892,
+      "sha256": "ad0a12e72d67706356aeaee801d57b8074e7819bb5c0e51ed4dc177bf631df0c",
+      "matchesSource": true
+    },
+    {
+      "file": "arena-starfish.css",
+      "status": 200,
+      "bytes": 1496,
+      "sha256": "e02ca698570a88784ab4f5cf28c30e9ebb1e700c5ee23450a22d50ae285018b7",
+      "matchesSource": true
+    },
+    {
+      "file": "learning.js",
+      "status": 200,
+      "bytes": 129264,
+      "sha256": "d67ba58a879cb238198480cfd6a01453c71ad945250c2f4b519c0955a3da64f7",
+      "matchesSource": true
+    },
+    {
+      "file": "index.html",
+      "status": 200,
+      "bytes": 7919,
+      "sha256": "9e75b55bd729085d94b99a6f51898ca1d8748c0d7543903356bf9a4adb4e6ae0",
+      "matchesSource": "server renders HTML"
+    },
+    {
+      "file": "arena-art/sao-bien-v1/poses.webp",
+      "status": 200,
+      "bytes": 592544,
+      "sha256": "edd183ee54e70bd2afb6943d20adfd244106c89a2eea4c00dd77a3dfaf598f8e",
+      "matchesSource": true
+    },
+    {
+      "file": "arena-art/sao-bien-v1/reactions.webp",
+      "status": 200,
+      "bytes": 294666,
+      "sha256": "b14d8f91e6bfd007c0764b76b0dc34a7e99b34584e9ed641bf7fe50fd34fd208",
+      "matchesSource": true
+    },
+    {
+      "file": "arena-art/sao-bien-v1/metadata.json",
+      "status": 200,
+      "bytes": 2327,
+      "sha256": "9774b9898cc440128dcff78dd7a92cb97cd601baf528c22fc39c90a488041245",
+      "matchesSource": true
+    },
+    {
+      "file": "arena-art/sao-bien-v1/idle.webp",
+      "status": 200,
+      "bytes": 25950,
+      "sha256": "e786448fd4b859d4282345ed8dc080be019b695aaf36dcb82aa7b24c3003655a",
+      "matchesSource": true
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "backend": "python",
+    "mode": "demo"
+  },
+  "grading": {
+    "status": 200,
+    "score": 10
+  },
+  "private": [
+    {
+      "url": "/design/5bmath/linh-vat/animations/sao-bien/v1/source/poses.png",
+      "status": 404
+    },
+    {
+      "url": "/.git/config",
+      "status": 404
+    },
+    {
+      "url": "/arena-art/sao-bien-v1/nope.webp",
+      "status": 404
+    }
+  ]
+}

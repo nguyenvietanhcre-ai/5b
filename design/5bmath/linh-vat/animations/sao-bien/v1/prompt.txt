@@ -1,0 +1,13 @@
+Use case: stylized-concept. Asset type: animation sprite sheet for a standalone review demo.
+Character: Sao biển. Ultimate: Ngũ Tinh Tỏa Sáng.
+Reference image: design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png. Use ONLY the 2th row / 3th column subject of a 2 by 3 review board.
+Keep the exact reference identity and the soft matte felt/clay 3D material, rounded proportions, large dark-brown expressive eyes, apricot cheeks, warm lighting of Cáo Nâu and Mầm Sách. Do not add fox tails, sprout leaves, books or clothes to unrelated species.
+Anatomy invariants: Sao biển màu đào–san hô, đúng năm tay/cánh dày bo tròn quanh thân giữa.; Mặt ở trung tâm, các chấm nổi kem nhỏ là hoa văn, không phải mắt/chi.; Không thêm tay/chân người; mỗi bản sao cũng giữ đúng năm cánh, không ghép thành sáu.
+Action idea (not yet approved choreography): Xòe năm cánh, tạo năm bản sao ánh sáng xoay quanh đối thủ. Các bản sao nối thành ngôi sao lớn dưới chân, phát ra một cột sáng rồi bung thành vô số sao nhỏ.
+Create EXACTLY SIXTEEN full-body poses, 4 columns × 4 rows, on genuinely transparent alpha, no checkerboard, grid, labels or shadows. Each pose stays inside its cell with generous margin. Keep consistent size/camera/markings. Face right in 3/4 view.
+Row 1, frames 1–4: neutral → notice/track target → windup → compressed ready pose, adapted to this species.
+Row 2, frames 5–8: four sequential approach/movement poses adapted to the action idea (walk/run/fly/swim/float, never add legs or wings that do not belong to the species).
+Row 3, frames 9–12: brace → anticipate → decisive species-specific action → follow-through. No composited beams/particles or text; effects are layered later by Canvas.
+Row 4, frames 13–16: joyful reaction → small celebration motion → settle → final proud friendly pose.
+Timeline for the separate animation: total 3.000 s / 90 frames at 30 fps. Windup 0–0.95; name appears at 0.65 before charge/action starts 0.95; impact at about 1.75; victory 1.90–3.00. Keep family-friendly toy motion and no injuries.
+This request creates only the selected character's review assets, never production game changes.

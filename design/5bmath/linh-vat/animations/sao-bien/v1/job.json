@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "sao-bien",
+  "variant": "v1",
+  "owner": "sao-bien-01a1cb4e",
+  "createdAt": "2026-11-11T15:52:45.114Z",
+  "updatedAt": "2026-11-11T16:45:06.637Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "sao-bien",
+    "name": "Sao biển",
+    "ultimateName": "Ngũ Tinh Tỏa Sáng",
+    "description": "Xòe năm cánh, tạo năm bản sao ánh sáng xoay quanh đối thủ. Các bản sao nối thành ngôi sao lớn dưới chân, phát ra một cột sáng rồi bung thành vô số sao nhỏ.",
+    "speciesType": "aquatic",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png",
+    "referenceCell": {
+      "row": 1,
+      "col": 2,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Sao biển màu đào–san hô, đúng năm tay/cánh dày bo tròn quanh thân giữa.",
+      "Mặt ở trung tâm, các chấm nổi kem nhỏ là hoa văn, không phải mắt/chi.",
+      "Không thêm tay/chân người; mỗi bản sao cũng giữ đúng năm cánh, không ghép thành sáu."
+    ],
+    "beats": {
+      "windup": "Năm cánh co/xòe nhẹ, các chấm sáng dần; năm bóng sáng tách ra.",
+      "decisive": "Bản sao xoay, nối thành sao lớn dưới chân đối thủ; cột sáng chạm mục tiêu.",
+      "victory": "Cột sáng bung thành sao nhỏ; sao biển gốc xoay nhẹ rồi giữ tư thế sáng vui."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/sao-bien.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1247,
+      "height": 1261,
+      "sourceBytes": 2540105,
+      "webpBytes": 592544,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "4237a6fcd4419d3792fd7f8277d43b63a7bd88814d5130bcb53cf0786c5a52ce",
+      "bytes": 2503744
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "81998f92a73b80a6b80db978b4350fac2245bd71a119555ff843f71bcf5158b1",
+      "bytes": 1954138
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "5aecc1e4e08733a23ed996843c08a2670a728293ddf9983e7836e5fe6a8a90bb",
+      "bytes": 1871849
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:20:35.217Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "sao-bien-01a1cb4e",
+  "lastReleasedAt": "2026-11-11T16:45:06.637Z"
+}

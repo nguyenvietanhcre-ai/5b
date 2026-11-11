@@ -1,0 +1,13 @@
+--- a/tests/test_staff_api.py
++++ b/tests/test_staff_api.py
+@@ -164,7 +164,9 @@
+         with connect(self.path) as db:
+             q = db.execute('SELECT q.question_code,v.id version_id FROM exam_items i JOIN question_versions v ON v.id=i.question_version_id '
+                            'JOIN questions q ON q.id=v.question_id WHERE i.exam_id=? LIMIT 1', (exam['id'],)).fetchone()
+-        row = self.admin.call('content?kind=questions&q=' + q['question_code'])['rows'][0]
++        rows = self.admin.call('content?kind=questions&q=' + q['question_code'])['rows']
++        self.assertIn(q['question_code'], [row['question_code'] for row in rows])
++        row = next(row for row in rows if row['question_code'] == q['question_code'])
+         with connect(self.path, True) as db:
+             asset = db.execute('SELECT id FROM media_assets LIMIT 1').fetchone()[0]
+             db.execute('INSERT OR IGNORE INTO question_assets VALUES (?,?)', (q['version_id'], asset))

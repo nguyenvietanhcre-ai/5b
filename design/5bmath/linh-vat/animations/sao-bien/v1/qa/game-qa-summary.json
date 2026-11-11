@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-11",
+  "server": "http://127.0.0.1:8795",
+  "isolatedDatabase": "work/mascot-animation/sao-bien/v1/qa2.sqlite3",
+  "status": "passed",
+  "latestMachineReport": "game-qa-report.json",
+  "checksAcrossRuns": [
+    "Real API QA registration and mascot choose/save/session/read/reload passed before continuation.",
+    "Real bot-start UI opens selected starfish in battle.",
+    "Normal correct answer invokes game animateHit, shows dedicated attack row0, then stops requestAnimationFrame.",
+    "Dedicated hit row1 and lose row2 final pose11 passed through runtime API; attack/hit/lose screenshots preserved.",
+    "After label/observer fix, final correct answer invokes ultimate: title observed at752ms before impact; stage retained at2073ms and result follows after completion.",
+    "Five viewport dimensions390x844,844x390,768x1024,1024x768,1440x900: no horizontal overflow; starfish Canvas dimensions nonzero; generic motion sprite display none and duplicate static art hidden.",
+    "Two starfish actors mount simultaneously and use separate Canvas records.",
+    "Reduced motion final action has no flight/rAF loop; simulated hidden-document visibilitychange clears flights/timers/rAF.",
+    "Runtime poses/reactions/metadata/idle assets return200; source PNG/private docs/unknown art return404; no page JavaScript errors in successful continuation."
+  ],
+  "observedDefectResolved": "Repeated title.textContent writes with broad MutationObserver caused redraw feedback. Integration agent guarded title writes and filtered observer; continuation verified visible title and impact after fix.",
+  "reviewedImages": ["game-attack.png", "game-ultimate-title.png", "game-ultimate-impact.png", "game-390x844.png", "game-844x390.png"],
+  "limits": [
+    "Latest script was run with --resume: earlier attack/hit/sad/reload checks are historical evidence from this same QA task, not rerun in the continuation.",
+    "External HTTP URLs were aborted in the successful continuation to avoid delayed remote font requests; local app/artwork remained unchanged.",
+    "Visibility hidden was simulated by defining document.hidden and dispatching visibilitychange, not by using a physical background tab.",
+    "No physical mobile device, FPS/CPU, network throttling, or production DB test.",
+    "Final ultimate tested via player-on-left actual correct answer; two-sided mount/reaction tested, reverse-side ultimate not independently exercised by this script."
+  ]
+}

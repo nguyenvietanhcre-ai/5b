@@ -1,0 +1,353 @@
+{
+  "checkedAt": "2026-11-11T16:39:09.666Z",
+  "errors": [],
+  "checks": [
+    {
+      "check": "Replay advances; pause cancels frames and holds exact time",
+      "running": 0.25,
+      "paused": 0.28
+    },
+    {
+      "check": "Seek renders exact time and resume continues from seek",
+      "seek": 1.2,
+      "resumed": 1.26
+    },
+    {
+      "check": "0.5x advances about half the wall clock time",
+      "time": 0.33,
+      "wallSeconds": 0.728
+    },
+    {
+      "check": "Playback stops once at3.00s and keeps final frame"
+    },
+    {
+      "check": "Reduced motion has no initial or mode-change autoplay",
+      "state": {
+        "matches": true,
+        "playing": false,
+        "time": 0
+      }
+    }
+  ],
+  "modes": [
+    {
+      "mode": "ultimate",
+      "state": {
+        "time": 2.8,
+        "t": 2.8,
+        "mode": "ultimate",
+        "phase": "CHIẾN THẮNG",
+        "pose": 15,
+        "atlas": "ultimate",
+        "nameVisible": false,
+        "attackStarted": true,
+        "impact": true,
+        "victory": true,
+        "cloneCount": 0
+      },
+      "h1": "Ngũ Tinh Tỏa Sáng"
+    },
+    {
+      "mode": "attack",
+      "state": {
+        "time": 1,
+        "t": 1,
+        "mode": "attack",
+        "phase": "TẤN CÔNG",
+        "pose": 12,
+        "atlas": "reactions",
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false,
+        "cloneCount": 0
+      },
+      "h1": "Tấn công · Sóng sao"
+    },
+    {
+      "mode": "hit",
+      "state": {
+        "time": 1,
+        "t": 1,
+        "mode": "hit",
+        "phase": "CHỊU ĐÒN · HỒI PHỤC",
+        "pose": 6,
+        "atlas": "reactions",
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false,
+        "cloneCount": 0
+      },
+      "h1": "Chịu đòn · Lắc mình hồi phục"
+    },
+    {
+      "mode": "lose",
+      "state": {
+        "time": 1,
+        "t": 1,
+        "mode": "lose",
+        "phase": "BUỒN KHI THUA CUỘC",
+        "pose": 10,
+        "atlas": "reactions",
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false,
+        "cloneCount": 0
+      },
+      "h1": "Thua cuộc · Buồn rồi cố gắng tiếp"
+    }
+  ],
+  "responsive": [
+    {
+      "viewport": {
+        "width": 320,
+        "height": 740
+      },
+      "width": 320,
+      "scroll": 320,
+      "controls": [
+        {
+          "id": "mode",
+          "w": 290,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "replay",
+          "w": 103.359375,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "pause",
+          "w": 89.046875,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "speed",
+          "w": 129,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "seek",
+          "w": 155,
+          "h": 44,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "scroll": 390,
+      "controls": [
+        {
+          "id": "mode",
+          "w": 290,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "replay",
+          "w": 103.359375,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "pause",
+          "w": 89.046875,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "speed",
+          "w": 129,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "seek",
+          "w": 274,
+          "h": 44,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "width": 844,
+      "scroll": 844,
+      "controls": [
+        {
+          "id": "mode",
+          "w": 300,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "replay",
+          "w": 113.359375,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "pause",
+          "w": 99.046875,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "speed",
+          "w": 139,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "seek",
+          "w": 700,
+          "h": 44,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "width": 768,
+      "scroll": 768,
+      "controls": [
+        {
+          "id": "mode",
+          "w": 300,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "replay",
+          "w": 113.359375,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "pause",
+          "w": 99.046875,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "speed",
+          "w": 139,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "seek",
+          "w": 624,
+          "h": 44,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "width": 1024,
+      "scroll": 1024,
+      "controls": [
+        {
+          "id": "mode",
+          "w": 300,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "replay",
+          "w": 113.359375,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "pause",
+          "w": 99.046875,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "speed",
+          "w": 139,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "seek",
+          "w": 188.59375,
+          "h": 44,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "width": 1440,
+      "scroll": 1440,
+      "controls": [
+        {
+          "id": "mode",
+          "w": 300,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "replay",
+          "w": 113.359375,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "pause",
+          "w": 99.046875,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "speed",
+          "w": 139,
+          "h": 46,
+          "visible": true
+        },
+        {
+          "id": "seek",
+          "w": 484.59375,
+          "h": 44,
+          "visible": true
+        }
+      ]
+    }
+  ],
+  "visibility": {
+    "method": "Synthetic hidden visibilitychange handler check; headless tabs remained visible",
+    "actual": {
+      "hidden": false,
+      "visibility": "visible",
+      "playing": true
+    }
+  },
+  "status": "passed"
+}

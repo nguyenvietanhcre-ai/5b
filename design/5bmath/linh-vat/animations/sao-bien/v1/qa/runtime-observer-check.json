@@ -1,0 +1,42 @@
+{
+  "base": "http://127.0.0.1:8795",
+  "errors": [],
+  "sample": {
+    "title": {
+      "elapsed": 1004.0999999996275,
+      "time": 1002,
+      "nameVisible": "true",
+      "label": "✦ Ngũ Tinh Tỏa Sáng",
+      "flights": 1,
+      "writes": 1
+    },
+    "finished": {
+      "loaded": true,
+      "reactionsLoaded": true,
+      "asset": "arena-art/sao-bien-v1/poses.webp",
+      "reactionsAsset": "arena-art/sao-bien-v1/reactions.webp",
+      "reducedMotion": false,
+      "pets": [
+        {
+          "mood": "idle",
+          "pose": 15,
+          "sheet": "reactions",
+          "time": 551,
+          "connected": true
+        },
+        {
+          "mood": "lose",
+          "pose": 11,
+          "sheet": "reactions",
+          "time": 1802,
+          "connected": true
+        }
+      ],
+      "flights": 0,
+      "running": false,
+      "timers": 0
+    },
+    "writes": 2
+  },
+  "passed": true
+}
