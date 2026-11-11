@@ -1,0 +1,8 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-11-11",
+  "reference": "source/poses-spacing-v1.png",
+  "prompt": "Edit the supplied 16-pose crab sprite sheet. Keep the EXACT SAME sixteen crab characters, poses, style, colors, anatomy, facial emotions and ordering. Fix ONLY their placement and spacing: strict FOUR equal columns by FOUR equal rows on genuine transparent alpha. Place every crab exactly at cell center. SHRINK EACH crab to occupy AT MOST 72% of its cell width and 72% height, leaving AT LEAST 14% fully transparent empty padding on ALL FOUR sides of EVERY cell including interior cell edges. No claw, eyestalk or leg may cross a cell boundary. There must be wide continuous transparent horizontal and vertical gutters. Do not enlarge any crab to fill gaps. All eight walking legs plus two claws must remain separate and fully visible in every pose. No grid lines, no labels, no text, no shadows, no other changes. Preserve transparent background.",
+  "output": "poses.png",
+  "reason": "QA found adjacent poses touching uniform cell boundaries; preserve old source for traceability."
+}

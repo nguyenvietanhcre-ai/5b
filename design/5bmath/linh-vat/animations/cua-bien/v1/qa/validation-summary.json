@@ -1,0 +1,825 @@
+{
+  "date": "2026-11-11",
+  "character": "Cua biển",
+  "status": "passed",
+  "artworkApproval": "pending_review",
+  "sprite": {
+    "bytes": 298234,
+    "width": 1247,
+    "height": 1261,
+    "alpha": true,
+    "poses": 16,
+    "paddingMinPixels": 22
+  },
+  "exports": {
+    "frames": 90,
+    "durationSeconds": 3,
+    "fps": 30,
+    "gifBytes": 2195277,
+    "mp4Bytes": 1974402
+  },
+  "tests": {
+    "windows": 75,
+    "docker": 77,
+    "crabIntegration": 1,
+    "buildTargets": [
+      "cloudflare",
+      "github"
+    ],
+    "seoPagesEach": 8
+  },
+  "limits": [
+    "No measurements on a physical phone or production Core Web Vitals.",
+    "Game foundation remains in the shared worktree; this commit records crab hooks as INTEGRATION.patch."
+  ],
+  "demo-qa": {
+    "status": "passed",
+    "checks": [
+      {
+        "halfSpeedAfter350ms": 0.19
+      },
+      "Play once finishes and pauses",
+      "Reduced motion does not autoplay"
+    ],
+    "errors": [],
+    "viewports": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "scroll": 390,
+        "width": 390,
+        "controls": [
+          {
+            "id": "action",
+            "height": 46,
+            "width": 130
+          },
+          {
+            "id": "replay",
+            "height": 46,
+            "width": 103.359375
+          },
+          {
+            "id": "pause",
+            "height": 46,
+            "width": 89.046875
+          },
+          {
+            "id": "speed",
+            "height": 46,
+            "width": 129
+          },
+          {
+            "id": "seek",
+            "height": 44,
+            "width": 225
+          }
+        ],
+        "canvas": {
+          "x": 12,
+          "y": 120,
+          "width": 366,
+          "height": 205.875,
+          "top": 120,
+          "right": 378,
+          "bottom": 325.875,
+          "left": 12
+        }
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "scroll": 844,
+        "width": 844,
+        "controls": [
+          {
+            "id": "action",
+            "height": 46,
+            "width": 140
+          },
+          {
+            "id": "replay",
+            "height": 46,
+            "width": 113.359375
+          },
+          {
+            "id": "pause",
+            "height": 46,
+            "width": 99.046875
+          },
+          {
+            "id": "speed",
+            "height": 46,
+            "width": 139
+          },
+          {
+            "id": "seek",
+            "height": 44,
+            "width": 168.59375
+          }
+        ],
+        "canvas": {
+          "x": 20,
+          "y": 115,
+          "width": 804,
+          "height": 452.25,
+          "top": 115,
+          "right": 824,
+          "bottom": 567.25,
+          "left": 20
+        }
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "scroll": 768,
+        "width": 768,
+        "controls": [
+          {
+            "id": "action",
+            "height": 46,
+            "width": 140
+          },
+          {
+            "id": "replay",
+            "height": 46,
+            "width": 113.359375
+          },
+          {
+            "id": "pause",
+            "height": 46,
+            "width": 99.046875
+          },
+          {
+            "id": "speed",
+            "height": 46,
+            "width": 139
+          },
+          {
+            "id": "seek",
+            "height": 44,
+            "width": 192.59375
+          }
+        ],
+        "canvas": {
+          "x": 20,
+          "y": 114,
+          "width": 728,
+          "height": 409.5,
+          "top": 114,
+          "right": 748,
+          "bottom": 523.5,
+          "left": 20
+        }
+      },
+      {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "scroll": 1024,
+        "width": 1024,
+        "controls": [
+          {
+            "id": "action",
+            "height": 46,
+            "width": 140
+          },
+          {
+            "id": "replay",
+            "height": 46,
+            "width": 113.359375
+          },
+          {
+            "id": "pause",
+            "height": 46,
+            "width": 99.046875
+          },
+          {
+            "id": "speed",
+            "height": 46,
+            "width": 139
+          },
+          {
+            "id": "seek",
+            "height": 44,
+            "width": 348.59375
+          }
+        ],
+        "canvas": {
+          "x": 20,
+          "y": 115,
+          "width": 984,
+          "height": 553.5,
+          "top": 115,
+          "right": 1004,
+          "bottom": 668.5,
+          "left": 20
+        }
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "scroll": 1440,
+        "width": 1440,
+        "controls": [
+          {
+            "id": "action",
+            "height": 46,
+            "width": 140
+          },
+          {
+            "id": "replay",
+            "height": 46,
+            "width": 113.359375
+          },
+          {
+            "id": "pause",
+            "height": 46,
+            "width": 99.046875
+          },
+          {
+            "id": "speed",
+            "height": 46,
+            "width": 139
+          },
+          {
+            "id": "seek",
+            "height": 44,
+            "width": 644.59375
+          }
+        ],
+        "canvas": {
+          "x": 80,
+          "y": 115,
+          "width": 1280,
+          "height": 720,
+          "top": 115,
+          "right": 1360,
+          "bottom": 835,
+          "left": 80
+        }
+      }
+    ]
+  },
+  "integration-smoke-report": {
+    "tests": [
+      "no atlas request without Cua biển",
+      "lazy atlas loaded once, transparent idle rendered",
+      "attack finite, resets idle",
+      "hurt ends without a scheduled animation frame",
+      "ultimate title at .65s, impact, victory and overlay cleanup",
+      "sad defeat held at pose 15 without RAF",
+      "pure renderer timing boundaries",
+      "reduced motion paints final pose without RAF",
+      "removed actor released by observer"
+    ],
+    "errors": [],
+    "viewports": [
+      {
+        "width": 390,
+        "height": 844,
+        "overflow": false
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "overflow": false
+      },
+      {
+        "width": 768,
+        "height": 1024,
+        "overflow": false
+      },
+      {
+        "width": 1024,
+        "height": 768,
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "overflow": false
+      }
+    ]
+  },
+  "ui-qa-offline": {
+    "status": "passed",
+    "checks": [
+      "Choose Cua biển in real UI and preserve choice after reload",
+      "Start bot match using real UI with crab fighter",
+      "Correct answer triggers actual crab attack",
+      {
+        "actualUltimateFinishesBeforeResultMs": 3382
+      },
+      "Bot answer triggers actual crab hit",
+      "Loss result displays sad crab pose15"
+    ],
+    "errors": [],
+    "viewports": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "overflow": false,
+        "crab": true
+      }
+    ]
+  },
+  "local-qa": {
+    "assets": [
+      {
+        "path": "arena-crab-animation.js",
+        "status": 200,
+        "bytes": 20403,
+        "matchesSource": true
+      },
+      {
+        "path": "arena-crab-animation.css",
+        "status": 200,
+        "bytes": 1744,
+        "matchesSource": true
+      },
+      {
+        "path": "arena-art/cua-bien-poses.webp",
+        "status": 200,
+        "bytes": 298234,
+        "matchesSource": true
+      }
+    ],
+    "health": {
+      "status": "ok",
+      "backend": "python",
+      "mode": "demo"
+    },
+    "sampleScore": 10.0,
+    "mascotPage": 200
+  },
+  "database-qa": {
+    "integrity": "ok",
+    "foreignKeyErrors": 0,
+    "core": [
+      {
+        "table": "accounts",
+        "before": 27,
+        "after": 27,
+        "existingIdsPreserved": true
+      },
+      {
+        "table": "students",
+        "before": 27,
+        "after": 27,
+        "existingIdsPreserved": true
+      },
+      {
+        "table": "student_companions",
+        "before": 22,
+        "after": 22,
+        "existingIdsPreserved": true
+      }
+    ],
+    "crabCatalogRows": 1
+  },
+  "game-qa-file": {
+    "status": "passed",
+    "errors": [],
+    "viewports": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 12,
+                "time": 1916,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 166,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1864,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 101,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1882,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 132,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1898,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 134,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1882,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 117,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      }
+    ]
+  },
+  "interruption-smoke-report": {
+    "status": "passed",
+    "checks": [
+      "stop after impact clears owned hit, overlay, timers and RAF",
+      "resize after impact settles characters and clears taking-hit",
+      "resize before impact cancels future hit callback",
+      "hidden tab clears transient hit feedback",
+      "stop preserves a later attacker spell, mood, class and announcement",
+      "removed actor releases victim and own pending callbacks",
+      "replay replaces previous ultimate and completes fresh attack"
+    ],
+    "errors": []
+  },
+  "ui-qa": {
+    "status": "passed",
+    "checks": [
+      "Choose Cua biển in real UI and preserve choice after reload",
+      "Start bot match using real UI with crab fighter",
+      "Correct answer triggers actual crab attack",
+      {
+        "actualUltimateFinishesBeforeResultMs": 3558
+      },
+      "Bot answer triggers actual crab hit",
+      "Loss result displays sad crab pose15"
+    ],
+    "errors": [],
+    "viewports": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "overflow": false,
+        "crab": true
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "overflow": false,
+        "crab": true
+      }
+    ]
+  },
+  "game-qa": {
+    "status": "passed",
+    "errors": [],
+    "viewports": [
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1889,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 132,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 844,
+          "height": 390
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 12,
+                "time": 1906,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 149,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1872,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 117,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1863,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 100,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      },
+      {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "state": {
+          "inspect": {
+            "loaded": true,
+            "pets": [
+              {
+                "mood": "ultimate",
+                "pose": 11,
+                "time": 1870,
+                "running": true,
+                "connected": true
+              },
+              {
+                "mood": "lose",
+                "pose": 14,
+                "time": 118,
+                "running": true,
+                "connected": true
+              }
+            ],
+            "flights": 1,
+            "visuals": 1,
+            "timers": 1,
+            "reducedMotion": false
+          },
+          "overflow": false
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-11-11",
+  "references": [
+    "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png (row 2,column 2)",
+    "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png (style)"
+  ],
+  "prompt": "Use case: stylized-concept. Asset: 4 by 4 sprite atlas of EXACTLY SIXTEEN full body Cua biển / sea crab poses for a children's Canvas game. Input 1: identity reference, use ONLY bottom row middle cell crab of the six-character board. Input 2: material/style only, Cáo Nâu/Mầm Sách approved tactile soft matte felt/clay 3D toys.\nPreserve coral orange round shell, cream oval belly, apricot round cheeks, happy curved mouth, TWO brown eyes on TWO stalks ABOVE shell, no eyes painted on shell. EVERY pose must clearly have EXACTLY TWO large pincers plus EIGHT walking legs (FOUR on each side), ten appendages total. Keep legs separately visible, same anatomy and same shell silhouette in ALL sixteen cells. Camera mostly frontal very slight right three quarter so all eight legs remain countable. Do not turn sideways and obscure legs. Warm soft studio lighting, sculpted felt fine grain, rounded toy shapes like reference. No clothes/book/leaves.\nTrue transparent alpha background, no floor, no shadow, no checkerboard, no labels, no grid lines, no text, no particles. 4 equal columns x 4 equal rows, full body centered each cell, consistent scale, generous empty margin; do not clip claws, eyestalks or feet. Uniform natural character rendering.\nRow1 poses 0–3: neutral cheerful claws apart; focus with claws raised; squat lower round shell with all eight legs spread; coiled ready pose.\nRow2 poses4–7: four lively SIDEWAYS scuttle steps to the right, eyes and front facing viewer, alternate four pairs of walking legs, claws at slightly different heights, leading claw reaching right then snapping shut then returning. Keep eight legs visible.\nRow3 poses8–11: ultimate sequence brace two claws open wide; swing both huge pincers inward; both claws close in front beside shell without covering face; follow-through with happy determined grin. Actual glowing giant claws/water effects will be drawn later, draw only same crab.\nRow4: pose12 victory both pincers raised in proud V; pose13 recoil startled squeezing eyes half shut, no injury; pose14 recovering gentle face and guarded claws; pose15 defeated sad, eyes lowered on stalks, small downturned mouth, both pincers lowered, all eight legs still visible, no tears hiding feet.\nFamily friendly, polished professional game assets. No extra animals, no fox or sprout in output. Priority exact anatomy and reference identity over pose exaggeration.",
+  "output": "poses.png",
+  "poseMap": {
+    "windup": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "attack": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "ultimate": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "victory": 12,
+    "hit": 13,
+    "recover": 14,
+    "defeat": 15
+  },
+  "originalOutput": "poses.png",
+  "preservedOriginal": "poses-spacing-v1.png",
+  "finalSpacingEdit": "PROMPT-SPACING.json"
+}

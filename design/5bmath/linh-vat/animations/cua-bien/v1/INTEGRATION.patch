@@ -1,0 +1,38 @@
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -23,0 +24 @@
++    <link rel="stylesheet" href="arena-crab-animation.css">
+@@ -53,0 +55 @@
++    <script src="arena-crab-animation.js" defer></script>
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -47,0 +48 @@
++ASSETS.update({"/" + file: file for file in ("arena-crab-animation.js", "arena-crab-animation.css")})
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -56 +56 @@
+-for (const asset of ['arena-lion.js', 'arena-lion.css']) {
++for (const asset of ['arena-lion.js', 'arena-lion.css', 'arena-crab-animation.js', 'arena-crab-animation.css']) {
+--- a/backend/platform_api.py
++++ b/backend/platform_api.py
+@@ -36,0 +37,2 @@
++MASCOT_NAMES['crab'] = 'Cua biển'
++MASCOT_CODES['Cua biển'] = 'crab'
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -129 +129 @@
+-    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
++    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
+@@ -140 +140 @@
+-        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
++        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
+@@ -334 +334 @@
+-            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
++            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+@@ -815,0 +816,4 @@
++        if(window.ArenaCrabAnimation?.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
++            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
++            ArenaAudio.effect(final?'beam':'rock');return;
++        }
+@@ -1107,0 +1112 @@
++        'choose-crab':async () => { if(live)await mutate('mascot',{mascot:'crab'});else {state.mascot = 'crab';save();}refresh(); },

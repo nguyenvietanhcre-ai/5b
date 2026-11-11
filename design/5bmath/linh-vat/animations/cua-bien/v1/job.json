@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "cua-bien",
+  "variant": "v1",
+  "owner": "cua-bien-01a1cb4d",
+  "createdAt": "2026-11-11T15:52:12.143Z",
+  "updatedAt": "2026-11-11T16:51:55.144Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "cua-bien",
+    "name": "Cua biển",
+    "ultimateName": "Song Càng Khóa Sóng",
+    "description": "Chạy ngang cực nhanh, để lại hàng bóng cua ở hai bên. Hai chiếc càng ánh sáng khổng lồ khép lại, ép sóng nước thành bong bóng nhốt đối thủ rồi bật tung như bong bóng xà phòng.",
+    "speciesType": "aquatic",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png",
+    "referenceCell": {
+      "row": 1,
+      "col": 1,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Cua cam san hô, mai tròn, hai mắt trên hai cuống.",
+      "Đúng hai càng và tám chân đi: bốn chân mỗi bên, ngoài hai càng.",
+      "Tổng mười phần phụ; không đếm càng như chân đi, không thêm mắt ở mặt mai hoặc tay bạch tuộc."
+    ],
+    "beats": {
+      "windup": "Nâng hai càng, hạ mai; chân chạy ngang vài nhịp để lấy đà.",
+      "decisive": "Lướt ngang, bóng cua tách hai bên; hai càng ánh sáng ép sóng quanh mục tiêu.",
+      "victory": "Bong bóng bật tung thành sao; cua giơ hai càng, tám chân vẫn đủ."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/cua-bien.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1247,
+      "height": 1261,
+      "sourceBytes": 1104623,
+      "webpBytes": 298234,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "580838536f08f3247a6719ad05b912c29efa68d6956e8b93bc340f899b5313c7",
+      "bytes": 2195277
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "6ed93fde3a448073f6f4fe10bd18987f352c9c8e921143787b1601caa625e7ea",
+      "bytes": 1974402
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "619121b6bbec3648d2557181b70798945a1aa01d944a67c8543231f70fcd52b0",
+      "bytes": 1860532
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:16:18.713Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "cua-bien-01a1cb4d",
+  "lastReleasedAt": "2026-11-11T16:51:55.144Z"
+}
