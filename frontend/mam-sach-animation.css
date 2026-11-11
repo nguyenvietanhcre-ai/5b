@@ -1,0 +1,12 @@
+/* The original Mầm Sách stays available until its Canvas atlas decodes. */
+body.learning-mode .battle-pet.sprout.mam-sach-ready > .mascot-art,
+body.learning-mode .battle-pet.sprout.mam-sach-ready > .motion-sprite { display:none !important; }
+body.learning-mode .mam-sach-pose { position:absolute; inset:0; display:block; width:100%; height:100%; pointer-events:none; }
+body.learning-mode .mam-sach-effect { position:absolute; inset:0; display:block; width:100%; height:100%; z-index:7; pointer-events:none; }
+body.learning-mode .mam-sach-action-active .spell-effect,
+body.learning-mode .mam-sach-action-active .energy-beam { display:none !important; }
+body.learning-mode .spell-announcement.mam-sach-spell-accessible { width:1px; height:1px; padding:0; border:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@media(prefers-reduced-motion:reduce) {
+  body.learning-mode .battle-pet.sprout.mam-sach-ready,
+  body.learning-mode .battle-pet.sprout.mam-sach-ready * { animation:none !important; transition:none !important; }
+}

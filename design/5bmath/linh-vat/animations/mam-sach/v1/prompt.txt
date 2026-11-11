@@ -1,0 +1,13 @@
+Use case: stylized-concept. Asset type: animation sprite sheet for a standalone review demo.
+Character: Mầm Sách. Ultimate: Đại Thụ Tri Thức.
+Reference image: design/5bmath/linh-vat/mam-sach-cao-nau-goc.png. Use ONLY the 1th row / 1th column subject of a 1 by 2 review board.
+Keep the exact reference identity and the soft matte felt/clay 3D material, rounded proportions, large dark-brown expressive eyes, apricot cheeks, warm lighting of Cáo Nâu and Mầm Sách. Do not add fox tails, sprout leaves, books or clothes to unrelated species.
+Anatomy invariants: Giữ nguyên mầm xanh bơ tròn, hai lá xanh trên đầu, mắt sẫm lớn, má cam và bốn chi ngắn.; Luôn giữ cuốn sách mở màu kem đúng tỷ lệ và phong cách đất sét/nỉ mềm.; Đúng hai lá thật trên đầu; đại thụ và trang sách bay là phép tách riêng, không biến nhân vật thành cây hoặc thêm chi.
+Action idea (not yet approved choreography): Mở sách, hai lá trên đầu bừng sáng. Những con số và dấu + − × ÷ bay ra, gieo thành hạt mầm dưới chân đối thủ. Một đại thụ ánh sáng vươn lên, nâng đối thủ vào tán lá rồi bung thành mưa sao và những trang sách màu kem.
+Create EXACTLY SIXTEEN full-body poses, 4 columns × 4 rows, on genuinely transparent alpha, no checkerboard, grid, labels or shadows. Each pose stays inside its cell with generous margin. Keep consistent size/camera/markings. Face right in 3/4 view.
+Row 1, frames 1–4: neutral → notice/track target → windup → compressed ready pose, adapted to this species.
+Row 2, frames 5–8: four sequential approach/movement poses adapted to the action idea (walk/run/fly/swim/float, never add legs or wings that do not belong to the species).
+Row 3, frames 9–12: brace → anticipate → decisive species-specific action → follow-through. No composited beams/particles or text; effects are layered later by Canvas.
+Row 4, frames 13–16: joyful reaction → small celebration motion → settle → final proud friendly pose.
+Timeline for the separate animation: total 3.000 s / 90 frames at 30 fps. Windup 0–0.95; name appears at 0.65 before charge/action starts 0.95; impact at about 1.75; victory 1.90–3.00. Keep family-friendly toy motion and no injuries.
+This request creates only the selected character's review assets, never production game changes.

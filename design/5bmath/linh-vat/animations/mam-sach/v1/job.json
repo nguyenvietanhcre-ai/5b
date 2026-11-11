@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "mam-sach",
+  "variant": "v1",
+  "owner": "mam-sach-01a1cb4e",
+  "createdAt": "2026-11-11T15:53:09.519Z",
+  "updatedAt": "2026-11-11T16:32:06.942Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "mam-sach",
+    "name": "Mầm Sách",
+    "ultimateName": "Đại Thụ Tri Thức",
+    "description": "Mở sách, hai lá trên đầu bừng sáng. Những con số và dấu + − × ÷ bay ra, gieo thành hạt mầm dưới chân đối thủ. Một đại thụ ánh sáng vươn lên, nâng đối thủ vào tán lá rồi bung thành mưa sao và những trang sách màu kem.",
+    "speciesType": "sprout",
+    "referenceImage": "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 0,
+      "rows": 1,
+      "columns": 2
+    },
+    "anatomyInvariants": [
+      "Giữ nguyên mầm xanh bơ tròn, hai lá xanh trên đầu, mắt sẫm lớn, má cam và bốn chi ngắn.",
+      "Luôn giữ cuốn sách mở màu kem đúng tỷ lệ và phong cách đất sét/nỉ mềm.",
+      "Đúng hai lá thật trên đầu; đại thụ và trang sách bay là phép tách riêng, không biến nhân vật thành cây hoặc thêm chi."
+    ],
+    "beats": {
+      "windup": "Mở sách, hai lá bừng sáng; số và dấu phép toán nổi lên.",
+      "decisive": "Số gieo thành hạt mầm; đại thụ ánh sáng vươn dưới mục tiêu, nâng đối thủ vào tán lá.",
+      "victory": "Tán cây bung thành mưa sao/trang sách; Mầm Sách mỉm cười với sách, hai lá giữ đúng."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/mam-sach.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1618295,
+      "webpBytes": 292192,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "b3b0d934dd73ac07650e508535c9958525edb1a9a3a076989de5b88a673e33f0",
+      "bytes": 1324990
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "57abb9720ce9fc3d38fb68502ffa98ac3cc0bb79d1713b8522c87cdce2c0118c",
+      "bytes": 1717533
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "9827a98866d4b04558770adf99d751453b94c6ff307315a0e4272e291de02d7f",
+      "bytes": 1862983
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:22:10.503Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "mam-sach-01a1cb4e",
+  "lastReleasedAt": "2026-11-11T16:32:06.942Z"
+}

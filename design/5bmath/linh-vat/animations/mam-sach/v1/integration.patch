@@ -1,0 +1,81 @@
+diff --git a/frontend/index.html b/frontend/index.html
+index 2f1c695..2215e4f 100644
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -23,6 +23,7 @@
+     <link rel="stylesheet" href="arena-cat-animation.css">
+     <link rel="stylesheet" href="arena-crab-animation.css">
+     <link rel="stylesheet" href="octopus-animation.css">
++    <link rel="stylesheet" href="mam-sach-animation.css">
+     <link rel="stylesheet" href="staff.css">
+     <script src="learning-content.js" defer></script>
+     <script src="arena-starfish.js" defer></script>
+@@ -46,6 +47,7 @@
+     <script src="arena-sparrow-animation.js" defer></script>
+     <script src="arena-bee-animation.js" defer></script>
+     <script src="octopus-animation.js" defer></script>
++    <script src="mam-sach-animation.js" defer></script>
+     <script src="learning.js" defer></script>
+     <script src="arena-dolphin.js" defer></script>
+     <script src="horse-animation.js" defer></script>
+diff --git a/backend/server.py b/backend/server.py
+index 307648d..6fd1853 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -20,6 +20,8 @@ ASSETS = {"/": "index.html", "/index.html": "index.html",
+           "/styles.css": "styles.css", "/app.js": "app.js",
+           "/demo-rectangle.svg": "demo-rectangle.svg",
+           "/5bmath-logo.svg": "5bmath-logo.svg", "/5bmath-icon.svg": "5bmath-icon.svg"}
++ASSETS.update({"/" + file: file for file in ("mam-sach-animation.js", "mam-sach-animation.css")})
++ASSETS["/arena-art/mam-sach/poses.webp"] = "arena-art/mam-sach/poses.webp"
+ ASSETS.update({"/" + file: file for file in ("arena-dolphin.js", "arena-dolphin.css")})
+ ASSETS.update({"/arena-art/ca-heo-v1/" + file: "arena-art/ca-heo-v1/" + file
+                for file in ("poses.webp", "actions.webp")})
+diff --git a/scripts/build-pages.cjs b/scripts/build-pages.cjs
+index 86c6a7c..09a6c54 100644
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -46,6 +46,9 @@ for (const [id, page] of Object.entries(pages)) {
+     if (!page.noindex) sitemap.push(canonical);
+ }
+
++for (const asset of ['mam-sach-animation.js', 'mam-sach-animation.css']) {
++    fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
++}
+ for (const asset of ['app.js', 'styles.css', '5bmath-logo.svg', '5bmath-icon.svg', 'demo-rectangle.svg',
+     'learning.css', 'learning.js', 'learning-content.js', 'platform-api.js', 'arena-audio.js', 'arena-voi.css', 'arena-voi.js', 'arena-voi-renderer.js', 'arena-voi-poses.js', 'eagle-animation.js', 'eagle-animation.css', 'rabbit-animation.js', 'shark-animation.js', 'arena-cat-animation.js', 'arena-cat-animation.css', 'mascots.webp', 'staff.js', 'staff.css', 'admissions.js', 'admissions.css']) {
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+diff --git a/frontend/learning.js b/frontend/learning.js
+index bd78fa6..b57a9ab 100644
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -806,6 +806,29 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+     let visualHp=null,catFinaleUntil=0,catFinishTimer=null;
+     let owlFinaleUntil=0,owlFinishTimer=null;
+     function animateHit(target,attacker,final) {
++        const mamSource=document.querySelector(attacker),mamVictim=document.querySelector(target);
++        const mamSourcePet=mamSource?.querySelector('.battle-pet.sprout');
++        if(mamSourcePet&&window.MamSachAnimation){
++            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
++            const mamVictimPet=mamVictim?.querySelector('.battle-pet'),label=document.querySelector('#spell-announcement');
++            if(label)label.textContent='';
++            if(mamVictim)mamVictim.dataset.spell='mam-sach';
++            const impact=()=>{
++                if(!mamVictim?.isConnected||!mamVictimPet)return;
++                mamVictimPet.dataset.mood=final?'lose':'hit';mamVictim.classList.add('taking-hit');
++                if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(mamVictimPet,final?'lose':'hit');
++            };
++            mamSource.classList.add('attacking');window.MamSachAnimation.hit({source:mamSource,victim:mamVictim,final});
++            if(final)setTimeout(impact,1750);else impact();
++            ArenaAudio.effect(final?'beam':'rock');
++            setTimeout(()=>{
++                mamSource?.classList.remove('attacking');mamVictim?.classList.remove('taking-hit');
++                if(mamSourcePet.isConnected)mamSourcePet.dataset.mood=final?'win':'idle';
++                if(mamVictimPet?.isConnected){mamVictimPet.dataset.mood=final?'lose':'idle';if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(mamVictimPet,final?'lose':'idle');}
++                if(label?.isConnected&&label.dataset.mamSach==='true')label.textContent='';
++            },final?3000:1100);
++            return;
++        }
+         const owlSource=document.querySelector(attacker),owlVictim=document.querySelector(target);
+         if(typeof OwlAnimation!=='undefined'&&OwlAnimation.hit({source:owlSource,victim:owlVictim,final})){
+             if(final)owlFinaleUntil=Date.now()+3100;
