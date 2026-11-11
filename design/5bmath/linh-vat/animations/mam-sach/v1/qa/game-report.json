@@ -1,0 +1,591 @@
+{
+  "base": "http://127.0.0.1:28794/",
+  "createdAt": "2026-11-11T16:35:00.740Z",
+  "checks": [
+    "Genuine database account starts bot match through application UI; Mầm Sách is the default selected mascot",
+    "Real answer event runs normal attack and unchanged damage; rendered at all five portrait/landscape/tablet/desktop sizes",
+    "Real bot tick produces hurt reaction; right-side Mầm Sách executes attack",
+    "Final20HP launches three-second Đại Thụ Tri Thức; results route waits, then shows victory",
+    "Right-side special and loss route keep the defeated Mầm holding its book in sad state",
+    "Navigating away removes game effect canvas",
+    "Reduced-motion preference exercises attack and cleanup without errors"
+  ],
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "label": "attack",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 10,
+            "frame": 10,
+            "time": 689,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "label": "attack",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 0,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 11,
+            "frame": 11,
+            "time": 1100,
+            "running": false,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 0
+      }
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "label": "attack",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 10,
+            "frame": 10,
+            "time": 721,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "label": "attack",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 11,
+            "frame": 11,
+            "time": 903,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "label": "attack",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 10,
+            "frame": 10,
+            "time": 613,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "label": "hurt",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 2,
+        "activeRaf": 3,
+        "pets": [
+          {
+            "mode": "hit",
+            "pose": 12,
+            "frame": 12,
+            "time": 510,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          },
+          {
+            "mode": "attack",
+            "pose": 9,
+            "frame": 9,
+            "time": 513,
+            "running": true,
+            "connected": true,
+            "facing": "left"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "label": "ultimate-impact",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "ultimate",
+            "pose": 6,
+            "frame": 6,
+            "time": 1993,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "label": "right-ultimate",
+      "inspect": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 2,
+        "activeRaf": 0,
+        "pets": [
+          {
+            "mode": "lose",
+            "pose": 15,
+            "frame": 15,
+            "time": 2400,
+            "running": false,
+            "connected": true,
+            "facing": "right"
+          },
+          {
+            "mode": "ultimate",
+            "pose": 7,
+            "frame": 7,
+            "time": 3000,
+            "running": false,
+            "connected": true,
+            "facing": "left"
+          }
+        ],
+        "effects": 0
+      }
+    }
+  ],
+  "media": [
+    "http://127.0.0.1:28794/mascots.webp",
+    "http://127.0.0.1:28794/arena-art/horse/v1/poses.webp",
+    "http://127.0.0.1:28794/arena-art/horse/v1/reactions.webp",
+    "http://127.0.0.1:28794/arena-art/02-stream.webp",
+    "http://127.0.0.1:28794/arena-art/cao-nau/poses.webp",
+    "http://127.0.0.1:28794/arena-art/cao-nau/reactions.webp",
+    "http://127.0.0.1:28794/arena-art/mam-sach/poses.webp",
+    "http://127.0.0.1:28794/arena-art/05-bamboo.webp",
+    "http://127.0.0.1:28794/arena-art/03-riverbank.webp",
+    "http://127.0.0.1:28794/arena-art/08-autumn.webp",
+    "http://127.0.0.1:28794/arena-art/06-waterfall.webp",
+    "http://127.0.0.1:28794/arena-art/sprout-motion.webp",
+    "http://127.0.0.1:28794/arena-art/09-meadow.webp",
+    "http://127.0.0.1:28794/arena-art/04-mountains.webp"
+  ],
+  "errors": [],
+  "snapshots": [
+    {
+      "label": "normal-attack",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 9,
+            "frame": 9,
+            "time": 439,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "label": "normal-attack",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 9,
+            "frame": 9,
+            "time": 438,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "label": "normal-attack",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 9,
+            "frame": 9,
+            "time": 437,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "label": "normal-attack",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 9,
+            "frame": 9,
+            "time": 420,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "label": "normal-attack",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 9,
+            "frame": 9,
+            "time": 413,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "label": "hurt",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 2,
+        "activeRaf": 3,
+        "pets": [
+          {
+            "mode": "hit",
+            "pose": 12,
+            "frame": 12,
+            "time": 227,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          },
+          {
+            "mode": "attack",
+            "pose": 8,
+            "frame": 8,
+            "time": 230,
+            "running": true,
+            "connected": true,
+            "facing": "left"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "label": "ultimate-title",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 2,
+        "pets": [
+          {
+            "mode": "ultimate",
+            "pose": 2,
+            "frame": 2,
+            "time": 710,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 1
+      }
+    },
+    {
+      "label": "win-result",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 1,
+        "pets": [
+          {
+            "mode": "win",
+            "pose": 6,
+            "frame": 6,
+            "time": 272,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 0
+      }
+    },
+    {
+      "label": "sad-result",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 1,
+        "activeRaf": 1,
+        "pets": [
+          {
+            "mode": "lose",
+            "pose": 14,
+            "frame": 14,
+            "time": 757,
+            "running": true,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 0
+      }
+    },
+    {
+      "label": "after-leaving-arena",
+      "state": {
+        "loaded": true,
+        "reducedMotion": false,
+        "mounted": 0,
+        "activeRaf": 0,
+        "pets": [],
+        "effects": 0
+      }
+    },
+    {
+      "label": "reduced-motion-attack",
+      "state": {
+        "loaded": true,
+        "reducedMotion": true,
+        "mounted": 1,
+        "activeRaf": 0,
+        "pets": [
+          {
+            "mode": "attack",
+            "pose": 11,
+            "frame": 11,
+            "time": 1100,
+            "running": false,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 0
+      }
+    },
+    {
+      "label": "reduced-motion-ended",
+      "state": {
+        "loaded": true,
+        "reducedMotion": true,
+        "mounted": 1,
+        "activeRaf": 0,
+        "pets": [
+          {
+            "mode": "idle",
+            "pose": 0,
+            "frame": 0,
+            "time": 0,
+            "running": false,
+            "connected": true,
+            "facing": "right"
+          }
+        ],
+        "effects": 0
+      }
+    },
+    {
+      "label": "reduced-motion-cleanup",
+      "state": {
+        "loaded": true,
+        "reducedMotion": true,
+        "mounted": 0,
+        "activeRaf": 0,
+        "pets": [],
+        "effects": 0
+      }
+    }
+  ],
+  "phases": [
+    {
+      "t": 0.64,
+      "mode": "ultimate",
+      "time": 0.64,
+      "pose": 1,
+      "progress": 0.21333333333333335,
+      "finished": false,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false,
+      "flourish": false,
+      "tree": 0,
+      "targetLift": 0
+    },
+    {
+      "t": 0.66,
+      "mode": "ultimate",
+      "time": 0.66,
+      "pose": 2,
+      "progress": 0.22,
+      "finished": false,
+      "nameVisible": true,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false,
+      "flourish": false,
+      "tree": 0,
+      "targetLift": 0
+    },
+    {
+      "t": 0.96,
+      "mode": "ultimate",
+      "time": 0.96,
+      "pose": 4,
+      "progress": 0.32,
+      "finished": false,
+      "nameVisible": true,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false,
+      "flourish": false,
+      "tree": 0,
+      "targetLift": 0
+    },
+    {
+      "t": 1.76,
+      "mode": "ultimate",
+      "time": 1.76,
+      "pose": 5,
+      "progress": 0.5866666666666667,
+      "finished": false,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false,
+      "flourish": false,
+      "tree": 1,
+      "targetLift": 110.59200000000001
+    },
+    {
+      "t": 1.91,
+      "mode": "ultimate",
+      "time": 1.91,
+      "pose": 6,
+      "progress": 0.6366666666666666,
+      "finished": false,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true,
+      "flourish": true,
+      "tree": 1,
+      "targetLift": 110.59200000000001
+    },
+    {
+      "t": 2.99,
+      "mode": "ultimate",
+      "time": 2.99,
+      "pose": 7,
+      "progress": 0.9966666666666667,
+      "finished": false,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true,
+      "flourish": true,
+      "tree": 0,
+      "targetLift": 0
+    }
+  ],
+  "status": "passed"
+}

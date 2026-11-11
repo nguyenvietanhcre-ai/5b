@@ -1,0 +1,99 @@
+{
+  "errors": [],
+  "checks": [
+    "Target lift and tree geometry fit available top headroom on desktop/mobile portrait/landscape; inspected impact screenshots"
+  ],
+  "samples": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "W": 622.140625,
+      "H": 622.140625,
+      "from": {
+        "x": 144.1640625,
+        "y": 366.6953125
+      },
+      "to": {
+        "x": 477.9765625,
+        "y": 107.0703125
+      },
+      "targetSize": 197.796875,
+      "mode": "ultimate",
+      "time": 1.78,
+      "pose": 5,
+      "progress": 0.5933333333333334,
+      "finished": false,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false,
+      "flourish": false,
+      "tree": 1,
+      "targetLift": 23.9075,
+      "treeTop": 8
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "W": 356,
+      "H": 356,
+      "from": {
+        "x": 82.9375,
+        "y": 209.671875
+      },
+      "to": {
+        "x": 273.0625,
+        "y": 61.828125
+      },
+      "targetSize": 112.625,
+      "mode": "ultimate",
+      "time": 1.78,
+      "pose": 5,
+      "progress": 0.5933333333333334,
+      "finished": false,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false,
+      "flourish": false,
+      "tree": 1,
+      "targetLift": 11.030625,
+      "treeTop": 8.000000000000014
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "W": 680,
+      "H": 680,
+      "from": {
+        "x": 157.46875,
+        "y": 400.828125
+      },
+      "to": {
+        "x": 522.53125,
+        "y": 116.90625
+      },
+      "targetSize": 216.3125,
+      "mode": "ultimate",
+      "time": 1.78,
+      "pose": 5,
+      "progress": 0.5933333333333334,
+      "finished": false,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false,
+      "flourish": false,
+      "tree": 1,
+      "targetLift": 26.707499999999996,
+      "treeTop": 7.999999999999972
+    }
+  ],
+  "status": "passed"
+}

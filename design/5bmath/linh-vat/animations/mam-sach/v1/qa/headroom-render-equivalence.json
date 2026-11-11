@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "standaloneTimelineSamples": 91,
+  "identicalDrawCommands": 18528,
+  "previousSha256": "37d25481323af5c61cdc5dfc1e26810f1e5e19e36c057c746c50f09301453820",
+  "updatedSha256": "9b05fa41c743e2eb5d525d7fdf84f38f112035d775133989978f40dd659fd2f2",
+  "headroom": {
+    "treeTop": 7.999999999999972,
+    "targetTop": 8
+  },
+  "copiedRenderer": "design/5bmath/linh-vat/animations/mam-sach/v1/assets/mam-sach-renderer.js",
+  "exportsNeedRegeneration": false
+}

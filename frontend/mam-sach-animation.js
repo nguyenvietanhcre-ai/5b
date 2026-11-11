@@ -100,8 +100,15 @@
         const from=options.from||{x:W*.23,y:H*.66},to=options.to||{x:W*.76,y:H*.43};
         const size=options.size||Math.min(W*.27,H*.50),targetSize=options.targetSize||size;
         const grow=ease((t-1.28)/.47),fade=1-ease((t-1.92)/.55);
-        const treeHeight=targetSize*1.12*grow,base={x:to.x,y:to.y+targetSize*.43};
-        const targetLift=targetSize*.32*ease((t-1.40)/.35)*(1-ease((t-2.05)/.42));
+        const base={x:to.x,y:to.y+targetSize*.43};
+        // The opponent sits near the top of the diagonal arena. Fit the full
+        // crown and the lifted body inside it while retaining the large tree
+        // in standalone previews that have enough room above the opponent.
+        const treeSize=Math.min(targetSize,Math.max(0,(base.y-8)/1.55));
+        const treeHeight=treeSize*1.12*grow;
+        const targetLift=Math.min(Math.max(0,to.y-targetSize*.38-8),
+            targetSize*.32*ease((t-1.40)/.35)*(1-ease((t-2.05)/.42)));
+        const treeTop=base.y-treeSize*1.55*grow;
         const nameVisible=t>=.65&&t<1.60;
         if(t<1.25){
             const pulse=ease(t/.65)*(1-ease((t-.98)/.27));
@@ -120,19 +127,19 @@
         }
         if(grow>0&&fade>0){
             ctx.save();ctx.globalAlpha=fade;ctx.translate(base.x,base.y);
-            ctx.strokeStyle='#FFE6A1';ctx.lineCap='round';ctx.lineWidth=Math.max(2,targetSize*.065*grow);
-            ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-targetSize*.05,-treeHeight*.3,targetSize*.05,-treeHeight*.68,0,-treeHeight);ctx.stroke();
-            ctx.lineWidth=Math.max(1,targetSize*.032*grow);
+            ctx.strokeStyle='#FFE6A1';ctx.lineCap='round';ctx.lineWidth=Math.max(2,treeSize*.065*grow);
+            ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-treeSize*.05,-treeHeight*.3,treeSize*.05,-treeHeight*.68,0,-treeHeight);ctx.stroke();
+            ctx.lineWidth=Math.max(1,treeSize*.032*grow);
             for(const side of [-1,1]){
-                ctx.beginPath();ctx.moveTo(0,-treeHeight*.50);ctx.quadraticCurveTo(side*targetSize*.10*grow,-treeHeight*.70,side*targetSize*.27*grow,-treeHeight*.81);ctx.stroke();
-                ctx.beginPath();ctx.moveTo(0,-treeHeight*.18);ctx.quadraticCurveTo(side*targetSize*.12*grow,-treeHeight*.36,side*targetSize*.37*grow,-treeHeight*.45);ctx.stroke();
+                ctx.beginPath();ctx.moveTo(0,-treeHeight*.50);ctx.quadraticCurveTo(side*treeSize*.10*grow,-treeHeight*.70,side*treeSize*.27*grow,-treeHeight*.81);ctx.stroke();
+                ctx.beginPath();ctx.moveTo(0,-treeHeight*.18);ctx.quadraticCurveTo(side*treeSize*.12*grow,-treeHeight*.36,side*treeSize*.37*grow,-treeHeight*.45);ctx.stroke();
             }
             for(let i=0;i<7;i++){
-                const a=i*Math.PI*2/7,x=Math.cos(a)*targetSize*.26*grow,y=-treeHeight+Math.sin(a)*targetSize*.17*grow;
-                ctx.fillStyle=i%2?'#A8D178':'#78B77E';ctx.beginPath();ctx.ellipse(x,y,targetSize*.26*grow,targetSize*.19*grow,a*.14,0,Math.PI*2);ctx.fill();
-                ctx.strokeStyle='#FFF4BD';ctx.lineWidth=Math.max(1,targetSize*.012);ctx.stroke();
+                const a=i*Math.PI*2/7,x=Math.cos(a)*treeSize*.26*grow,y=-treeHeight+Math.sin(a)*treeSize*.17*grow;
+                ctx.fillStyle=i%2?'#A8D178':'#78B77E';ctx.beginPath();ctx.ellipse(x,y,treeSize*.26*grow,treeSize*.19*grow,a*.14,0,Math.PI*2);ctx.fill();
+                ctx.strokeStyle='#FFF4BD';ctx.lineWidth=Math.max(1,treeSize*.012);ctx.stroke();
             }
-            ctx.strokeStyle='#FFBE73';ctx.lineWidth=Math.max(1,targetSize*.02);ctx.beginPath();ctx.ellipse(0,0,targetSize*.40*grow,targetSize*.09*grow,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+            ctx.strokeStyle='#FFBE73';ctx.lineWidth=Math.max(1,treeSize*.02);ctx.beginPath();ctx.ellipse(0,0,treeSize*.40*grow,treeSize*.09*grow,0,0,Math.PI*2);ctx.stroke();ctx.restore();
         }
         if(t>=1.75&&t<2.95){
             const p=clamp((t-1.75)/1.2);
@@ -144,7 +151,7 @@
         }
         if(options.drawActor!==false)renderPet(ctx,{time:t,mode:'ultimate',x:from.x,y:from.y,size,facing:options.facing??(to.x<from.x?-1:1),motion:options.motion!==false});
         if(nameVisible&&options.drawName!==false)banner(ctx,W,H,'ĐẠI THỤ TRI THỨC');
-        return {...sample('ultimate',t),nameVisible,attackStarted:t>=.95,impact:t>=1.75,victory:t>=1.9,flourish:t>=1.9,tree:grow*fade,targetLift};
+        return {...sample('ultimate',t),nameVisible,attackStarted:t>=.95,impact:t>=1.75,victory:t>=1.9,flourish:t>=1.9,tree:grow*fade,targetLift,treeTop};
     }
     function renderAttack(ctx,t,W,H,{from,to,size}={}) {
         from ||= {x:W*.23,y:H*.66};to ||= {x:W*.76,y:H*.43};size ||= W*.24;

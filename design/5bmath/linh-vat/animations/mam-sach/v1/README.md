@@ -15,3 +15,5 @@ Runtime game: frontend/mam-sach-animation.js,frontend/mam-sach-animation.css,fro
 Nền game và nhiều thay đổi của các chat khác chưa được commit ở thời điểm làm. Commit riêng của chat này lưu module,tài sản,Demo và integration.patch mô tả chính xác các điểm nối vào index/server/build/learning. Các điểm nối đã áp dụng trong cây làm việc và Docker local; không gom toàn bộ nền game/chức năng khác vào commit. Đây là checkpoint riêng Mầm Sách,không phải một release độc lập từ HEAD cũ.
 
 QA xuất tại qa/qa-report.json và qa/contact-sheet.png; QA tương tác/renderer/game/HTTP tại work/mam-sach-animation/. Chưa đo FPS/CPU trên điện thoại thật. Job giữ pending_review,không tự approved.
+
+Nghiệm thu game: năm viewport,đánh/đỡ/hai hướng chiêu cuối/thắng/thua/reducedmotion/cleanup đạt. Sửa tán cây tránh mép trên,kiểm ba viewportđạt;qa/game-report.json vàqa/qa-headroom-report.json. FullWindows74vàDocker77testsđạt. Headroomkhôngđổihìnhdemo(91mốc/18.528lệnhCanvasgiốnghệt),bảnGIF/MP4giữnguyên.
