@@ -1,0 +1,17 @@
+/* Cá heo uses only its WebP sheets; idle poses do not run a render loop. */
+body.learning-mode .mascot-art.dolphin {
+  display:block; aspect-ratio:1; background-image:url('arena-art/ca-heo-v1/actions.webp');
+  background-size:400% 400%; background-position:0 0; background-repeat:no-repeat;
+}
+body.learning-mode .battle-pet.dolphin { --motion-image:none; }
+body.learning-mode .battle-pet.dolphin .motion-sprite { display:none !important; }
+body.learning-mode .battle-pet.dolphin > .mascot-art { visibility:visible; animation:none; }
+body.learning-mode .battle-pet.dolphin.dolphin-ready > .mascot-art { visibility:hidden; }
+body.learning-mode .dolphin-pose-canvas { position:absolute; inset:0; display:block; width:100%; height:100%; pointer-events:none; }
+body.learning-mode .battle-pet.dolphin.dolphin-in-ultimate { visibility:hidden; }
+body.learning-mode .dolphin-ultimate-canvas { position:absolute; inset:0; display:block; width:100%; height:100%; z-index:7; pointer-events:none; }
+body.learning-mode .illustrated-arena.dolphin-ultimate-active .energy-beam,
+body.learning-mode .fighter[data-spell="dolphin"] .spell-effect { display:none; }
+@media(prefers-reduced-motion:reduce) {
+  body.learning-mode .battle-pet.dolphin,body.learning-mode .battle-pet.dolphin * { animation:none !important; transition:none !important; }
+}

@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "ca-heo",
+  "variant": "v1",
+  "owner": "ca-heo-01a1cb4d",
+  "createdAt": "2026-11-11T15:51:37.368Z",
+  "updatedAt": "2026-11-11T16:43:05.419Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "ca-heo",
+    "name": "Cá heo",
+    "ultimateName": "Sóng Âm Cầu Vồng",
+    "description": "Bật nhảy, phát ra các vòng sóng âm sáng màu hướng tới đối thủ. Cá heo lộn một vòng, hợp các vòng sóng thành quả cầu nước khổng lồ rồi cho nổ bung thành bọt cầu vồng.",
+    "speciesType": "aquatic",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 2,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Cá heo xanh lam nhạt, bụng kem, mõm dài tròn đặc trưng.",
+      "Một vây lưng cong, hai vây bên và hai thùy đuôi nằm ngang.",
+      "Không thêm khe mang cá mập, chân/tay hoặc đuôi dựng đứng."
+    ],
+    "beats": {
+      "windup": "Nghiêng mình, quẫy đuôi; các vòng sóng âm nhỏ sáng dần.",
+      "decisive": "Bật nhảy/lộn vòng, hợp sóng âm thành quả cầu nước chạm đối thủ.",
+      "victory": "Quả cầu bung bọt cầu vồng; cá heo đáp nước và nhảy vui lần cuối."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/ca-heo.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1659008,
+      "webpBytes": 459542,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "13f3a0bdc56d64e317ed5b5b7853c43a012abf8e3acac3251454aa58b15e0ba8",
+      "bytes": 2505105
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "a5e16e585e0d034f2b522476a5b57fda29c91c17287b3a2326aff492eda0e639",
+      "bytes": 2158444
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "9f1c4d5c772f492d37f88bf4b1145b45573f1a808433c6fcad03af93b8fe1758",
+      "bytes": 1381029
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:15:14.896Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "ca-heo-01a1cb4d",
+  "lastReleasedAt": "2026-11-11T16:43:05.419Z"
+}

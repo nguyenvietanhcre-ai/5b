@@ -1,0 +1,30 @@
+{
+  "scope": "Only dolphin hooks, shared working baseline retained outside this commit",
+  "files": [
+    {
+      "path": "frontend/learning.js",
+      "beforeSha256": "c92bddb4b99d2cb7955194bb97ecb3ab47a0af654ddafce523b07addde9c5c3d",
+      "afterSha256": "d67ba58a879cb238198480cfd6a01453c71ad945250c2f4b519c0955a3da64f7"
+    },
+    {
+      "path": "frontend/index.html",
+      "beforeSha256": "c4c7553ff42c6f4348fd74471cc9d47136746248cac87c8411166ca0ffc98268",
+      "afterSha256": "be62998d49c1e4a211bea6bc2cfd384b5020655f7d85240851237cd88ff6278c"
+    },
+    {
+      "path": "backend/server.py",
+      "beforeSha256": "49d0fd2f872e5bf49ca349dc2eeeb2ba7d953b844c45e6a2bc7a3540819f81b2",
+      "afterSha256": "a4d8fb509f65b115f84e20c1e7503fcc8effd2958eaddde78c7157c21831f257"
+    },
+    {
+      "path": "backend/platform_api.py",
+      "beforeSha256": "75aee392acf9b330f1037d3f374602aadfa4f56bc8aed03b154556d7942bf7c0",
+      "afterSha256": "8ba46bf97b22a9238b4fd79fa9e3c89ac1843cbfdc6c4e8bbe6ed5d1bee8d878"
+    },
+    {
+      "path": "scripts/build-pages.cjs",
+      "beforeSha256": "97c2207757a41de15d0c46cac9cf061e7d6e1f21646fcb0e818b47d6417addad",
+      "afterSha256": "379d11ba1ff0a0ce3e2107cf32091ccb21dc46ef6193655ed2942b9944ce1aef"
+    }
+  ]
+}

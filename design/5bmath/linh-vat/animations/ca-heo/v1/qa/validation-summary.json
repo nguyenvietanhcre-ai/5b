@@ -1,0 +1,152 @@
+{
+  "date": "2026-11-11",
+  "reports": {
+    "runtime": {
+      "passed": true,
+      "errors": [],
+      "checks": [
+        "runtime-mode",
+        "runtime-mode",
+        "runtime-mode",
+        "runtime-lifecycle",
+        "runtime-reduced-motion"
+      ]
+    },
+    "demo": {
+      "passed": true,
+      "errors": [],
+      "checks": [
+        "demo-viewport",
+        "demo-viewport",
+        "demo-viewport",
+        "demo-viewport",
+        "demo-viewport",
+        "demo-reduced-motion"
+      ]
+    },
+    "bridge": {
+      "passed": true,
+      "errors": [],
+      "checks": [
+        "api-mascot",
+        "real-bot-attack",
+        "app-viewport",
+        "app-viewport",
+        "app-viewport",
+        "app-viewport",
+        "app-viewport",
+        "result-diagnostic",
+        "real-bot-defeat"
+      ],
+      "transport": "Browser routes fulfilled from source; real Python platform dispatch via stdin, fixture DB; no network sockets"
+    },
+    "ultimate": {
+      "passed": true,
+      "errors": [],
+      "checks": [
+        "api-mascot",
+        "real-bot-attack",
+        "real-game-ultimate"
+      ],
+      "transport": "Browser routes fulfilled from source; real Python platform dispatch via stdin, fixture DB; no network sockets"
+    }
+  },
+  "dockerTests": {
+    "count": 77,
+    "passed": true,
+    "seconds": 127.98
+  },
+  "targetedDolphinTests": 2,
+  "builds": {
+    "cloudflare": 8,
+    "github": 8,
+    "seoPassed": true
+  },
+  "runtimeSheetsBytes": 954992,
+  "sourceMatchesServing": {
+    "/learning.js": true,
+    "/arena-dolphin.js": true,
+    "/arena-dolphin.css": true,
+    "/arena-art/ca-heo-v1/poses.webp": true,
+    "/arena-art/ca-heo-v1/actions.webp": true
+  },
+  "containerSmoke": {
+    "routes": {
+      "/": {
+        "status": 200,
+        "bytes": 7919,
+        "sha256": "9e75b55bd729085d94b99a6f51898ca1d8748c0d7543903356bf9a4adb4e6ae0",
+        "mime": "text/html"
+      },
+      "/linh-vat/": {
+        "status": 200,
+        "bytes": 7957,
+        "sha256": "b8d45293384a46d16e9314b73af95af1012938c40e7a13e4b34288a1bf609c3c",
+        "mime": "text/html"
+      },
+      "/api/health": {
+        "status": 200,
+        "bytes": 53,
+        "sha256": "1c4a9c25b0d41c991de894e667f9d0f8fca0a85fdce67dc7e5c75bd6fac2d846",
+        "mime": "application/json"
+      },
+      "/learning.js": {
+        "status": 200,
+        "bytes": 129264,
+        "sha256": "d67ba58a879cb238198480cfd6a01453c71ad945250c2f4b519c0955a3da64f7",
+        "mime": "text/javascript"
+      },
+      "/arena-dolphin.js": {
+        "status": 200,
+        "bytes": 18404,
+        "sha256": "027caac5baa31c08a93f61c692b02df1ef95882f146e1891be5d652eda034586",
+        "mime": "text/javascript"
+      },
+      "/arena-dolphin.css": {
+        "status": 200,
+        "bytes": 1329,
+        "sha256": "2d9e73dce1d3589a95454e6b30fad4e07fb1b60ba9100d45b67f3da94b3538d7",
+        "mime": "text/css"
+      },
+      "/arena-art/ca-heo-v1/poses.webp": {
+        "status": 200,
+        "bytes": 459542,
+        "sha256": "17ca77a30a037307dcfbdf24bfa3b8451786bb4d5c392e626afccaa2993afada",
+        "mime": "image/webp"
+      },
+      "/arena-art/ca-heo-v1/actions.webp": {
+        "status": 200,
+        "bytes": 495450,
+        "sha256": "1e2fb1b417d186fac50eeb34b74677f12db79869af28d8e4d5bbda302c55eaa7",
+        "mime": "image/webp"
+      },
+      "/backend/server.py": {
+        "status": 404
+      },
+      "/design/5bmath/linh-vat/animations/ca-heo/v1/source/poses.png": {
+        "status": 404
+      },
+      "/not-a-real-page/": {
+        "status": 404
+      }
+    },
+    "sourceMatch": {
+      "/learning.js": true,
+      "/arena-dolphin.js": true,
+      "/arena-dolphin.css": true,
+      "/arena-art/ca-heo-v1/poses.webp": true,
+      "/arena-art/ca-heo-v1/actions.webp": true
+    },
+    "gradeScore": 10,
+    "database": {
+      "integrity": "ok",
+      "foreignKeyErrors": 0,
+      "dolphinEntries": 1
+    }
+  },
+  "limits": [
+    "Windows full suite had 8 HTTP errors from WinError10013 sandbox; Docker full suite passed",
+    "Browser app QA used intercepted transport to real Python dispatch and fixture DB; actual service HTTP separately checked inside container",
+    "No real phone FPS/CPU measurement, no external CI/push/public deployment"
+  ]
+}

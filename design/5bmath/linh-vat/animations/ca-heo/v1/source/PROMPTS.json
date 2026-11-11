@@ -1,0 +1,26 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "createdDate": "2026-11-11",
+  "transparentBackground": true,
+  "references": [
+    {"path": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png", "role": "character identity, top row third column only"},
+    {"path": "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png", "role": "material and lighting style only"}
+  ],
+  "generations": [
+    {
+      "file": "source/poses.png",
+      "outputName": "exec-c70197a3-0630-4c0f-8a23-eeaf0e905b00.png",
+      "prompt": "Create a production animation sprite atlas on TRUE TRANSPARENT ALPHA background, 4 columns x 4 rows, 16 equal square cells, no lines, no text, no background, no water or floor shadows. Reference 1 is CHARACTER reference: use ONLY dolphin in top row third column, pale sky blue, cream belly, rounded long bottlenose, brown glossy eyes and apricot circular cheeks. Reference 2 is MATERIAL/STYLE reference only: same tactile soft clay/felt matte toy and warm diffuse lighting as fox/sprout. Create ONLY dolphin, never fox/sprout or other animals. All 16 full-body dolphin poses preserve exact identity and anatomy: one curved dorsal fin, exactly two side flippers, horizontal paired tail flukes; no gill slits, no legs, no hands. Primary facing right (mirror original reference orientation), 3/4 side view shows face. Each cell has same framing, one dolphin centered, generous 12% transparent padding, no clipping, uniform character scale. Row1 cells 0-3: neutral buoyant, tail lowers preparing leap, body compress tilts upwards, head raises concentrating sound. Row2 cells 4-7: takeoff angled up 25deg, rising arc 45deg, tucked rolling pose, fully curled mid somersault (tail attached). Row3 cells 8-11: unroll tilted forward, face right and open mouth singing sound, flippers spread projecting sound, graceful landing curved down. Row4 cells 12-15: happy landing, joyous leap, cheerful flippers spread and eyes smiling, proud happy settled final pose. Keep happy expressive child-friendly face except focused casting; no battle injury. Effects will be added separately in canvas. Atlas must be 4x4 not a collage of variable cells. Transparent background mandatory."
+    },
+    {
+      "file": "source/actions.png",
+      "outputName": "exec-dd29e212-40f7-4245-9081-80be4ce72792.png",
+      "prompt": "Create second production sprite atlas, 4 columns x 4 rows, 16 equal square cells, TRUE transparent alpha, no background no text no grid lines no props or fx. Character identity reference is ONLY pale blue dolphin top right of reference1; style reference2 soft felt matte clay toy fox/sprout. Same cheerful pale sky blue dolphin with cream belly, big dark brown glossy eyes, round apricot cheeks, rounded long bottlenose, one curved dorsal fin, two side flippers, horizontal paired tail flukes. All face RIGHT in 3/4 view, full body centered consistent size, generous transparent padding each cell. NO gill slits, legs, feet or hands, don't humanize anatomy. Row1 frames0-3: buoyant relaxed idle; idle tail lifted; focused ready tail curled down; backward windup. Row2 frames4-7: quick forward lunge nose extended, open mouth emitting sound (no visible effects), strong tail stroke, return relaxed happy neutral. Row3 frames8-11: surprised eyes mouth O; short recoil body tilted back with eyes squeezed shut; flippers draw in and brows wincing; recovery determined. Child-friendly harmless reaction, NO wounds bruises bandage weapons stars. Row4 frames12-15: drooping head with sad eyebrows mouth small frown, head bows lower eyes downcast, sad with eyes closed and flippers drooping, resigned sitting-like floating low body tail droops but no legs. Mild disappointed loss, no tears needed. Emotions readable yet warm. Each frame one complete anatomically consistent dolphin. No extra animals, no labels. Consistent original identity and lighting, not flat vector, soft detailed felt texture."
+    }
+  ],
+  "preparation": {
+    "poses": "CLI prepare, WebP alpha preserved; PNG unchanged",
+    "actions": "sharp WebP quality84 alphaQuality100; PNG unchanged",
+    "visualCheck": "Both WebP sheets composited on cream and dark green and inspected, no cyan/checkerboard baked into assets"
+  }
+}

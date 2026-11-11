@@ -1,0 +1,94 @@
+{
+  "characterId": "ca-heo",
+  "variant": "v1",
+  "format": "animated WebP review export",
+  "fps": 30,
+  "width": 768,
+  "height": 432,
+  "frames": 90,
+  "durationMs": 3000,
+  "loop": 0,
+  "errors": [],
+  "outputs": {
+    "attack": {
+      "path": "exports/attack.webp",
+      "width": 768,
+      "height": 432,
+      "frames": 90,
+      "durationMs": 3000,
+      "loop": 0,
+      "bytes": 830522,
+      "sha256": "e24ae374be6885adda73b0ba8cb3bd11b72ea4b82bfa70fd91c75cfc69b9f3bb"
+    },
+    "hurt": {
+      "path": "exports/hurt.webp",
+      "width": 768,
+      "height": 432,
+      "frames": 90,
+      "durationMs": 3000,
+      "loop": 0,
+      "bytes": 612530,
+      "sha256": "d0a5e2a46682e6be2a081253cdbff3402a048e6276a9a9d30d5b051866117561"
+    },
+    "lose": {
+      "path": "exports/lose.webp",
+      "width": 768,
+      "height": 432,
+      "frames": 90,
+      "durationMs": 3000,
+      "loop": 0,
+      "bytes": 623792,
+      "sha256": "dce95ff5e4279bec842d48cd97b6a1854c12c2c1ba492cb42aa3a5be5b5962f1"
+    }
+  },
+  "runtimeRequests": [
+    {
+      "type": "document",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/ca-heo/v1/demo.html?export=1"
+    },
+    {
+      "type": "script",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/ca-heo/v1/config.js"
+    },
+    {
+      "type": "script",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/ca-heo/v1/poses.js"
+    },
+    {
+      "type": "script",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/ca-heo/v1/animation.js"
+    },
+    {
+      "type": "image",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/ca-heo/v1/assets/poses.webp"
+    },
+    {
+      "type": "image",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/ca-heo/v1/assets/actions.webp"
+    },
+    {
+      "type": "image",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp"
+    },
+    {
+      "type": "image",
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp"
+    }
+  ],
+  "sourceHashes": {
+    "animation.js": "c54dbdc5b12e1ccef3f1f95e5d95fe3f96494fc9c56356d3b646b72ba9410e2b",
+    "config.js": "7c0e03afd6643965abdcca0c3133a1cdfbb4cbc70e9398b0339e7f6908497620",
+    "poses.js": "3f9b0415adccf72742d3ea066837f87d1b3d5e83b6bef2104d32ab95654ea20d",
+    "source/poses.png": "68ab85213849fde2bf88d27025fe549bb9a1dc2659d1b9e3cdd740837e8aef55",
+    "source/actions.png": "4f3dfd201d5e768ba09157e2e14bdb0a1811e40224c90b2ac50956348039868a",
+    "assets/poses.webp": "17ca77a30a037307dcfbdf24bfa3b8451786bb4d5c392e626afccaa2993afada",
+    "assets/actions.webp": "1e2fb1b417d186fac50eeb34b74677f12db79869af28d8e4d5bbda302c55eaa7"
+  },
+  "contactSheet": {
+    "path": "qa/actions-contact-sheet.png",
+    "bytes": 661232,
+    "sha256": "cd8e3d8631f064a778766389784bd8dd901952d52013b7bc7e235fb0c4564eb1"
+  },
+  "status": "passed",
+  "checkedAt": "2026-11-11T16:40:18.374Z"
+}
