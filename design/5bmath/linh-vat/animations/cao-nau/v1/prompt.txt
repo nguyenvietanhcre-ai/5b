@@ -1,0 +1,13 @@
+Use case: stylized-concept. Asset type: animation sprite sheet for a standalone review demo.
+Character: Cáo Nâu. Ultimate: Lốc Đuôi Tinh Quái.
+Reference image: design/5bmath/linh-vat/mam-sach-cao-nau-goc.png. Use ONLY the 1th row / 2th column subject of a 1 by 2 review board.
+Keep the exact reference identity and the soft matte felt/clay 3D material, rounded proportions, large dark-brown expressive eyes, apricot cheeks, warm lighting of Cáo Nâu and Mầm Sách. Do not add fox tails, sprout leaves, books or clothes to unrelated species.
+Anatomy invariants: Giữ nguyên Cáo Nâu đã duyệt: lông cam nâu, mõm/bụng/đầu đuôi kem, mắt nâu, má cam.; Hai tai nhọn, bốn chi, đúng một đuôi xù; khăn xanh lá từ ảnh gốc.; Không tự thêm chín đuôi, bỏ khăn, thay mặt hoặc đổi chất liệu; bóng đuôi/lá là hiệu ứng riêng.
+Action idea (not yet approved choreography): Ve vẩy đuôi đánh lạc hướng rồi lách nhanh ra sau đối thủ. Chiếc đuôi xù quét một vòng, cuốn lá cam thành cơn lốc hình đuôi cáo. Cú xoay đuôi cuối cuốn đối thủ lên rồi khiến cơn lốc bung thành pháo lá mùa thu.
+Create EXACTLY SIXTEEN full-body poses, 4 columns × 4 rows, on genuinely transparent alpha, no checkerboard, grid, labels or shadows. Each pose stays inside its cell with generous margin. Keep consistent size/camera/markings. Face right in 3/4 view.
+Row 1, frames 1–4: neutral → notice/track target → windup → compressed ready pose, adapted to this species.
+Row 2, frames 5–8: four sequential approach/movement poses adapted to the action idea (walk/run/fly/swim/float, never add legs or wings that do not belong to the species).
+Row 3, frames 9–12: brace → anticipate → decisive species-specific action → follow-through. No composited beams/particles or text; effects are layered later by Canvas.
+Row 4, frames 13–16: joyful reaction → small celebration motion → settle → final proud friendly pose.
+Timeline for the separate animation: total 3.000 s / 90 frames at 30 fps. Windup 0–0.95; name appears at 0.65 before charge/action starts 0.95; impact at about 1.75; victory 1.90–3.00. Keep family-friendly toy motion and no injuries.
+This request creates only the selected character's review assets, never production game changes.

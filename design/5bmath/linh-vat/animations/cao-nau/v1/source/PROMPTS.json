@@ -1,0 +1,20 @@
+{
+  "createdAt": "2026-11-11",
+  "tool": "built-in image_gen",
+  "reference": "source/reference.png (original design/5bmath/linh-vat/mam-sach-cao-nau-goc.png, right half)",
+  "style": "STYLE.md; soft felt/clay, brown-orange fox, green scarf, one cream-tipped tail",
+  "ultimate": {
+    "source": "source/poses.png",
+    "prompt": "Create a production animation sprite sheet for the EXACT Cáo Nâu fox in the RIGHT HALF of the supplied reference. Left green sprout is style reference only, DO NOT draw it. Same rounded orange-brown fox, cream muzzle belly and single fluffy cream-tipped tail, exactly two pointed ears, exactly two arms + two feet, green fringed scarf, dark brown glossy eyes, apricot cheeks, matte fine felt/clay toy 3D texture, warm soft lighting. Exactly 16 separate FULL BODY fox poses, STRICT evenly spaced 4 columns by 4 rows, genuinely transparent background, no text, no grid, no ground shadows. One fox in each equal cell, all within cell with generous 12% margin, consistent body/face proportions and size. Face right in three-quarter view except turn poses. Tail stays ONE connected anatomical tail. Action is playful ultimate Lốc Đuôi Tinh Quái (mischievous tail whirlwind). Row1: neutral standing alert; playful tail wag left; lean left as feint tail right; crouched ready to dart. Row2: four sequential quick sidesteps / dart right, feet natural toy action, scarf and tail following, last pose pivots into spin. Row3: coil tail to left; turn torso with sweeping tail; a dynamic spin showing single tail sweeping right; finish turn with tail stretched beside body. Row4: cheerful landing; small joyful hop arms high; proud smile hand on hip; settle friendly triumphant smile with single tail curled to side. No particles/leaves/vortex or other figures; effects will be drawn separately. Preserve fox design precisely, avoid duplicate tails, extra limbs or cropped ears."
+  },
+  "reactions": {
+    "source": "source/reactions.png",
+    "references": [
+      "source/reference.png",
+      "source/poses.png"
+    ],
+    "prompt": "Create a SECOND animation sprite sheet for the EXACT Cáo Nâu fox from RIGHT HALF of reference image 1, consistent with 16-pose ultimate sheet reference image 2. Soft matte felt clay toy 3D, orange-brown fur, cream muzzle belly and ONE fluffy cream tipped tail, two pointed ears, green fringed scarf, dark brown eyes and apricot cheeks. Exactly 16 full body poses in evenly spaced STRICT 4 columns x 4 rows, genuine transparent alpha, no text, no grid, no shadows, no scenery. Keep generous margins inside each cell, consistent size, three-quarter face right. Row 1 four sequential NORMAL ATTACK poses: alert ready; crouch draws tail back; playful quick forward tail swipe with one arm extended; relaxed follow-through. Row 2 four sequential TAKING A HIT poses: alert surprised eyes; small backward recoil arms raised; eyes closed wince with ears lower, balanced feet; recovering breath no wounds. Row 3 four DEFEAT SADNESS poses: downcast mouth and lowered ears; slowly lowering head and tail; sitting with paws in lap and sad eyes; quietly sitting with head gently down, tail resting at side, no tears or cruelty. Row4 four victory/idle poses: friendly neutral standing; happy small hop arms up; broad smile proud hands hips; warm encouraging little wave. One physically connected tail per pose; exactly two hands and two feet, paws can occlude naturally. Preserve exact fox identity and felt texture. No leaves, no magic FX, no weapons, no other character."
+  },
+  "postprocess": "Lossy WebP quality82, alphaQuality100, effort6; alpha bounds extracted with sharp; original PNG unchanged.",
+  "approval": "pending_review; current task authorizes local integration and commit, no public publication"
+}

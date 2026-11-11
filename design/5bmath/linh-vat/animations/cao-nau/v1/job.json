@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "cao-nau",
+  "variant": "v1",
+  "owner": "cao-nau-01a1cb4f",
+  "createdAt": "2026-11-11T15:53:05.828Z",
+  "updatedAt": "2026-11-11T16:43:11.102Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "cao-nau",
+    "name": "Cáo Nâu",
+    "ultimateName": "Lốc Đuôi Tinh Quái",
+    "description": "Ve vẩy đuôi đánh lạc hướng rồi lách nhanh ra sau đối thủ. Chiếc đuôi xù quét một vòng, cuốn lá cam thành cơn lốc hình đuôi cáo. Cú xoay đuôi cuối cuốn đối thủ lên rồi khiến cơn lốc bung thành pháo lá mùa thu.",
+    "speciesType": "mammal",
+    "referenceImage": "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 1,
+      "rows": 1,
+      "columns": 2
+    },
+    "anatomyInvariants": [
+      "Giữ nguyên Cáo Nâu đã duyệt: lông cam nâu, mõm/bụng/đầu đuôi kem, mắt nâu, má cam.",
+      "Hai tai nhọn, bốn chi, đúng một đuôi xù; khăn xanh lá từ ảnh gốc.",
+      "Không tự thêm chín đuôi, bỏ khăn, thay mặt hoặc đổi chất liệu; bóng đuôi/lá là hiệu ứng riêng."
+    ],
+    "beats": {
+      "windup": "Ve vẩy đuôi và nghiêng người đánh lạc hướng; lá cam gom dần.",
+      "decisive": "Lách nhanh, quét đuôi tạo lốc; cú xoay đuôi khóa cơn lốc tại đối thủ.",
+      "victory": "Lốc bung thành pháo lá; Cáo Nâu giơ tay/đuôi tự hào, vẫn chỉ một đuôi thật."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/cao-nau.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1261,
+      "height": 1247,
+      "sourceBytes": 1893707,
+      "webpBytes": 445786,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "671728a4a8f7cc65a5eb94fefb2db3ba90dda582bbc5f531082ff8dfd1b77390",
+      "bytes": 2216053
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "1ca857c1f62e647609651aeed04231cf8c77068d39fcc0b2eba53d9cdd1c54b9",
+      "bytes": 2103759
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "541204a8cf3000ade4dec71db70c2748ca8026101632d83a930bf1e86b5f4d02",
+      "bytes": 1867861
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:13:32.385Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "cao-nau-01a1cb4f",
+  "lastReleasedAt": "2026-11-11T16:43:11.102Z"
+}

@@ -1,0 +1,330 @@
+{
+  "url": "https://fox-game.test/",
+  "viewports": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "normal": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "attack",
+            "pose": 1,
+            "time": 492,
+            "running": true,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "winner": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "win",
+            "pose": 15,
+            "time": 1600,
+            "running": false,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "defeated": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "lose",
+            "pose": 8,
+            "time": 40,
+            "running": true,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "sad": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "lose",
+            "pose": 11,
+            "time": 2200,
+            "running": false,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "normal": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "attack",
+            "pose": 1,
+            "time": 498,
+            "running": true,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "winner": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "win",
+            "pose": 15,
+            "time": 1600,
+            "running": false,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "defeated": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "lose",
+            "pose": 8,
+            "time": 46,
+            "running": true,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "sad": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "lose",
+            "pose": 11,
+            "time": 2200,
+            "running": false,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "normal": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "attack",
+            "pose": 1,
+            "time": 498,
+            "running": true,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "winner": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "win",
+            "pose": 15,
+            "time": 1600,
+            "running": false,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "defeated": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "lose",
+            "pose": 8,
+            "time": 46,
+            "running": true,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      },
+      "sad": {
+        "loaded": true,
+        "pets": [
+          {
+            "mood": "lose",
+            "pose": 11,
+            "time": 2200,
+            "running": false,
+            "connected": true
+          }
+        ],
+        "flights": 0,
+        "reducedMotion": false
+      }
+    }
+  ],
+  "errors": [],
+  "checks": [
+    "Full source learning-app bot UI under fulfilled static HTTP fixture (socket API unavailable), correct answer normal attack then ultimate at final20HP; local battle HP changes remain20 per correct answer.",
+    "Name before impact, ultimate completes then victory result; bot answer triggers loss and last sad pose holds without RAF.",
+    "Three desktop/mobile portrait/landscape viewports no overflow; reduced-motion renders last sad frame without RAF; no video/GIF runtime requests."
+  ],
+  "requests": [
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp",
+    "https://fox-game.test/fox-animation.css",
+    "https://fox-game.test/fox-animation.js",
+    "https://fox-game.test/arena-art/cao-nau/frames.json",
+    "https://fox-game.test/arena-art/cao-nau/poses.webp",
+    "https://fox-game.test/arena-art/cao-nau/reactions.webp"
+  ],
+  "reduced": {
+    "loaded": true,
+    "pets": [
+      {
+        "mood": "lose",
+        "pose": 11,
+        "time": 2200,
+        "running": false,
+        "connected": true
+      }
+    ],
+    "flights": 0,
+    "reducedMotion": true
+  }
+}

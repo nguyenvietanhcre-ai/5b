@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "no atlas requests without fox",
+    "two foxes mount; idle has no animation loop",
+    "attack completes and stops",
+    "hit completes and stops",
+    "lose completes and stops",
+    "win completes and stops",
+    "ultimate label before impact; 3-second overlay cleanup",
+    "portrait/landscape tablet/desktop no horizontal overflow",
+    "route removal releases pets and overlays",
+    "reduced motion holds pose without vortex animation"
+  ],
+  "errors": [],
+  "requests": [
+    "http://fox.test/arena-art/cao-nau/frames.json",
+    "http://fox.test/arena-art/cao-nau/poses.webp",
+    "http://fox.test/arena-art/cao-nau/reactions.webp",
+    "http://fox.test/arena-art/cao-nau/frames.json",
+    "http://fox.test/arena-art/cao-nau/poses.webp",
+    "http://fox.test/arena-art/cao-nau/reactions.webp"
+  ],
+  "passed": true
+}

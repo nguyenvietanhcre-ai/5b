@@ -1,0 +1,17 @@
+/* Cáo Nâu uses an atlas only after a battle sprite is mounted. */
+body.learning-mode .battle-pet.fox.fox-ready > .mascot-art { visibility:hidden; }
+body.learning-mode .battle-pet.fox.fox-ready .motion-sprite { display:none !important; }
+body.learning-mode .fox-canvas { position:absolute; inset:0; display:block; width:100%; height:100%; pointer-events:none; }
+body.learning-mode .illustrated-arena .pet-turn.face-fox { transform:none; }
+body.learning-mode .illustrated-arena .right .pet-turn.face-fox { transform:scaleX(-1); }
+body.learning-mode .fighter:has(.battle-pet.fox.fox-ready).attacking { animation:none; }
+body.learning-mode .battle-pet.fox.fox-in-ultimate { visibility:hidden; }
+body.learning-mode .fox-ultimate-canvas { position:absolute; inset:0; display:block; width:100%; height:100%; z-index:7; pointer-events:none; }
+body.learning-mode .illustrated-arena.fox-ultimate-active .energy-beam,
+body.learning-mode .illustrated-arena.fox-ultimate-active .spell-effect { display:none; }
+body.learning-mode .spell-announcement.fox-spell-accessible { width:1px; height:1px; padding:0; border:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+body.learning-mode .battle-pet.fox-caught { animation:fox-leaf-lift .8s ease both; }
+@keyframes fox-leaf-lift { 0%,100% { transform:translateY(0) rotate(0); } 40% { transform:translateY(-16%) rotate(-8deg); } 70% { transform:translateY(-9%) rotate(6deg); } }
+@media(prefers-reduced-motion:reduce) {
+  body.learning-mode .battle-pet.fox,body.learning-mode .battle-pet.fox *,body.learning-mode .battle-pet.fox-caught { animation:none !important; transition:none !important; }
+}

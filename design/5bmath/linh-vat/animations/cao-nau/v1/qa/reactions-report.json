@@ -1,0 +1,195 @@
+{
+  "characterId": "cao-nau",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "modes": [
+    {
+      "mode": "attack",
+      "samples": [
+        {
+          "time": 0,
+          "t": 0,
+          "mode": "attack",
+          "phase": "TẤN CÔNG",
+          "pose": 0,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 0.6666666666666666,
+          "t": 0.6666666666666666,
+          "mode": "attack",
+          "phase": "TẤN CÔNG",
+          "pose": 2,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 1.3333333333333333,
+          "t": 1.3333333333333333,
+          "mode": "attack",
+          "phase": "TẤN CÔNG",
+          "pose": 3,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 2.966666666666667,
+          "t": 2.966666666666667,
+          "mode": "attack",
+          "phase": "TẤN CÔNG",
+          "pose": 3,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        }
+      ],
+      "gif": {
+        "frames": 90,
+        "durationMs": 3000,
+        "bytes": 844176
+      },
+      "mp4": {
+        "duration": 3,
+        "width": 1280,
+        "height": 720,
+        "decoded": true,
+        "frames": 90,
+        "bytes": 1526136
+      }
+    },
+    {
+      "mode": "hit",
+      "samples": [
+        {
+          "time": 0,
+          "t": 0,
+          "mode": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 4,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 0.6666666666666666,
+          "t": 0.6666666666666666,
+          "mode": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 6,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 1.3333333333333333,
+          "t": 1.3333333333333333,
+          "mode": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 7,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 2.966666666666667,
+          "t": 2.966666666666667,
+          "mode": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 7,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        }
+      ],
+      "gif": {
+        "frames": 90,
+        "durationMs": 3000,
+        "bytes": 790534
+      },
+      "mp4": {
+        "duration": 3,
+        "width": 1280,
+        "height": 720,
+        "decoded": true,
+        "frames": 90,
+        "bytes": 1516935
+      }
+    },
+    {
+      "mode": "lose",
+      "samples": [
+        {
+          "time": 0,
+          "t": 0,
+          "mode": "lose",
+          "phase": "BUỒN KHI THUA",
+          "pose": 8,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 0.6666666666666666,
+          "t": 0.6666666666666666,
+          "mode": "lose",
+          "phase": "BUỒN KHI THUA",
+          "pose": 9,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 1.3333333333333333,
+          "t": 1.3333333333333333,
+          "mode": "lose",
+          "phase": "BUỒN KHI THUA",
+          "pose": 10,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 2.966666666666667,
+          "t": 2.966666666666667,
+          "mode": "lose",
+          "phase": "BUỒN KHI THUA",
+          "pose": 11,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        }
+      ],
+      "gif": {
+        "frames": 90,
+        "durationMs": 3000,
+        "bytes": 932425
+      },
+      "mp4": {
+        "duration": 3,
+        "width": 1280,
+        "height": 720,
+        "decoded": true,
+        "frames": 90,
+        "bytes": 1528188
+      }
+    }
+  ],
+  "errors": []
+}

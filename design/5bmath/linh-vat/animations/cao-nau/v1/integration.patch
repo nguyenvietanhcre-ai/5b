@@ -1,0 +1,80 @@
+diff --git a/frontend/index.html b/frontend/index.html
+index 4fb77e1..2215e4f 100644
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -14,6 +14,7 @@
+     <link rel="stylesheet" href="arena-dolphin.css">
+     <link rel="stylesheet" href="arena-bee-animation.css">
+     <link rel="stylesheet" href="bear-animation.css">
++    <link rel="stylesheet" href="fox-animation.css">
+     <link rel="stylesheet" href="butterfly-animation.css">
+     <link rel="stylesheet" href="horse-animation.css">
+     <link rel="stylesheet" href="arena-voi.css">
+@@ -32,6 +33,7 @@
+     <script src="butterfly-animation.js" defer></script>
+     <script src="platform-api.js" defer></script>
+     <script src="arena-audio.js" defer></script>
++    <script src="fox-animation.js" defer></script>
+     <script src="tiger-animation.js" defer></script>
+     <script src="arena-voi-renderer.js" defer></script>
+     <script src="arena-voi-poses.js" defer></script>
+diff --git a/backend/server.py b/backend/server.py
+index e04185b..6fd1853 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -35,6 +35,9 @@ ASSETS.update({"/" + file: file for file in
+ ASSETS.update({"/" + file: file for file in ("arena-starfish.js", "arena-starfish.css")})
+ ASSETS.update({"/arena-art/sao-bien-v1/" + file: "arena-art/sao-bien-v1/" + file
+                for file in ("poses.webp", "reactions.webp", "metadata.json", "idle.webp")})
++ASSETS.update({"/" + file: file for file in ("fox-animation.js", "fox-animation.css")})
++ASSETS.update({"/arena-art/cao-nau/" + file: "arena-art/cao-nau/" + file
++               for file in ("poses.webp", "reactions.webp", "frames.json")})
+ ASSETS.update({"/" + file: file for file in ("arena-lion.js", "arena-lion.css")})
+ ASSETS.update({"/" + file: file for file in ("arena-crab-animation.js", "arena-crab-animation.css")})
+ ASSETS.update({"/arena-art/" + file.name: "arena-art/" + file.name
+diff --git a/scripts/build-pages.cjs b/scripts/build-pages.cjs
+index ff9c695..09a6c54 100644
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -77,6 +77,9 @@ fs.cpSync(path.join(frontend, 'arena-art'), path.join(output, 'arena-art'), { re
+ for (const asset of ['arena-starfish.js', 'arena-starfish.css']) {
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
++for (const asset of ['fox-animation.js', 'fox-animation.css']) {
++    fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
++}
+ for (const asset of ['horse-animation.js', 'horse-animation.css']) {
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
+diff --git a/frontend/learning.js b/frontend/learning.js
+index cd57631..7d41e19 100644
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -877,6 +877,27 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+         }
+         const stage=document.querySelector('#battle-stage'),victim=document.querySelector(target),source=document.querySelector(attacker);
+         const sourcePet=source?.querySelector('.battle-pet'),victimPet=victim?.querySelector('.battle-pet');
++        if(sourcePet?.classList.contains('fox')&&window.FoxAnimation){
++            if(final)catFinaleUntil=Date.now()+3100;
++            if(victim)victim.dataset.spell='fox';
++            const impact=()=>{if(!victim?.isConnected||!victimPet)return;victimPet.dataset.mood=final?'lose':'hit';victim.classList.add('taking-hit');};
++            const show=()=>{
++                if(!stage?.isConnected||!sourcePet.isConnected)return;
++                if(final)catFinaleUntil=Date.now()+3100;
++                if(final)setTimeout(impact,1750);else impact();
++                source.classList.add('attacking');window.FoxAnimation.hit({source,victim,final});
++                const label=document.querySelector('#spell-announcement');if(label)label.textContent='';
++                ArenaAudio.effect(final?'beam':'rock');
++                setTimeout(()=>{victim?.classList.remove('taking-hit');source?.classList.remove('attacking');if(victimPet?.isConnected&&!final)victimPet.dataset.mood='idle';if(sourcePet.isConnected)window.FoxAnimation.play(sourcePet,final?'win':'idle');},final?3000:1100);
++            };
++            // Start the impact and result delay with the decoded images on a cold load.
++            window.FoxAnimation.ready().then(show).catch(()=>{
++                if(!sourcePet.isConnected)return;
++                sourcePet.dataset.mood='attack';impact();
++                setTimeout(()=>{victim?.classList.remove('taking-hit');if(victimPet?.isConnected&&!final)victimPet.dataset.mood='idle';if(sourcePet.isConnected)sourcePet.dataset.mood='idle';},1100);
++            });
++            return;
++        }
+         if(sourcePet?.classList.contains('eagle')&&window.EagleAnimation){
+             if(final)catFinaleUntil=Date.now()+3100;
+             if(victim)victim.dataset.spell='eagle';

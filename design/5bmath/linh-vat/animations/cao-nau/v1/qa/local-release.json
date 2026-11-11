@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-11-11T16:41:47.093Z",
+  "url": "http://127.0.0.1:32773/",
+  "container": "{\"Command\":\"\\\"python -m backend -…\\\"\",\"CreatedAt\":\"2026-11-11 23:40:45 +0700 +07\",\"Engine\":\"\",\"ExitCode\":0,\"Health\":\"healthy\",\"ID\":\"ba975ebe0bf5\",\"Image\":\"mam-toan:fox-local-01a1cb4f\",\"Labels\":\"com.docker.compose.config-hash=16b8d6fd4b05e133297f4aa86cfa833f7c0fe181ddaf8763e49089f08728f16e,com.docker.compose.image=sha256:9b64d74c726566e3cadfeba7844d7257ba463bfb9b994a52f259d7c4c58bb173,com.docker.compose.oneoff=False,desktop.docker.io/binds/0/Source=F:\\\\ChatGPT Math Project\\\\work\\\\mascot-animation\\\\cao-nau\\\\v1\\\\local-data,desktop.docker.io/binds/0/SourceKind=hostFile,com.docker.compose.project.working_dir=F:\\\\ChatGPT Math Project\\\\work\\\\mascot-animation\\\\cao-nau\\\\v1,com.docker.compose.replace=web-1,com.docker.compose.service=web,com.docker.compose.version=5.6.1,desktop.docker.io/binds/0/Target=/data,desktop.docker.io/ports.scheme=v2,desktop.docker.io/ports/8000/tcp=127.0.0.1:0,com.docker.compose.container-number=1,com.docker.compose.project=mam-toan-fox,com.docker.compose.project.config_files=F:\\\\ChatGPT Math Project\\\\work\\\\mascot-animation\\\\cao-nau\\\\v1\\\\compose.local.yaml,com.docker.compose.depends_on=\",\"LocalVolumes\":\"0\",\"Mounts\":\"/run/desktop/m…\",\"Name\":\"mam-toan-fox-web-1\",\"Names\":\"mam-toan-fox-web-1\",\"Networks\":\"mam-toan-fox_default\",\"Ports\":\"127.0.0.1:32773-\\u003e8000/tcp\",\"Project\":\"mam-toan-fox\",\"Publishers\":[{\"URL\":\"127.0.0.1\",\"TargetPort\":8000,\"PublishedPort\":32773,\"Protocol\":\"tcp\"}],\"RunningFor\":\"About a minute ago\",\"Service\":\"web\",\"Size\":\"0B\",\"State\":\"running\",\"Status\":\"Up About a minute (healthy)\"}",
+  "http": {
+    "/": {
+      "status": 200,
+      "sha256": "9e75b55bd729085d94b99a6f51898ca1d8748c0d7543903356bf9a4adb4e6ae0"
+    },
+    "/api/health": {
+      "status": 200,
+      "sha256": "1c4a9c25b0d41c991de894e667f9d0f8fca0a85fdce67dc7e5c75bd6fac2d846"
+    },
+    "/fox-animation.js": {
+      "status": 200,
+      "sha256": "fbbe8e9402b8345c393eb3b1bbe77c29d7316d29f724d32be745ba20b2a065f9"
+    },
+    "/fox-animation.css": {
+      "status": 200,
+      "sha256": "e3ac56cf279abec99edaf574db468c3a0626176c1403206f65f5d2adfc31aaec"
+    },
+    "/arena-art/cao-nau/poses.webp": {
+      "status": 200,
+      "sha256": "36e5e0f2b5eedda7149de843eb7424b3201dc796b1357a8a1edc4a896c1a1f9c"
+    },
+    "/arena-art/cao-nau/reactions.webp": {
+      "status": 200,
+      "sha256": "62c3a9b110d693113b546fbce34342427847fad7224fe87e3e1d10e7316c9470"
+    },
+    "/arena-art/cao-nau/frames.json": {
+      "status": 200,
+      "sha256": "37739dadd3411421c24997aa3c0dbbdbc8b40a3c695475b5b57917164b612759"
+    },
+    "foxHookSha256": "8e7281513398e0b7a9b26d0fbb36feaa44124272da7c18f13d2a098b93b7dd34"
+  },
+  "sourceMatches": true,
+  "foxHookMatches": true,
+  "files": [
+    "fox-animation.js",
+    "fox-animation.css",
+    "arena-art/cao-nau/poses.webp",
+    "arena-art/cao-nau/reactions.webp",
+    "arena-art/cao-nau/frames.json"
+  ],
+  "limits": "Read-only HTTP inside deployed container; frontend fixture tested separately; primary8765 is concurrently managed by other chats. Dedicated local data under work/mascot-animation/cao-nau/v1/local-data; no production DB."
+}
