@@ -1,0 +1,32 @@
+{
+  "integrity": "ok",
+  "foreignKeyErrors": 0,
+  "tables": {
+    "students": {
+      "before": 27,
+      "after": 27,
+      "allPreviousIdsPreserved": true
+    },
+    "staff_users": {
+      "before": 1,
+      "after": 1,
+      "allPreviousIdsPreserved": true
+    },
+    "mascots": {
+      "before": 2,
+      "after": 18,
+      "allPreviousIdsPreserved": true
+    },
+    "exams": {
+      "before": 20,
+      "after": 20,
+      "allPreviousIdsPreserved": true
+    },
+    "class_enrollments": {
+      "before": 1,
+      "after": 1,
+      "allPreviousIdsPreserved": true
+    }
+  },
+  "passed": true
+}

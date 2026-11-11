@@ -1,0 +1,82 @@
+{
+  "passed": true,
+  "scope": "Static game UI, HTML from static build; all JS/CSS/WebP/JSON fulfilled from current workspace; all animal modules present, no real database requests",
+  "viewports": [
+    [
+      390,
+      844
+    ],
+    [
+      844,
+      390
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      1440,
+      900
+    ]
+  ],
+  "responsive": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "title": "Đấu trí toán học",
+      "answers": 4,
+      "canvases": 1
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false,
+      "title": "Đấu trí toán học",
+      "answers": 4,
+      "canvases": 1
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false,
+      "title": "Đấu trí toán học",
+      "answers": 4,
+      "canvases": 1
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false,
+      "title": "Đấu trí toán học",
+      "answers": 4,
+      "canvases": 1
+    }
+  ],
+  "errors": [],
+  "missing": [],
+  "media": [
+    "http://localhost:8765/rabbit-animation.js",
+    "http://localhost:8765/arena-art/tho-idle.webp",
+    "http://localhost:8765/arena-art/tho-frames.json",
+    "http://localhost:8765/arena-art/tho-poses.webp",
+    "http://localhost:8765/arena-art/tho-actions.webp"
+  ],
+  "reduced": {
+    "mood": "lose",
+    "canvases": 1,
+    "staticCanvas": true
+  },
+  "victory": {
+    "outcome": "win",
+    "rounds": 5
+  },
+  "loss": {
+    "outcome": "lose",
+    "nearDefeatSeed": true
+  }
+}

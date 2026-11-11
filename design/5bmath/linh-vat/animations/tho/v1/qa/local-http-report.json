@@ -1,0 +1,44 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "assets": {
+    "rabbit-animation.js": {
+      "bytes": 9234,
+      "sha256": "ffaeb07488434d96ff6ed9dbf0d4c467d188453e305e34c86d984dd1c60d97b3",
+      "matchesSource": true
+    },
+    "arena-art/tho-poses.webp": {
+      "bytes": 457452,
+      "sha256": "e99569e0133ae7c93557adc887b439cf525a4430d513bd0ed6b586629d17df40",
+      "matchesSource": true
+    },
+    "arena-art/tho-actions.webp": {
+      "bytes": 528562,
+      "sha256": "4bbd914ed0353a4bd70c086f38ca171cbe6357dd7f2c5218d772e61bdab448f9",
+      "matchesSource": true
+    },
+    "arena-art/tho-idle.webp": {
+      "bytes": 21690,
+      "sha256": "f955cafec16bf1c4a86a9d98dd547a46c3b1a41cd7b316cb12a1563a35d6017d",
+      "matchesSource": true
+    },
+    "arena-art/tho-frames.json": {
+      "bytes": 4192,
+      "sha256": "dfa3999d2064b7fadf98a27cf27118bb87c176a9927a535a20613c00621ac021",
+      "matchesSource": true
+    }
+  },
+  "checks": {
+    "/": 200,
+    "/linh-vat/": 200,
+    "/dau-tri/": 200,
+    "/api/health": 200,
+    "/README.md": 404,
+    "/.git/config": 404,
+    "/design/5bmath/linh-vat/animations/tho/v1/source/poses.png": 404,
+    "grade": 10.0,
+    "rabbitHooksServed": true,
+    "learningSha256": "d67ba58a879cb238198480cfd6a01453c71ad945250c2f4b519c0955a3da64f7",
+    "learningMatchesCurrentSource": true
+  },
+  "passed": true
+}

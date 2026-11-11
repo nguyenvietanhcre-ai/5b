@@ -1,0 +1,330 @@
+--- /dev/null
++++ b/frontend/rabbit-animation.js
+@@ -0,0 +1,119 @@
++/* Thỏ: Canvas runtime. Only the two WebP sheets and frame bounds are loaded. */
++const RabbitAnimation = (() => {
++    'use strict';
++    const sprites = {}, active = new Map(), mounted = new Set(), timers = new Set();
++    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
++    const clamp = n => Math.max(0, Math.min(1, n));
++    const smooth = n => { n = clamp(n); return n * n * (3 - 2 * n); };
++    let readyPromise, frame = 0;
++    function image(src) {
++        return new Promise((resolve, reject) => {
++            const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src;
++        });
++    }
++    function ready() {
++        if (!readyPromise) readyPromise = Promise.all([
++            image('arena-art/tho-poses.webp'), image('arena-art/tho-actions.webp'),
++            fetch('arena-art/tho-frames.json').then(r => { if (!r.ok) throw Error('Thỏ: thiếu frame bounds'); return r.json(); }),
++        ]).then(([ultimate, actions, bounds]) => {
++            for (const [key, img] of Object.entries({ultimate, actions})) {
++                const spec = bounds[key];
++                if (!spec || spec.frames.length !== 16) throw Error('Thỏ: frame bounds không hợp lệ');
++                sprites[key] = {image:img, ...spec, maxHeight:Math.max(...spec.frames.map(f => f.height)), maxWidth:Math.max(...spec.frames.map(f => f.width))};
++            }
++        });
++        return readyPromise;
++    }
++    function star(ctx, x, y, r, alpha=1) {
++        ctx.save(); ctx.globalAlpha *= alpha; ctx.translate(x,y); ctx.fillStyle='#ffcf7b'; ctx.beginPath();
++        for (let i=0;i<10;i++) { const a=i*Math.PI/5-Math.PI/2, d=i%2?r*.43:r; ctx.lineTo(Math.cos(a)*d,Math.sin(a)*d); }
++        ctx.closePath(); ctx.fill(); ctx.restore();
++    }
++    function pose(ctx, sheet, index, x, feet, height, flip=false, rotation=0) {
++        const spec=sprites[sheet], f=spec.frames[index], scale=height/spec.maxHeight;
++        ctx.save();ctx.translate(x,feet);ctx.rotate(rotation);if(flip)ctx.scale(-1,1);
++        ctx.drawImage(spec.image,f.left,f.top,f.width,f.height,-f.width*scale/2,-f.height*scale,f.width*scale,f.height*scale);ctx.restore();
++    }
++    function canvasFor(node) {
++        let canvas=node.querySelector('.rabbit-canvas');
++        if(!canvas){canvas=document.createElement('canvas');canvas.width=384;canvas.height=384;canvas.className='rabbit-canvas';canvas.setAttribute('aria-hidden','true');node.append(canvas);}
++        return canvas;
++    }
++    function drawPet(node, action, seconds) {
++        const ctx=canvasFor(node).getContext('2d');ctx.clearRect(0,0,384,384);
++        let sheet='actions',index=0,x=192,feet=365,rotation=0;
++        const u=clamp(seconds/(action==='attack'||action==='hit'?1.2:3));
++        if(action==='attack'){index=4+Math.min(3,Math.floor(u*4));x+=Math.sin(u*Math.PI)*35;feet-=Math.sin(u*Math.PI)*18;}
++        else if(action==='hit'){index=8+Math.min(3,Math.floor(u*4));x+=Math.sin(u*Math.PI*6)*(1-u)*13;rotation=Math.sin(u*Math.PI)*-.08;}
++        else if(action==='lose')index=12+Math.min(3,Math.floor(u*4));
++        else if(action==='win'){sheet='ultimate';index=12+Math.min(3,Math.floor(u*4));feet-=Math.sin(u*Math.PI)*17;}
++        pose(ctx,sheet,index,x,feet,322,false,rotation);
++        if(action==='hit'&&u<.8)for(let i=0;i<3;i++)star(ctx,150+i*42,40+Math.sin(u*12+i)*9,9,1-u);
++    }
++    function ultimateCanvas(node) {
++        const stage=node.closest('#battle-stage');if(!stage)return null;
++        const canvas=document.createElement('canvas');canvas.width=768;canvas.height=768;canvas.className='rabbit-ultimate-canvas';canvas.setAttribute('aria-hidden','true');stage.append(canvas);
++        const box=stage.getBoundingClientRect(), own=node.getBoundingClientRect(), opponent=stage.querySelector(node.closest('.fighter').id==='fighter-me'?'#fighter-opponent .battle-pet':'#fighter-me .battle-pet').getBoundingClientRect();
++        const point=rect=>({x:(rect.x-box.x+rect.width/2)/box.width*768,y:(rect.y-box.y+rect.height)/box.height*768,height:rect.height/box.height*768});
++        node.classList.add('rabbit-in-ultimate');
++        stage.classList.add('rabbit-ultimate-playing');
++        return {canvas,stage,start:point(own),target:point(opponent),flip:node.closest('.fighter').classList.contains('right')};
++    }
++    function drawUltimate(job,t) {
++        const {canvas,start:a,target:b,flip}=job.overlay,ctx=canvas.getContext('2d');ctx.clearRect(0,0,768,768);
++        const actorHeight=Math.min(a.height*.94,220),apex=Math.max(actorHeight+24,Math.min(a.y-44,310));
++        const mx=384,my=apex-actorHeight*.52,mr=110,show=smooth(t/.55)*(1-smooth((t-2.1)/.7));
++        ctx.save();ctx.globalAlpha=show*.86;ctx.fillStyle='#fff4c9';ctx.shadowColor='#fff1a0';ctx.shadowBlur=22;ctx.beginPath();ctx.arc(mx,my,mr,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#ffe3a1';
++        for(const [x,y,r]of [[-28,-30,17],[43,24,23],[-36,44,12]]){ctx.beginPath();ctx.arc(mx+x,my+y,r,0,Math.PI*2);ctx.fill();}ctx.restore();
++        let x=a.x,y=a.y,index=0,rotation=0;
++        if(t<.95){index=Math.min(3,Math.floor(t/.95*4));y+=Math.sin(clamp(t/.95)*Math.PI)*8;}
++        else if(t<1.75){const u=(t-.95)/.8;x=a.x+(mx-a.x)*Math.sin(u*Math.PI);y=a.y-Math.sin(u*Math.PI)*(a.y-apex);index=4+Math.min(3,Math.floor(u*4));rotation=Math.sin(u*Math.PI)*-.08;}
++        else if(t<1.9){index=8+Math.min(3,Math.floor((t-1.75)/.15*4));y+=Math.sin((t-1.75)/.15*Math.PI)*8;}
++        else{index=12+Math.min(3,Math.floor((t-1.9)/1.1*4));y-=Math.sin(clamp((t-1.9)/.7)*Math.PI)*12;}
++        if(t>=1.6){const u=clamp((t-1.6)/.4);ctx.save();ctx.globalAlpha=.85*(1-smooth((t-2.05)/.4));ctx.fillStyle='#fff1c7';ctx.beginPath();ctx.ellipse(a.x,a.y-3,Math.max(2,a.height*.45*u),15*u,0,0,Math.PI*2);ctx.fill();ctx.restore();}
++        if(t>=1.75){const u=clamp((t-1.75)/.65);ctx.save();ctx.globalAlpha=1-u;ctx.strokeStyle='#fff4c9';ctx.lineWidth=8*(1-u)+2;ctx.beginPath();ctx.ellipse(a.x+(b.x-a.x)*u,a.y+(b.y-a.y)*u-20,30+u*110,15+u*42,0,0,Math.PI*2);ctx.stroke();ctx.restore();for(let i=0;i<8;i++){const angle=i*Math.PI/4;star(ctx,b.x+Math.cos(angle)*(25+u*100),b.y-b.height*.45+Math.sin(angle)*(25+u*80),8,1-u);}}
++        pose(ctx,'ultimate',index,x,y,actorHeight,flip,rotation);
++        const announcement=job.node.closest('#battle-stage')?.querySelector('#spell-announcement');
++        if(announcement)announcement.textContent=t>=.65&&t<1.75?'☾ Cú Nhảy Trăng Rằm':'';
++    }
++    function dispose(job) {
++        job.overlay?.canvas.remove();job.overlay?.stage.classList.remove('rabbit-ultimate-playing');job.node.classList.remove('rabbit-in-ultimate');
++    }
++    function tick(now) {
++        frame=0;if(document.hidden)return;
++        for(const [node,job]of active){
++            if(!node.isConnected){dispose(job);active.delete(node);continue;}
++            const t=Math.max(0,Math.min(job.duration,(now-job.started)/1000));
++            if(job.overlay)drawUltimate(job,t);else drawPet(node,job.action,t);
++            if(t>=job.duration){dispose(job);active.delete(node);if(job.action!=='lose'&&job.action!=='win'){node.dataset.mood='idle';drawPet(node,'idle',0);}}
++        }
++        if(active.size)frame=requestAnimationFrame(tick);
++    }
++    function play(node,action='idle') {
++        if(!node?.classList.contains('rabbit'))return false;
++        node.dataset.mood=action;
++        ready().then(()=>{
++            if(!node.isConnected||node.dataset.mood!==action)return;
++            if(active.get(node)?.action===action)return;
++            if(active.has(node)){dispose(active.get(node));active.delete(node);}
++            const duration=action==='attack'||action==='hit'?1.2:3;
++            node.classList.add('rabbit-ready');
++            if(action==='idle'||reduced.matches){drawPet(node,action==='ultimate'?'win':action,action==='idle'?0:duration);return;}
++            const job={node,action,duration,started:performance.now(),overlay:action==='ultimate'?ultimateCanvas(node):null};
++            if(job.overlay)drawPet(node,'idle',0);
++            active.set(node,job);if(!frame&&!document.hidden)frame=requestAnimationFrame(tick);
++        }).catch(()=>{node.classList.remove('rabbit-ready');node.dataset.mood='idle';});
++        return true;
++    }
++    function mount(root=document){for(const node of root.querySelectorAll('.battle-pet.rabbit')){mounted.add(node);play(node,node.dataset.mood||'idle');}}
++    function notifyVictim(target,attacker,final){
++        const victim=document.querySelector(target),node=victim?.querySelector('.battle-pet.rabbit');
++        if(!node)return false;
++        const impact=()=>{if(!node.isConnected)return;victim.classList.add('taking-hit');play(node,final?'lose':'hit');};
++        if(final){const timer=setTimeout(()=>{timers.delete(timer);impact();},1750);timers.add(timer);}else impact();
++        return true;
++    }
++    function destroy(){cancelAnimationFrame(frame);frame=0;for(const timer of timers)clearTimeout(timer);timers.clear();for(const job of active.values())dispose(job);active.clear();mounted.clear();}
++    document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else if(active.size&&!frame)frame=requestAnimationFrame(tick);});
++    return {ready,mount,play,notifyVictim,destroy};
++})();
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -126,7 +126,7 @@
+     const selectedLesson = () => lessonList().find(lesson => lesson.id === query('id')) || lessonList()[0];
+     const submittedExams = () => Object.values(state.exams).filter(exam => exam.submittedAt);
+     const level = () => Math.floor((state.points - 1000) / 20) + 1;
+-    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
++    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
+
+     function load() {
+         if(live)return;
+@@ -137,7 +137,7 @@
+         for (const property of ['completed','exams','battles','activity']) {
+             if (!state[property] || typeof state[property] !== 'object' || Array.isArray(state[property])) state[property] = {};
+         }
+-        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
++        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
+         state.points = Math.max(1000, Number(state.points) || 1000);
+         if (!Number.isInteger(state.birthYear)) state.birthYear = null;
+     }
+@@ -331,7 +331,7 @@
+             return `${intro('Linh vật của em','Chọn bạn đồng hành và xem kinh nghiệm sau mỗi trận.')}
+             <section class="card feature-row sage mascot-feature"><div>${badge('Đang đồng hành · Cấp ' + level(),'white')}<h2>${escape(petName())}</h2><p>${content.format(state.points)} / ${content.format(1000 + level() * 20)} điểm kinh nghiệm để lên cấp ${level() + 1}</p>${meter((state.points - 1000) % 20 * 5,'Tiến độ lên cấp tiếp theo')}<small>Còn ${20 - (state.points - 1000) % 20} điểm để lên cấp tiếp theo.</small></div>${art(state.mascot,petName())}</section>
+             <div class="grid3 stats">${stat('cup',history.filter(item => item.outcome === 'win').length + ' trận','Thắng · +2 điểm','sand')}${stat('flag',history.filter(item => item.outcome === 'lose').length + ' trận','Thua · −1 điểm','peach')}${stat('users',history.filter(item => item.outcome === 'draw').length + ' trận','Hòa · 0 điểm')}</div>
+-            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
++            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+         },
+
+         rank() { return liveRank(); },
+@@ -927,6 +927,8 @@
+             },final?3000:1200);
+             return;
+         }
++        const rabbitUltimate=final&&sourcePet?.classList.contains('rabbit')&&typeof RabbitAnimation!=='undefined';
++        if(rabbitUltimate)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
+         const bearUltimate=final&&sourcePet?.classList.contains('gau')&&typeof BearAnimation!=='undefined';
+         if(bearUltimate){catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);stage?.classList.add('bear-ultimate');setTimeout(()=>stage?.classList.remove('bear-ultimate'),3000);}
+         const playBear=(pet,mode,onFinish)=>{const canvas=pet?.querySelector('canvas[data-bear]');if(canvas&&typeof BearAnimation!=='undefined')BearAnimation.play(canvas,mode,{onFinish});};
+@@ -942,26 +944,28 @@
+         victim?.classList.remove('taking-hit');source?.classList.remove('attacking');if(victim)void victim.offsetWidth;
+         const spells=[['rock','Đá rơi'],['vine','Dây leo trói'],['lightning','Sét đánh']];
+         const spell=spells[(artSeed(currentBattle?.id||'')+(currentBattle?.index||0))%spells.length];
+-        const hit=()=>{if(!victim?.isConnected||!victimPet)return;victim.dataset.spell=beeAttack?'bee':catAttack?'cat':bearUltimate?'bear':spell[0];victimPet.dataset.mood=final&&!victimPet.classList.contains('gau')?'lose':'hit';victim.classList.add('taking-hit');playBear(victimPet,'hit',()=>{if(final&&victimPet.isConnected){victimPet.dataset.mood='lose';playBear(victimPet,'defeat');}});};
+-        if(beeUltimate||catUltimate||bearUltimate||sparrowUltimate)setTimeout(hit,1750);else hit();
+-        if(sourcePet)sourcePet.dataset.mood=beeUltimate||catUltimate||bearUltimate||sparrowUltimate?'ultimate':'attack';
++        const hit=()=>{if(!victim?.isConnected||!victimPet)return;victim.dataset.spell=beeAttack?'bee':catAttack?'cat':rabbitUltimate?'moon':bearUltimate?'bear':spell[0];victimPet.dataset.mood=final&&!victimPet.classList.contains('gau')?'lose':'hit';victim.classList.add('taking-hit');playBear(victimPet,'hit',()=>{if(final&&victimPet.isConnected){victimPet.dataset.mood='lose';playBear(victimPet,'defeat');}});};
++        if(beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate)setTimeout(hit,1750);else hit();
++        if(sourcePet)sourcePet.dataset.mood=beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate?'ultimate':'attack';
+         if(sparrowUltimate)window.ArenaSparrowAnimation.ultimate({source,victim});
+         if(beeAttack)window.ArenaBeeAnimation.hit({source,victim,final,animateVictim:false});
+         window.ArenaCatAnimation?.hit({source,victim,final});
+         source?.classList.add('attacking');
++        if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(sourcePet,rabbitUltimate?'ultimate':'attack');
+         playBear(sourcePet,bearUltimate?'ultimate':'attack');
+         const announcement=document.querySelector('#spell-announcement');
+-        if(announcement)announcement.textContent=beeAttack||catAttack||bearUltimate||sparrowAttack?'':'✦ '+spell[1];
+-        if(final){if(!beeUltimate&&!catUltimate&&!bearUltimate&&!sparrowUltimate)stage?.classList.add(attacker==='#fighter-me'?'ultimate-right':'ultimate-left');ArenaAudio.effect('beam');}else ArenaAudio.effect(catAttack?'rock':spell[0]);
++        if(announcement)announcement.textContent=beeAttack||rabbitUltimate||catAttack||bearUltimate||sparrowAttack?'':'✦ '+spell[1];
++        if(final){if(!beeUltimate&&!rabbitUltimate&&!catUltimate&&!bearUltimate&&!sparrowUltimate)stage?.classList.add(attacker==='#fighter-me'?'ultimate-right':'ultimate-left');ArenaAudio.effect('beam');}else ArenaAudio.effect(catAttack?'rock':spell[0]);
+         setTimeout(()=>{
+             victim?.classList.remove('taking-hit');source?.classList.remove('attacking');
+-            for(const node of [victim,source])if(node?.isConnected){const pet=node.querySelector('.battle-pet');const mood=final&&node===victim?'lose':'idle';pet.dataset.mood=mood;const bearMode=final?(node===victim?'defeat':'win'):'idle';playBear(pet,bearMode);if(pet?.classList.contains('gau'))pet.dataset.mood=bearMode==='defeat'?'lose':bearMode;}
++            for(const node of [victim,source])if(node?.isConnected){const pet=node.querySelector('.battle-pet');const mood=final&&node===victim?'lose':'idle';pet.dataset.mood=mood;if(pet!==victimPet&&typeof RabbitAnimation!=='undefined')RabbitAnimation.play(pet,mood);const bearMode=final?(node===victim?'defeat':'win'):'idle';playBear(pet,bearMode);if(pet?.classList.contains('gau'))pet.dataset.mood=bearMode==='defeat'?'lose':bearMode;}
+             if(announcement?.isConnected)announcement.textContent='';
+-        },beeUltimate||catUltimate||bearUltimate||sparrowUltimate?3000:1600);
++        },beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate?3000:1600);
+     }
+     function dispatchBattleHit(target,attacker,final) {
+         if(final&&[target,attacker].some(selector=>document.querySelector(selector)?.querySelector('.battle-pet.cu-meo')))owlFinaleUntil=Math.max(owlFinaleUntil,Date.now()+3100);
+         window.HorseAnimation?.notifyVictim(target,attacker,final);
++        if(typeof RabbitAnimation!=='undefined')RabbitAnimation.notifyVictim(target,attacker,final);
+         if(typeof ArenaVoi!=='undefined')ArenaVoi.notifyVictim(target,attacker,final);
+         animateHit(target,attacker,final);
+     }
+@@ -1104,6 +1108,7 @@
+         'choose-ca-map':async () => { if(live)await mutate('mascot',{mascot:'ca-map'});else {state.mascot = 'ca-map';save();}refresh(); },
+         'choose-bee':async () => { if(live)await mutate('mascot',{mascot:'bee'});else {state.mascot = 'bee';save();}refresh(); },
+         'choose-octopus':async () => { if(live)await mutate('mascot',{mascot:'octopus'});else {state.mascot = 'octopus';save();}refresh(); },
++        'choose-rabbit':async () => { if(live)await mutate('mascot',{mascot:'rabbit'});else {state.mascot = 'rabbit';save();}refresh(); },
+         'choose-crab':async () => { if(live)await mutate('mascot',{mascot:'crab'});else {state.mascot = 'crab';save();}refresh(); },
+         'choose-gau':async () => { if(live)await mutate('mascot',{mascot:'gau'});else {state.mascot = 'gau';save();}refresh(); },
+         'choose-cat':async () => { if(live)await mutate('mascot',{mascot:'cat'});else {state.mascot = 'cat';save();}refresh(); },
+@@ -1163,6 +1168,7 @@
+         bindArenaModes();
+         if(typeof TigerAnimation!=='undefined')TigerAnimation.hydrate();
+         if(typeof ArenaVoi!=='undefined')ArenaVoi.mount(document);
++        if(typeof RabbitAnimation!=='undefined')RabbitAnimation.mount();
+         if(typeof OwlAnimation!=='undefined')OwlAnimation.mount();
+         window.ArenaDolphin?.mount();
+         window.ButterflyAnimation?.mount();
+@@ -1288,6 +1294,7 @@
+         if(browser)window.ArenaBeeAnimation?.stop();
+         if(browser)window.ArenaCatAnimation?.stop();
+         if(typeof ArenaVoi!=='undefined')ArenaVoi.stop();
++        if(typeof RabbitAnimation!=='undefined')RabbitAnimation.destroy();
+         window.ArenaDolphin?.destroy();
+         window.ButterflyAnimation?.destroy();
+         if(browser)window.SharkAnimation?.destroy();
+--- a/frontend/learning.css
++++ b/frontend/learning.css
+@@ -115,6 +115,7 @@
+ body.learning-mode .mascot-art { display: block; background-image: url(mascots.webp); background-size: 200% 100%; background-repeat: no-repeat; aspect-ratio: 1; }
+ body.learning-mode .sprout { background-position: left center; }
+ body.learning-mode .fox { background-position: right center; }
++body.learning-mode .mascot-art.rabbit { background-image:url(arena-art/tho-idle.webp); background-size:contain; background-position:center; }
+ body.learning-mode .hero-art .mascot-art { width: min(285px, 94%); margin-bottom: 7px; filter: drop-shadow(0 11px 12px #0d382859); }
+ body.learning-mode .orbit { position: absolute; font-size: 30px; color: var(--orange); right: 15%; top: 14%; }
+ body.learning-mode .small-orbit { right: auto; left: 9%; top: 65%; font-size: 20px; color: #d4e3ba; }
+@@ -524,6 +525,13 @@
+ body.learning-mode .battle-pet[data-mood="lose"] { --motion-row:100%; }
+ body.learning-mode .battle-pet[data-mood="win"] .motion-sprite { animation:mascot-frames 1.5s steps(1,end) infinite; }
+ body.learning-mode .battle-pet[data-mood="lose"] .motion-sprite { animation:mascot-sad-frames 3.2s steps(1,end) infinite; }
++body.learning-mode .battle-pet.rabbit .motion-sprite { display:none; }
++body.learning-mode .battle-pet.rabbit:not(.rabbit-ready) > .mascot-art { visibility:visible; }
++body.learning-mode .battle-pet.rabbit.rabbit-ready > .mascot-art { visibility:hidden; animation:none; }
++body.learning-mode .rabbit-canvas { display:block; position:absolute; inset:0; width:100%; height:100%; }
++body.learning-mode .rabbit-in-ultimate { visibility:hidden; }
++body.learning-mode .rabbit-ultimate-canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4; }
++body.learning-mode .rabbit-ultimate-playing .spell-announcement { top:12%; }
+ body.learning-mode .illustrated-arena .spell-effect { display:none; position:absolute; inset:-20%; z-index:6; pointer-events:none; background-size:200% 200%; background-repeat:no-repeat; }
+ body.learning-mode .illustrated-arena .taking-hit .spell-effect { display:block; animation:spell-frames 1.5s steps(1,end) both; }
+ body.learning-mode .fighter[data-spell="rock"] .spell-effect { background-image:url(arena-art/rock-spell.webp); top:-55%; bottom:auto; aspect-ratio:1; }
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -40,6 +40,7 @@
+     <script src="arena-voi.js" defer></script>
+     <script src="eagle-animation.js" defer></script>
+     <script src="arena-lion.js" defer></script>
++    <script src="rabbit-animation.js" defer></script>
+     <script src="owl-animation.js" defer></script>
+     <script src="shark-animation.js" defer></script>
+     <link rel="stylesheet" href="arena-sparrow-animation.css">
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -33,7 +33,7 @@
+                for file in ("poses.webp", "actions.webp")})
+ ASSETS.update({"/" + file: file for file in ("bear-animation.js", "bear-animation.css", "bear-frames.js")})
+ ASSETS.update({"/" + file: file for file in
+-               ("learning.css", "learning.js", "learning-content.js", "platform-api.js", "arena-audio.js", "arena-voi.css", "arena-voi.js", "arena-voi-renderer.js", "arena-voi-poses.js", "mascots.webp",
++               ("learning.css", "learning.js", "learning-content.js", "platform-api.js", "arena-audio.js", "arena-voi.css", "arena-voi.js", "arena-voi-renderer.js", "arena-voi-poses.js", "rabbit-animation.js", "mascots.webp",
+                 "staff.js", "staff.css", "admissions.js", "admissions.css", "arena-cat-animation.js", "arena-cat-animation.css", "eagle-animation.js", "eagle-animation.css")})
+ ASSETS.update({"/" + file: file for file in
+                ("butterfly-renderer.js", "butterfly-animation.js", "butterfly-animation.css")})
+@@ -48,6 +48,7 @@
+ ASSETS.update({"/" + file: file for file in ("arena-crab-animation.js", "arena-crab-animation.css")})
+ ASSETS.update({"/arena-art/" + file.name: "arena-art/" + file.name
+                for file in (FRONTEND / "arena-art").glob("*.webp")})
++ASSETS["/arena-art/tho-frames.json"] = "arena-art/tho-frames.json"
+ ASSETS["/owl-animation.js"] = "owl-animation.js"
+ for file in ("poses.webp", "poses.json"):
+     ASSETS["/arena-art/owl/" + file] = "arena-art/owl/" + file
+@@ -142,7 +143,7 @@
+             file = FRONTEND / ("admissions.html" if page == "entrance" else "index.html" if page else ASSETS[route])
+             try:
+                 mime = {".js":"text/javascript", ".css":"text/css", ".html":"text/html",
+-                        ".svg":"image/svg+xml", ".webp":"image/webp"}[file.suffix]
++                        ".svg":"image/svg+xml", ".webp":"image/webp", ".json":"application/json"}[file.suffix]
+                 body = file.read_bytes()
+                 if file.suffix == '.html' and page != 'entrance':
+                     body = body.replace(b'<html lang="vi"', b'<html lang="vi" data-backend="database"', 1)
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -50,7 +50,7 @@
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
+ for (const asset of ['app.js', 'styles.css', '5bmath-logo.svg', '5bmath-icon.svg', 'demo-rectangle.svg',
+-    'learning.css', 'learning.js', 'learning-content.js', 'platform-api.js', 'arena-audio.js', 'arena-voi.css', 'arena-voi.js', 'arena-voi-renderer.js', 'arena-voi-poses.js', 'eagle-animation.js', 'eagle-animation.css', 'shark-animation.js', 'arena-cat-animation.js', 'arena-cat-animation.css', 'mascots.webp', 'staff.js', 'staff.css', 'admissions.js', 'admissions.css']) {
++    'learning.css', 'learning.js', 'learning-content.js', 'platform-api.js', 'arena-audio.js', 'arena-voi.css', 'arena-voi.js', 'arena-voi-renderer.js', 'arena-voi-poses.js', 'eagle-animation.js', 'eagle-animation.css', 'rabbit-animation.js', 'shark-animation.js', 'arena-cat-animation.js', 'arena-cat-animation.css', 'mascots.webp', 'staff.js', 'staff.css', 'admissions.js', 'admissions.css']) {
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
+ for (const asset of ['arena-lion.js', 'arena-lion.css', 'arena-crab-animation.js', 'arena-crab-animation.css']) {
+--- a/backend/platform_api.py
++++ b/backend/platform_api.py
+@@ -21,7 +21,7 @@
+ VN = timezone(timedelta(hours=7))
+ COOKIE = '5bmath_session'
+ ITERATIONS = 600_000
+-MASCOT_NAMES = {'voi': 'Voi', 'sprout': 'Mầm Sách', 'fox': 'Cáo Nâu', 'cat': 'Mèo', 'gau': 'Gấu'}
++MASCOT_NAMES = {'voi': 'Voi', 'sprout': 'Mầm Sách', 'fox': 'Cáo Nâu', 'cat': 'Mèo', 'rabbit': 'Thỏ', 'gau': 'Gấu'}
+ MASCOT_NAMES['sparrow'] = 'Chim sẻ'
+ MASCOT_NAMES['eagle'] = 'Đại bàng'
+ MASCOT_NAMES['tiger'] = 'Hổ'
+--- a/tests/test_platform_api.py
++++ b/tests/test_platform_api.py
+@@ -165,5 +165,23 @@
+         self.assertEqual(first.call('leaderboard?kind=battle&period=all')['rows'][0]['value'],1002)
+
+
++    def test_rabbit_companion_persists_and_reaches_opponent_and_leaderboard(self):
++        client,_,login,password=self.user()
++        selected=client.call('mascot',{'mascot':'rabbit'})
++        self.assertEqual(selected['state']['mascot'],'rabbit')
++        other=Client(self.server)
++        self.assertEqual(other.call('auth/login',{'login':login,'password':password})['state']['mascot'],'rabbit')
++        self.assertTrue(any(row['mine'] and row['mascot']=='rabbit' for row in client.call('leaderboard?kind=battle&period=all')['rows']))
++        room=client.call('arena',{'action':'create','scope':'weekly','public':True})
++        friend,_,_,_=self.user()
++        self.assertEqual(next(row for row in friend.call('arena',{'action':'list'})['rooms'] if row['code']==room['code'])['mascot'],'rabbit')
++        join=friend.call('arena',{'action':'join','code':room['code']})
++        client.call('arena',{'action':'accept',**room})
++        self.server.arena.rooms[room['code']]['readyAt']=0
++        view=friend.call('arena',{'action':'state',**join})
++        self.assertEqual(view['battle']['opponentMascot'],'rabbit')
++        with self.assertRaises(APIError):client.call('mascot',{'mascot':'unknown'})
++        with self.assertRaises(APIError):client.call('mascot',{'mascot':['rabbit']})
++
+
+ if __name__=='__main__':unittest.main()

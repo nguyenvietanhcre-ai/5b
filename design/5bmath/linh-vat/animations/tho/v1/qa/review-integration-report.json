@@ -1,0 +1,121 @@
+{
+  "passed": true,
+  "victimEarlyBranches": [
+    {
+      "branch": "ArenaDolphin",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "ArenaDolphin",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "SharkAnimation",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "SharkAnimation",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "ButterflyAnimation",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "ButterflyAnimation",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "ArenaCrabAnimation",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "ArenaCrabAnimation",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "TigerAnimation",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "TigerAnimation",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "ArenaVoi",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "ArenaVoi",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "ArenaLion",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "ArenaLion",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "FoxAnimation",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "FoxAnimation",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "EagleAnimation",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "EagleAnimation",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "OctopusAnimation",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "OctopusAnimation",
+      "final": true,
+      "passed": true
+    },
+    {
+      "branch": "fallback",
+      "final": false,
+      "passed": true
+    },
+    {
+      "branch": "fallback",
+      "final": true,
+      "passed": true
+    }
+  ],
+  "pvpFinisher": {
+    "holdMs": 3100,
+    "resultHeld": true,
+    "resultAfterHold": true
+  },
+  "scope": "VM regression of actual learning.js functions; not network/browser timing"
+}

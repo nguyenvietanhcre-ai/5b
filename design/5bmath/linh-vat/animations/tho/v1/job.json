@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "tho",
+  "variant": "v1",
+  "owner": "tho-01a1cb49",
+  "createdAt": "2026-11-11T15:46:50.227Z",
+  "updatedAt": "2026-11-11T16:47:09.388Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "tho",
+    "name": "Thỏ",
+    "ultimateName": "Cú Nhảy Trăng Rằm",
+    "description": "Đôi tai dựng lên, hai chân sau lấy đà bật vút lên cao, in bóng thỏ trước vầng trăng. Thỏ đáp xuống một chiếc đệm trăng, tạo làn sóng tròn khiến đối thủ nảy lên giữa những ngôi sao.",
+    "speciesType": "mammal",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/01-thu-tren-can.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 2,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Lông kem, hai tai dài dựng với lòng tai màu đào.",
+      "Hai chân trước ngắn, hai chân sau lớn; đuôi tròn bông nhỏ.",
+      "Giữ đủ bốn chi và hai tai; không thêm sừng/cánh hoặc kéo tai thành tay."
+    ],
+    "beats": {
+      "windup": "Dựng tai, ép hai chân sau xuống để lấy đà; vầng trăng mờ hiện sau lưng.",
+      "decisive": "Bật lên in bóng trước trăng, hạ xuống đệm trăng; sóng tròn chạm đối thủ.",
+      "victory": "Đối thủ nảy trong sao; thỏ hạ an toàn rồi giơ chân trước ăn mừng."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/tho.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1690112,
+      "webpBytes": 457452,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "bf77655bbbc738c13da5bf46b98c34e47c0e18f3654f85b899b6358bbed09b9d",
+      "bytes": 1839596
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "aec78aba96918f4a627dd81f472baf87396262d9aa2a76695ab5a6d72993908a",
+      "bytes": 1799322
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "0c2d52a07cefe70c1bae3b078f26f091ef1248c1b5c9414b21b79e63c8a79dbe",
+      "bytes": 1816906
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:41:18.049Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "tho-01a1cb49",
+  "lastReleasedAt": "2026-11-11T16:47:09.388Z"
+}

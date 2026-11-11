@@ -1,0 +1,1170 @@
+{
+  "createdAt": "2026-11-11T16:21:30.083Z",
+  "status": "passed",
+  "attackAmplitude": 400,
+  "attackContact": {
+    "sampleTime": 0.6,
+    "image": "qa/attack-contact.png",
+    "visualReview": "Front paws reach the opponent at contact; cream rabbit, soft clay/felt style and anatomy preserved."
+  },
+  "checks": [
+    "Ultimate timeline still names at0.65, starts attack0.95, impacts1.75, celebrates1.90 through3.00",
+    "Four action options select and render their own pose tracks",
+    "Seek updates time and pauses; paused animation stays stationary",
+    "Replay resets and pause/resume controls operate",
+    "0.5× control advances at half elapsed time within render tolerance",
+    "Synthetic document.hidden visibilitychange invokes pause (not an OS tab-background measurement)",
+    "Playback ends once at 3 seconds and remains stopped",
+    "All four actions fit five desktop/tablet/phone viewports with touch controls >=44px tall",
+    "Reduced-motion page and action selection remain still until explicit play",
+    "Runtime loads only four WebP images; never review GIF/MP4"
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/demo.html?export=1",
+      "type": "document"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/config.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/poses.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/actions.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/animation.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/poses.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/actions.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/demo.html",
+      "type": "document"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/config.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/poses.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/actions.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/animation.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/poses.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/actions.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp",
+      "type": "image"
+    }
+  ],
+  "responsive": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "states": [
+        {
+          "action": "ultimate",
+          "overflow": false,
+          "canvas": {
+            "x": 12,
+            "y": 94,
+            "width": 366,
+            "height": 205.875,
+            "top": 94,
+            "right": 378,
+            "bottom": 299.875,
+            "left": 12
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 155,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 103.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 89.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 129,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 225,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "attack",
+          "overflow": false,
+          "canvas": {
+            "x": 12,
+            "y": 94,
+            "width": 366,
+            "height": 205.875,
+            "top": 94,
+            "right": 378,
+            "bottom": 299.875,
+            "left": 12
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 155,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 103.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 89.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 129,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 225,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "hit",
+          "overflow": false,
+          "canvas": {
+            "x": 12,
+            "y": 94,
+            "width": 366,
+            "height": 205.875,
+            "top": 94,
+            "right": 378,
+            "bottom": 299.875,
+            "left": 12
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 155,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 103.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 89.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 129,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 225,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "lose",
+          "overflow": false,
+          "canvas": {
+            "x": 12,
+            "y": 94,
+            "width": 366,
+            "height": 205.875,
+            "top": 94,
+            "right": 378,
+            "bottom": 299.875,
+            "left": 12
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 155,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 103.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 89.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 129,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 225,
+              "height": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "states": [
+        {
+          "action": "ultimate",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 804,
+            "height": 452.25,
+            "top": 115,
+            "right": 824,
+            "bottom": 567.25,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 143.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "attack",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 804,
+            "height": 452.25,
+            "top": 115,
+            "right": 824,
+            "bottom": 567.25,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 143.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "hit",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 804,
+            "height": 452.25,
+            "top": 115,
+            "right": 824,
+            "bottom": 567.25,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 143.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "lose",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 804,
+            "height": 452.25,
+            "top": 115,
+            "right": 824,
+            "bottom": 567.25,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 143.59375,
+              "height": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "states": [
+        {
+          "action": "ultimate",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 114,
+            "width": 728,
+            "height": 409.5,
+            "top": 114,
+            "right": 748,
+            "bottom": 523.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 167.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "attack",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 114,
+            "width": 728,
+            "height": 409.5,
+            "top": 114,
+            "right": 748,
+            "bottom": 523.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 167.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "hit",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 114,
+            "width": 728,
+            "height": 409.5,
+            "top": 114,
+            "right": 748,
+            "bottom": 523.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 167.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "lose",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 114,
+            "width": 728,
+            "height": 409.5,
+            "top": 114,
+            "right": 748,
+            "bottom": 523.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 167.59375,
+              "height": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "states": [
+        {
+          "action": "ultimate",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 984,
+            "height": 553.5,
+            "top": 115,
+            "right": 1004,
+            "bottom": 668.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 323.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "attack",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 984,
+            "height": 553.5,
+            "top": 115,
+            "right": 1004,
+            "bottom": 668.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 323.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "hit",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 984,
+            "height": 553.5,
+            "top": 115,
+            "right": 1004,
+            "bottom": 668.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 323.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "lose",
+          "overflow": false,
+          "canvas": {
+            "x": 20,
+            "y": 115,
+            "width": 984,
+            "height": 553.5,
+            "top": 115,
+            "right": 1004,
+            "bottom": 668.5,
+            "left": 20
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 323.59375,
+              "height": 44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "states": [
+        {
+          "action": "ultimate",
+          "overflow": false,
+          "canvas": {
+            "x": 80,
+            "y": 115,
+            "width": 1280,
+            "height": 720,
+            "top": 115,
+            "right": 1360,
+            "bottom": 835,
+            "left": 80
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 619.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "attack",
+          "overflow": false,
+          "canvas": {
+            "x": 80,
+            "y": 115,
+            "width": 1280,
+            "height": 720,
+            "top": 115,
+            "right": 1360,
+            "bottom": 835,
+            "left": 80
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 619.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "hit",
+          "overflow": false,
+          "canvas": {
+            "x": 80,
+            "y": 115,
+            "width": 1280,
+            "height": 720,
+            "top": 115,
+            "right": 1360,
+            "bottom": 835,
+            "left": 80
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 619.59375,
+              "height": 44
+            }
+          ]
+        },
+        {
+          "action": "lose",
+          "overflow": false,
+          "canvas": {
+            "x": 80,
+            "y": 115,
+            "width": 1280,
+            "height": 720,
+            "top": 115,
+            "right": 1360,
+            "bottom": 835,
+            "left": 80
+          },
+          "targets": [
+            {
+              "id": "action",
+              "width": 165,
+              "height": 46
+            },
+            {
+              "id": "replay",
+              "width": 113.359375,
+              "height": 46
+            },
+            {
+              "id": "pause",
+              "width": 99.046875,
+              "height": 46
+            },
+            {
+              "id": "speed",
+              "width": 139,
+              "height": 46
+            },
+            {
+              "id": "seek",
+              "width": 619.59375,
+              "height": 44
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "exports": {
+    "attack": {
+      "path": "exports/attack.gif",
+      "bytes": 797862,
+      "width": 768,
+      "height": 432,
+      "frames": 90,
+      "durationMs": 3000,
+      "regenerated": true
+    },
+    "hit": {
+      "path": "exports/hit.gif",
+      "bytes": 673660,
+      "width": 768,
+      "height": 432,
+      "frames": 90,
+      "durationMs": 3000,
+      "regenerated": false
+    },
+    "lose": {
+      "path": "exports/lose.gif",
+      "bytes": 493284,
+      "width": 768,
+      "height": 432,
+      "frames": 90,
+      "durationMs": 3000,
+      "regenerated": false
+    }
+  },
+  "controls": {
+    "ultimate": {
+      "state": {
+        "t": 0.5,
+        "time": 0.5,
+        "action": "ultimate",
+        "phase": "LẤY ĐÀ",
+        "pose": 2,
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false
+      },
+      "title": "Cú Nhảy Trăng Rằm"
+    },
+    "attack": {
+      "state": {
+        "t": 0.5,
+        "time": 0.5,
+        "action": "attack",
+        "phase": "TẤN CÔNG",
+        "pose": 5,
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false
+      },
+      "title": "Tấn công"
+    },
+    "hit": {
+      "state": {
+        "t": 0.5,
+        "time": 0.5,
+        "action": "hit",
+        "phase": "CHỊU ĐÒN",
+        "pose": 9,
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false
+      },
+      "title": "Chịu đòn"
+    },
+    "lose": {
+      "state": {
+        "t": 0.5,
+        "time": 0.5,
+        "action": "lose",
+        "phase": "THUA CUỘC",
+        "pose": 12,
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false
+      },
+      "title": "Buồn bã khi thua cuộc"
+    },
+    "slowPlayback": {
+      "time": 0.33,
+      "elapsed": 0.661,
+      "ratio": 0.49924357034795763
+    }
+  },
+  "timeline": [
+    {
+      "t": 0,
+      "time": 0,
+      "action": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 0.64,
+      "time": 0.64,
+      "action": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 2,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 0.65,
+      "time": 0.65,
+      "action": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 3,
+      "nameVisible": true,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 0.94,
+      "time": 0.94,
+      "action": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 3,
+      "nameVisible": true,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 0.95,
+      "time": 0.95,
+      "action": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 4,
+      "nameVisible": true,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 1.74,
+      "time": 1.74,
+      "action": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 7,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 1.75,
+      "time": 1.75,
+      "action": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 8,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false
+    },
+    {
+      "t": 1.89,
+      "time": 1.89,
+      "action": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 11,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false
+    },
+    {
+      "t": 1.9,
+      "time": 1.9,
+      "action": "ultimate",
+      "phase": "CHIẾN THẮNG",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true
+    },
+    {
+      "t": 3,
+      "time": 3,
+      "action": "ultimate",
+      "phase": "CHIẾN THẮNG",
+      "pose": 15,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true
+    }
+  ],
+  "runtimeImages": [
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/poses.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/tho/v1/assets/actions.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp"
+  ],
+  "completedAt": "2026-11-11T16:23:51.156Z"
+}

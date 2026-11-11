@@ -1,0 +1,417 @@
+{
+  "createdAt": "2026-11-11T15:56:44.104Z",
+  "owner": "tho-01a1cb49",
+  "sources": {
+    "sha256": {
+      "source/poses.png": "d0cbcde2c6ceca941f3d1b38987af68a2a3fb49906896ac2f368827953e9a0d7",
+      "source/actions.png": "95946392456a6bd9884be0b2305d2421c6e680ab645870cf361c44ee2c4d90ff"
+    },
+    "unchanged": true
+  },
+  "compression": {
+    "quality": 82,
+    "alphaQuality": 100,
+    "effort": 4
+  },
+  "sizes": {
+    "tho-poses.webp": 457452,
+    "tho-actions.webp": 528562,
+    "tho-idle.webp": 21690,
+    "tho-frames.json": 4192
+  },
+  "totalBytes": 1011896,
+  "ultimateCells": [
+    {
+      "index": 0,
+      "visiblePixels": 32310,
+      "transparentPixels": 64519,
+      "margins": {
+        "left": 77,
+        "top": 4,
+        "right": 59,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 1,
+      "visiblePixels": 32048,
+      "transparentPixels": 65153,
+      "margins": {
+        "left": 81,
+        "top": 10,
+        "right": 64,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 2,
+      "visiblePixels": 31737,
+      "transparentPixels": 65228,
+      "margins": {
+        "left": 80,
+        "top": 23,
+        "right": 61,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 3,
+      "visiblePixels": 30338,
+      "transparentPixels": 66967,
+      "margins": {
+        "left": 70,
+        "top": 42,
+        "right": 63,
+        "bottom": 18
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 4,
+      "visiblePixels": 32419,
+      "transparentPixels": 64687,
+      "margins": {
+        "left": 80,
+        "top": 3,
+        "right": 68,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 5,
+      "visiblePixels": 28772,
+      "transparentPixels": 68908,
+      "margins": {
+        "left": 85,
+        "top": 3,
+        "right": 67,
+        "bottom": 51
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 6,
+      "visiblePixels": 26239,
+      "transparentPixels": 71235,
+      "margins": {
+        "left": 85,
+        "top": 3,
+        "right": 68,
+        "bottom": 77
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 7,
+      "visiblePixels": 28832,
+      "transparentPixels": 68835,
+      "margins": {
+        "left": 78,
+        "top": 7,
+        "right": 70,
+        "bottom": 44
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 8,
+      "visiblePixels": 30594,
+      "transparentPixels": 66412,
+      "margins": {
+        "left": 77,
+        "top": 2,
+        "right": 65,
+        "bottom": 29
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 9,
+      "visiblePixels": 32616,
+      "transparentPixels": 64705,
+      "margins": {
+        "left": 81,
+        "top": 9,
+        "right": 68,
+        "bottom": 18
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 10,
+      "visiblePixels": 32003,
+      "transparentPixels": 65021,
+      "margins": {
+        "left": 74,
+        "top": 26,
+        "right": 68,
+        "bottom": 18
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 11,
+      "visiblePixels": 33311,
+      "transparentPixels": 63862,
+      "margins": {
+        "left": 70,
+        "top": 8,
+        "right": 70,
+        "bottom": 19
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 12,
+      "visiblePixels": 33048,
+      "transparentPixels": 64220,
+      "margins": {
+        "left": 79,
+        "top": 11,
+        "right": 64,
+        "bottom": 16
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 13,
+      "visiblePixels": 33538,
+      "transparentPixels": 64008,
+      "margins": {
+        "left": 71,
+        "top": 8,
+        "right": 67,
+        "bottom": 16
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 14,
+      "visiblePixels": 35027,
+      "transparentPixels": 62289,
+      "margins": {
+        "left": 58,
+        "top": 6,
+        "right": 62,
+        "bottom": 16
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 15,
+      "visiblePixels": 35498,
+      "transparentPixels": 62059,
+      "margins": {
+        "left": 55,
+        "top": 2,
+        "right": 65,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    }
+  ],
+  "actionsCells": [
+    {
+      "index": 0,
+      "visiblePixels": 32432,
+      "transparentPixels": 64475,
+      "margins": {
+        "left": 79,
+        "top": 9,
+        "right": 64,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 1,
+      "visiblePixels": 32138,
+      "transparentPixels": 64883,
+      "margins": {
+        "left": 79,
+        "top": 9,
+        "right": 64,
+        "bottom": 16
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 2,
+      "visiblePixels": 32107,
+      "transparentPixels": 64547,
+      "margins": {
+        "left": 79,
+        "top": 9,
+        "right": 62,
+        "bottom": 16
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 3,
+      "visiblePixels": 31788,
+      "transparentPixels": 65163,
+      "margins": {
+        "left": 79,
+        "top": 15,
+        "right": 65,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 4,
+      "visiblePixels": 30271,
+      "transparentPixels": 67082,
+      "margins": {
+        "left": 80,
+        "top": 35,
+        "right": 67,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 5,
+      "visiblePixels": 30665,
+      "transparentPixels": 66801,
+      "margins": {
+        "left": 54,
+        "top": 6,
+        "right": 50,
+        "bottom": 46
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 6,
+      "visiblePixels": 31683,
+      "transparentPixels": 65446,
+      "margins": {
+        "left": 75,
+        "top": 8,
+        "right": 36,
+        "bottom": 34
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 7,
+      "visiblePixels": 32215,
+      "transparentPixels": 65306,
+      "margins": {
+        "left": 80,
+        "top": 16,
+        "right": 65,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 8,
+      "visiblePixels": 32387,
+      "transparentPixels": 64410,
+      "margins": {
+        "left": 79,
+        "top": 17,
+        "right": 64,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 9,
+      "visiblePixels": 32801,
+      "transparentPixels": 64330,
+      "margins": {
+        "left": 60,
+        "top": 9,
+        "right": 47,
+        "bottom": 14
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 10,
+      "visiblePixels": 32052,
+      "transparentPixels": 64883,
+      "margins": {
+        "left": 74,
+        "top": 34,
+        "right": 58,
+        "bottom": 16
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 11,
+      "visiblePixels": 32617,
+      "transparentPixels": 64426,
+      "margins": {
+        "left": 80,
+        "top": 14,
+        "right": 59,
+        "bottom": 16
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 12,
+      "visiblePixels": 35190,
+      "transparentPixels": 62043,
+      "margins": {
+        "left": 60,
+        "top": 40,
+        "right": 46,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 13,
+      "visiblePixels": 34166,
+      "transparentPixels": 63571,
+      "margins": {
+        "left": 56,
+        "top": 52,
+        "right": 46,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 14,
+      "visiblePixels": 34012,
+      "transparentPixels": 63513,
+      "margins": {
+        "left": 55,
+        "top": 63,
+        "right": 41,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    },
+    {
+      "index": 15,
+      "visiblePixels": 33484,
+      "transparentPixels": 64364,
+      "margins": {
+        "left": 50,
+        "top": 88,
+        "right": 42,
+        "bottom": 17
+      },
+      "touchesCellBoundary": false
+    }
+  ],
+  "sourceCellBoundaryWarnings": [],
+  "notes": [
+    "Bounds use alpha >70, padded 2 pixels within cell.",
+    "Cell boundary warnings require visual review; pixel analysis does not certify anatomy.",
+    "WebP composites on light/dark backgrounds written for visual QA."
+  ]
+}
