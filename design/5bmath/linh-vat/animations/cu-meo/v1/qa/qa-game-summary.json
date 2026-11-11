@@ -1,0 +1,51 @@
+{
+  "status": "passed",
+  "checkedAt": "2026-11-11T16:33:38.165Z",
+  "groups": 14,
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    }
+  ],
+  "errors": 0,
+  "warnings": 0,
+  "coverage": {
+    "selection": "Chọn Cú mèo bằng UI, lưu SQLite thử riêng, reload giữ lựa chọn.",
+    "bot": "Trả lời qua UI để chạy attack/hit/ultimate/win/lose. Fixture chỉ rút ngắn chuẩn bị/thời điểm bot và HP để đến trạng thái cuối; không gọi API animation cho các ca sự kiện game.",
+    "visualReplay": "Năm kích thước dùng direct replay API trên trận bot đang mở để chụp cùng chiêu.",
+    "realPvp": "Hai tài khoản thử riêng, phòng thật, năm câu đúng qua UI; hai phía thấy Cú mèo đánh/chịu đòn/chiêu cuối và kết quả thắng/thua.",
+    "lifecycle": "Giảm chuyển động, ẩn tab hoàn tất và dọn overlay, rời trang dọn Canvas; trang chủ không tải sheet Cú mèo; runtime chỉ WebP+JSON.",
+    "limits": "Chrome desktop giả lập viewport; chưa đo FPS/CPU trên điện thoại thật.",
+    "slowPolling": "Trận người thật: Mầm Sách đánh Cú mèo. Fixture mạng giữ polling khi Cú mèo còn 40 HP, thả ngay sau đòn cuối; phòng, câu trả lời và HP vẫn do server xử lý. Khi chỉ số câu nhảy, Cú mèo vẫn hiện tư thế thua trong sân trước trang kết quả."
+  },
+  "baseGroups": 12,
+  "regressionGroups": 2,
+  "slowPollingRegression": {
+    "status": "passed",
+    "errors": 0,
+    "holdAfterFinalHpMs": 3194.7,
+    "impactDelayMs": 1752.9
+  }
+}

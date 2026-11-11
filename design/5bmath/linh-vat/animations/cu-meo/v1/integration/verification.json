@@ -1,0 +1,33 @@
+{
+  "files": [
+    "frontend/learning.js",
+    "frontend/learning.css",
+    "backend/platform_api.py",
+    "backend/server.py",
+    "frontend/index.html",
+    "scripts/build-pages.cjs"
+  ],
+  "checks": {
+    "learning.pet-name": 1,
+    "learning.allowlist": 1,
+    "learning.selector": 1,
+    "learning.refresh-before": 1,
+    "learning.refresh-after": 1,
+    "learning.choose": 1,
+    "learning.hold-vars": 1,
+    "learning.final-victim-hold": 1,
+    "learning.source-dispatch": 1,
+    "learning.result-hold": 1,
+    "learning.mount": 1,
+    "learning.unmount": 1,
+    "learning.css-block": 1,
+    "api.mascot": 1,
+    "server.assets": 1,
+    "index.script": 1,
+    "build.copy": 1
+  },
+  "bytes": 6386,
+  "hunks": 17,
+  "reverseCheckExit": 0,
+  "reverseCheckOutput": ""
+}

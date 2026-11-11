@@ -1,0 +1,127 @@
+{
+  "errors": [],
+  "modes": [
+    {
+      "t": 1.73,
+      "time": 1.73,
+      "mode": "ultimate",
+      "pose": 7,
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 0.45,
+      "time": 0.45,
+      "mode": "attack",
+      "pose": 5,
+      "phase": "Tấn công · Lướt cánh",
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 0.3,
+      "time": 0.3,
+      "mode": "hit",
+      "pose": 8,
+      "phase": "Chịu đòn",
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "t": 2.8,
+      "time": 2.8,
+      "mode": "defeat",
+      "pose": 11,
+      "phase": "Buồn khi thua cuộc",
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    }
+  ],
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "scroll": 390,
+      "controls": [
+        46,
+        46,
+        46,
+        46,
+        44
+      ]
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scroll": 844,
+      "controls": [
+        46,
+        46,
+        46,
+        46,
+        44
+      ]
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "scroll": 768,
+      "controls": [
+        46,
+        46,
+        46,
+        46,
+        44
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "scroll": 1024,
+      "controls": [
+        46,
+        46,
+        46,
+        46,
+        44
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440,
+      "controls": [
+        46,
+        46,
+        46,
+        46,
+        44
+      ]
+    }
+  ],
+  "checks": [
+    "Four distinct actions, 5 viewports and 44px controls",
+    "Replay/pause/seek/0.5x/play once and no scheduled frame at end",
+    "Reduced-motion disables autoplay"
+  ],
+  "halfSpeed": {
+    "time": 0.018450000000046204,
+    "elapsed": 0.03779999999981373
+  },
+  "sprite": {
+    "width": 1254,
+    "height": 1254,
+    "hasAlpha": true,
+    "bytes": 314304
+  },
+  "status": "passed"
+}

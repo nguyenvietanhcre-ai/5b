@@ -1,0 +1,75 @@
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -129 +129 @@
+-    const petName = () => ({dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
++    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
+@@ -140 +140 @@
+-        if (!['dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
++        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
+@@ -334 +334 @@
+-            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
++            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+@@ -689,0 +690,5 @@
++            return;
++        }
++        // Visual completion only; authoritative damage, score and deadlines stay unchanged.
++        if(result.outcome!=='left'&&currentRoute==='battle'&&Date.now()<owlFinaleUntil){
++            if(!owlFinishTimer)owlFinishTimer=setTimeout(()=>{owlFinishTimer=null;if(currentBattle?.id===result.id&&currentRoute==='battle')finishBattle(result);},owlFinaleUntil-Date.now()+30);
+@@ -791,0 +797 @@
++                const owlRefreshHp=changed&&currentRoute==='battle'&&currentBattle?.id===result.battle.id&&(state.mascot==='cu-meo'||result.battle.opponentMascot==='cu-meo')?visualHp?.slice():null;
+@@ -793,0 +800 @@
++                if(owlRefreshHp&&currentRoute==='battle'){visualHp=owlRefreshHp;updateBattleVisuals();}
+@@ -806,0 +814 @@
++    let owlFinaleUntil=0,owlFinishTimer=null;
+@@ -835,0 +844,5 @@
++        }
++        const owlSource=document.querySelector(attacker),owlVictim=document.querySelector(target);
++        if(typeof OwlAnimation!=='undefined'&&OwlAnimation.hit({source:owlSource,victim:owlVictim,final})){
++            if(final)owlFinaleUntil=Date.now()+3100;
++            ArenaAudio.effect(final?'beam':'next');return;
+@@ -952,0 +966 @@
++        if(final&&[target,attacker].some(selector=>document.querySelector(selector)?.querySelector('.battle-pet.cu-meo')))owlFinaleUntil=Math.max(owlFinaleUntil,Date.now()+3100);
+@@ -1085,0 +1100 @@
++        'choose-cu-meo':async () => { if(live)await mutate('mascot',{mascot:'cu-meo'});else {state.mascot = 'cu-meo';save();}refresh(); },
+@@ -1156,0 +1172 @@
++        if(typeof OwlAnimation!=='undefined')OwlAnimation.mount();
+@@ -1271,0 +1288,2 @@
++        clearTimeout(owlFinishTimer);owlFinishTimer=null;owlFinaleUntil=0;
++        if(typeof OwlAnimation!=='undefined')OwlAnimation.destroy();
+--- a/frontend/learning.css
++++ b/frontend/learning.css
+@@ -660 +660,15 @@
+-
++/* Cú mèo — WebP atlas fallback, then a Canvas with species-specific flight. */
++body.learning-mode .mascot-art.cu-meo { background-image:url('arena-art/owl/poses.webp'); background-size:400% 400%; background-position:0 0; }
++body.learning-mode .battle-pet.cu-meo { --motion-image:none; }
++body.learning-mode .battle-pet.cu-meo .motion-sprite { display:none !important; }
++body.learning-mode .battle-pet.cu-meo > .mascot-art { visibility:visible; animation:none; }
++body.learning-mode .battle-pet.cu-meo.owl-ready > .mascot-art { visibility:hidden; }
++body.learning-mode .owl-canvas { display:block; position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
++body.learning-mode .battle-pet.cu-meo.owl-in-ultimate { visibility:hidden; }
++body.learning-mode .owl-ultimate-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:7; pointer-events:none; }
++body.learning-mode .owl-ultimate-active .energy-beam,
++body.learning-mode .owl-ultimate-active .spell-effect { display:none !important; }
++body.learning-mode .illustrated-arena [data-spell="owl"] .spell-effect { display:none; }
++@media(prefers-reduced-motion:reduce) {
++  body.learning-mode .battle-pet.cu-meo,body.learning-mode .battle-pet.cu-meo * { animation:none !important; transition:none !important; }
++}
+--- a/backend/platform_api.py
++++ b/backend/platform_api.py
+@@ -28,0 +29 @@
++MASCOT_NAMES['cu-meo'] = 'Cú mèo'
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -51,0 +52,3 @@
++ASSETS["/owl-animation.js"] = "owl-animation.js"
++for file in ("poses.webp", "poses.json"):
++    ASSETS["/arena-art/owl/" + file] = "arena-art/owl/" + file
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -43,0 +44 @@
++    <script src="owl-animation.js" defer></script>
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -68,0 +69 @@
++fs.copyFileSync(path.join(frontend, 'owl-animation.js'), path.join(output, 'owl-animation.js'));

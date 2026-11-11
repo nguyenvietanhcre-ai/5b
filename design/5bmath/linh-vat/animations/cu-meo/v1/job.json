@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "cu-meo",
+  "variant": "v1",
+  "owner": "cu-meo-01a1cb4c",
+  "createdAt": "2026-11-11T15:50:20.132Z",
+  "updatedAt": "2026-11-11T16:48:24.429Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "cu-meo",
+    "name": "Cú mèo",
+    "ultimateName": "Ánh Mắt Đêm Trăng",
+    "description": "Sân đấu chuyển sang đêm, đôi mắt cú sáng lên khóa mục tiêu. Cú lướt êm qua đối thủ; bóng đôi cánh khép thành vầng trăng bao quanh rồi lóe sáng, để lại những ngôi sao nhỏ.",
+    "speciesType": "bird",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png",
+    "referenceCell": {
+      "row": 1,
+      "col": 1,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Cú tròn nâu vàng, hai đĩa mặt kem đối xứng, mắt lớn hướng trước.",
+      "Mỏ nhỏ, chùm lông tai nhỏ, hai cánh và hai chân.",
+      "Không thêm tai/mõm mèo thật; không xoay cổ trọn vòng hoặc mọc đôi tay riêng."
+    ],
+    "beats": {
+      "windup": "Ánh sân dịu như đêm, mắt cú sáng và hai cánh mở nhẹ.",
+      "decisive": "Lướt êm qua đối thủ; bóng cánh khép thành vầng trăng tại mục tiêu.",
+      "victory": "Vầng trăng lóe sao rồi dịu; cú đáp, chớp mắt và xòe cánh vui."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/cu-meo.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1856625,
+      "webpBytes": 314304,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "a9ab36d4b9222127d8ad3ed91b456dde05d59078ec036658a2e34d68f1718f60",
+      "bytes": 8424325
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "56e9374d0027c087c8da97b8617c62bd4dd3b370d7576ada9d810944399edbfb",
+      "bytes": 2282067
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "cdb24a6ea7677938bac994297e47dca09987b2d03976b8f240281570f00ecd55",
+      "bytes": 1791996
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:02:00.266Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "cu-meo-01a1cb4c",
+  "lastReleasedAt": "2026-11-11T16:48:24.429Z"
+}

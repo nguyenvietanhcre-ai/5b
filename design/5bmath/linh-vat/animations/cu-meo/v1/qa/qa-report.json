@@ -1,0 +1,239 @@
+{
+  "characterId": "cu-meo",
+  "variant": "v1",
+  "status": "passed",
+  "fps": 30,
+  "count": 90,
+  "duration": 3,
+  "canvas": {
+    "width": 1280,
+    "height": 720
+  },
+  "checks": [
+    "Canvas runtime loads WebP images and does not load PNG source or review GIF/MP4",
+    "Renderer state verifies name before attack and victory after impact through the final frame",
+    "GIF has 90 frames and exact 3000 ms cycle",
+    "MP4 decodes its first frame at 1280x720 with 90 AVC samples and exact 3.000 s duration"
+  ],
+  "errors": [],
+  "phaseSamples": [
+    {
+      "time": 0.63,
+      "state": {
+        "t": 0.63,
+        "time": 0.63,
+        "mode": "ultimate",
+        "pose": 2,
+        "phase": "LẤY ĐÀ",
+        "nameVisible": false,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false
+      }
+    },
+    {
+      "time": 0.67,
+      "state": {
+        "t": 0.67,
+        "time": 0.67,
+        "mode": "ultimate",
+        "pose": 2,
+        "phase": "LẤY ĐÀ",
+        "nameVisible": true,
+        "attackStarted": false,
+        "impact": false,
+        "victory": false
+      }
+    },
+    {
+      "time": 0.97,
+      "state": {
+        "t": 0.97,
+        "time": 0.97,
+        "mode": "ultimate",
+        "pose": 4,
+        "phase": "ĐÒN QUYẾT ĐỊNH",
+        "nameVisible": true,
+        "attackStarted": true,
+        "impact": false,
+        "victory": false
+      }
+    },
+    {
+      "time": 1.77,
+      "state": {
+        "t": 1.77,
+        "time": 1.77,
+        "mode": "ultimate",
+        "pose": 7,
+        "phase": "ĐÒN QUYẾT ĐỊNH",
+        "nameVisible": false,
+        "attackStarted": true,
+        "impact": true,
+        "victory": false
+      }
+    },
+    {
+      "time": 1.92,
+      "state": {
+        "t": 1.92,
+        "time": 1.92,
+        "mode": "ultimate",
+        "pose": 12,
+        "phase": "CHIẾN THẮNG",
+        "nameVisible": false,
+        "attackStarted": true,
+        "impact": true,
+        "victory": true
+      }
+    },
+    {
+      "time": 2.966666666666667,
+      "state": {
+        "t": 2.966666666666667,
+        "time": 2.966666666666667,
+        "mode": "ultimate",
+        "pose": 15,
+        "phase": "CHIẾN THẮNG",
+        "nameVisible": false,
+        "attackStarted": true,
+        "impact": true,
+        "victory": true
+      }
+    }
+  ],
+  "responsive": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "overflow": false,
+      "canvas": {
+        "x": 12,
+        "y": 94,
+        "width": 366,
+        "height": 205.875,
+        "top": 94,
+        "right": 378,
+        "bottom": 299.875,
+        "left": 12
+      }
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "overflow": false,
+      "canvas": {
+        "x": 20,
+        "y": 115,
+        "width": 804,
+        "height": 452.25,
+        "top": 115,
+        "right": 824,
+        "bottom": 567.25,
+        "left": 20
+      }
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "overflow": false,
+      "canvas": {
+        "x": 20,
+        "y": 114,
+        "width": 728,
+        "height": 409.5,
+        "top": 114,
+        "right": 748,
+        "bottom": 523.5,
+        "left": 20
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "overflow": false,
+      "canvas": {
+        "x": 20,
+        "y": 115,
+        "width": 984,
+        "height": 553.5,
+        "top": 115,
+        "right": 1004,
+        "bottom": 668.5,
+        "left": 20
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "overflow": false,
+      "canvas": {
+        "x": 80,
+        "y": 115,
+        "width": 1280,
+        "height": 720,
+        "top": 115,
+        "right": 1360,
+        "bottom": 835,
+        "left": 80
+      }
+    }
+  ],
+  "runtimeImages": [
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/cu-meo/v1/assets/poses.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/cu-meo/v1/assets/garden.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/cu-meo/v1/assets/opponents.webp"
+  ],
+  "runtimeSprite": {
+    "format": "webp",
+    "width": 1254,
+    "height": 1254,
+    "hasAlpha": true,
+    "bytes": 314304
+  },
+  "gif": {
+    "width": 768,
+    "height": 432,
+    "frames": 90,
+    "durationMs": 3000,
+    "bytes": 8424325
+  },
+  "videoProbeErrors": [],
+  "mp4": {
+    "duration": 3,
+    "width": 1280,
+    "height": 720,
+    "firstFrameDecoded": true,
+    "codec": "H.264 AVC",
+    "frames": 90,
+    "bytes": 2282067
+  },
+  "outputs": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "a9ab36d4b9222127d8ad3ed91b456dde05d59078ec036658a2e34d68f1718f60",
+      "bytes": 8424325
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "56e9374d0027c087c8da97b8617c62bd4dd3b370d7576ada9d810944399edbfb",
+      "bytes": 2282067
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "cdb24a6ea7677938bac994297e47dca09987b2d03976b8f240281570f00ecd55",
+      "bytes": 1791996
+    }
+  },
+  "checkedAt": "2026-11-11T16:02:00.266Z"
+}

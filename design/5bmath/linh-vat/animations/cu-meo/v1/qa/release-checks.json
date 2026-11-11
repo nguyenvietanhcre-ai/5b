@@ -1,0 +1,86 @@
+{
+  "windows": {
+    "status": "passed",
+    "tests": 74,
+    "log": "work/mascot-animation/cu-meo/v1/unittest-local.log"
+  },
+  "docker": {
+    "status": "passed",
+    "tests": 77,
+    "isolated": true,
+    "persistentDatabaseMounted": false,
+    "scratch": "/work tmpfs",
+    "log": "work/mascot-animation/cu-meo/v1/unittest-docker-final.log"
+  },
+  "javascript": "syntax passed: owl-animation.js, learning.js, app.js, build-pages.cjs",
+  "staticPages": {
+    "cloudflare": "passed, 8 public pages",
+    "github": "passed, 8 public pages"
+  },
+  "localhost": {
+    "base": "http://127.0.0.1:8765",
+    "assets": [
+      {
+        "path": "owl-animation.js",
+        "status": 200,
+        "bytes": 15684,
+        "sha256": "6c27eab6376d4fd12baadff2035379c3130ffac3ebd72694ed4d3bc984abe759",
+        "sourceMatches": true
+      },
+      {
+        "path": "arena-art/owl/poses.webp",
+        "status": 200,
+        "bytes": 314304,
+        "sha256": "590ca8e8a86794d6ae5ef450a3c4070fc59cf8add0d7db75c595da640a443cbe",
+        "sourceMatches": true
+      },
+      {
+        "path": "arena-art/owl/poses.json",
+        "status": 200,
+        "bytes": 1838,
+        "sha256": "732c184661c459a2a4352aacdee33aae4f6f271f3c77854ed6f2384dd10e48ff",
+        "sourceMatches": true
+      },
+      {
+        "path": "learning.js",
+        "status": 200,
+        "bytes": 129566,
+        "sha256": "5228458d1bae2b92230bb54e9cf69be0ef8f44235a88a7f798172dff91a90595",
+        "sourceMatches": true
+      },
+      {
+        "path": "learning.css",
+        "status": 200,
+        "bytes": 62371,
+        "sha256": "a2f53092a2066f4e4a27e7cc9936c9791109080947eb372a2aac12cdc5a24779",
+        "sourceMatches": true
+      },
+      {
+        "path": "index.html",
+        "status": 200,
+        "bytes": 7919,
+        "sha256": "9e75b55bd729085d94b99a6f51898ca1d8748c0d7543903356bf9a4adb4e6ae0",
+        "renderedTemplateHasOwl": true
+      }
+    ],
+    "private_paths": [
+      {
+        "path": "/design/5bmath/linh-vat/animations/cu-meo/v1/source/poses.png",
+        "status": 404
+      },
+      {
+        "path": "/.git/config",
+        "status": 404
+      },
+      {
+        "path": "/docs/PROJECT_MEMORY.md",
+        "status": 404
+      }
+    ],
+    "health": 200,
+    "sampleScore": 10,
+    "status": "passed"
+  },
+  "scope": "Local only. No push, CI or public deployment performed by this chat.",
+  "earlierAttempts": "Loopback sandbox denial resolved with elevated local verification; Docker fixture /work permission and concurrently updated staff test resolved by an isolated fresh-image rerun. No persistent DB was mounted for tests."
+}
