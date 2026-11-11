@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Demo animation linh vật · 3 giây</title>
+<style>
+:root{color-scheme:light;--green:#1f6248;--ink:#203a32;--cream:#fff9ed;--peach:#ffbe73}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:"Arial",sans-serif}main{max-width:1320px;margin:auto;padding:20px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px}h1{font-size:clamp(22px,4vw,32px);margin:4px 0}.eyebrow{font-size:12px;letter-spacing:.15em;color:var(--green);font-weight:bold}header p{margin:4px 0;font-size:14px}.badge{background:#e7efdd;border:1px solid #c7d6c0;border-radius:24px;padding:10px 16px;font-size:13px;white-space:nowrap}canvas{display:block;width:100%;height:auto;border-radius:24px;box-shadow:0 16px 44px #203a3225;background:#264734}.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0 10px}button,select{min-height:46px;border-radius:14px;border:1px solid #b7c6ad;background:#fffdf5;color:var(--ink);padding:10px 18px;font:inherit;font-weight:bold;cursor:pointer}button.primary{background:var(--green);color:white;border-color:var(--green)}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #ffbe73;outline-offset:3px}input[type=range]{accent-color:var(--green);flex:1;min-width:140px;min-height:44px}.clock{font-variant-numeric:tabular-nums;min-width:90px;font-size:14px}.beats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.beat{padding:12px 16px;background:#edf1e3;border-radius:14px;font-size:13px;line-height:1.5}.beat strong{display:block}.note{font-size:13px;color:#52705f;margin-bottom:0}@media(max-width:600px){main{padding:12px}header{align-items:flex-start}.badge{font-size:11px;padding:8px 10px}canvas{border-radius:16px}.controls{gap:8px}button,select{padding:10px 13px}.beats{grid-template-columns:1fr}.beat strong{display:inline;margin-right:6px}.clock{min-width:80px}header p{font-size:12px}}
+</style>
+<main>
+ <header><div><div class="eyebrow">5BMATH · BẠCH TUỘC</div><h1>Tám Tay Ảo Thuật</h1><p>Bốn hoạt cảnh · Canvas + WebP</p></div><span class="badge">3 giây / hoạt cảnh</span></header>
+ <canvas id="stage" width="1280" height="720" aria-label="Hoạt cảnh linh vật lấy đà, tung chiêu cuối và ăn mừng chiến thắng.">Demo chiêu cuối linh vật.</canvas>
+ <div class="controls"><select id="mode" aria-label="Chọn hoạt cảnh"><option value="ultimate">Chiêu cuối</option><option value="attack">Tấn công</option><option value="hit">Chịu đòn</option><option value="lose">Buồn khi thua</option></select><button id="replay" class="primary">↻ Phát lại</button><button id="pause">Tạm dừng</button><label><select id="speed" aria-label="Tốc độ xem"><option value="1">Tốc độ 1×</option><option value="0.5">Chậm 0,5×</option></select></label><input id="seek" type="range" min="0" max="3" step="0.01" value="0" aria-label="Vị trí trong hoạt cảnh"><span id="clock" class="clock">0,00 / 3,00 s</span></div>
+ <div class="beats"><div class="beat"><strong>Chiêu cuối</strong>Tên lúc 0,65 s → mực tím → tám tay và tám bóng nước đồng quy → hiện lại ăn mừng.</div><div class="beat"><strong>Tấn công / Chịu đòn</strong>Bóng nước tinh nghịch; giật mình rồi bình tĩnh, không có vết thương.</div><div class="beat"><strong>Thua cuộc</strong>Tám tay hạ nhẹ, nét mặt buồn và lời động viên thử lại.</div></div>
+ <p class="note">Bản xem riêng của Bạch tuộc. Không có âm thanh. Phát một lần; có thể dừng, kéo thời gian hoặc xem chậm.</p>
+</main>
+<script src="config.js"></script>
+<script src="poses.js"></script>
+<script src="animation.js"></script>
+</html>

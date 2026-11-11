@@ -1,0 +1,33 @@
+{
+  "checkedAt": "2026-11-11T16:25:03.795Z",
+  "idle": {
+    "width": 320,
+    "height": 320,
+    "leftOpaqueEdgePixels": 0,
+    "rightOpaqueEdgePixels": 0
+  },
+  "attack": {
+    "width": 320,
+    "height": 320,
+    "leftOpaqueEdgePixels": 0,
+    "rightOpaqueEdgePixels": 0
+  },
+  "attackState": {
+    "loaded": true,
+    "pets": [
+      {
+        "action": "attack",
+        "pose": 9,
+        "running": true
+      }
+    ],
+    "flights": 0,
+    "reducedMotion": false
+  },
+  "afterDestroy": {
+    "loaded": true,
+    "pets": [],
+    "flights": 0,
+    "reducedMotion": false
+  }
+}

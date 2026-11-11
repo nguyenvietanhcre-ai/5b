@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "bach-tuoc",
+  "variant": "v1",
+  "owner": "bach-tuoc-01a1cb4d-root",
+  "createdAt": "2026-11-11T15:51:51.205Z",
+  "updatedAt": "2026-11-11T16:29:08.384Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "bach-tuoc",
+    "name": "Bạch tuộc",
+    "ultimateName": "Tám Tay Ảo Thuật",
+    "description": "Phun một màn mực tím rồi biến mất. Tám tay bất ngờ xuất hiện quanh đối thủ, tung tám quả cầu nước vào giữa; màn mực tan ra giữa chùm sao lấp lánh.",
+    "speciesType": "aquatic",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png",
+    "referenceCell": {
+      "row": 1,
+      "col": 0,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Bạch tuộc tím lavender, đầu/thân tròn với mắt nâu lớn, má cam.",
+      "Đúng tám tay tách biệt, giác hút kem nhỏ phía dưới.",
+      "Đếm rõ tám đầu tay, không sáu hoặc chín; tránh một tay giữa thừa, không ghép tay với đối thủ."
+    ],
+    "beats": {
+      "windup": "Thu nhẹ tám tay, lấy đà phun màn mực tím.",
+      "decisive": "Ẩn trong mực; tám tay tạo/tung tám bóng nước đồng quy tại mục tiêu.",
+      "victory": "Mực tan giữa chùm sao; bạch tuộc hiện lại với tám tay xòe vui."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/bach-tuoc.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2119411,
+      "webpBytes": 415190,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "afbe88f55ea243d68deb2ad63947a3fec42c8ec885183330b15a80a19e98c8a8",
+      "bytes": 1797312
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "e693abbc7a5fedbccbc6ef22eee2c089704a723cc4a2923091ff227f3b581ad6",
+      "bytes": 1863912
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "ed032dd4a1791498dcc27cd0d03cef63e69620174237cb7dedf81f788a38a7b9",
+      "bytes": 1870877
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:06:40.547Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "bach-tuoc-01a1cb4d-root",
+  "lastReleasedAt": "2026-11-11T16:29:08.384Z"
+}

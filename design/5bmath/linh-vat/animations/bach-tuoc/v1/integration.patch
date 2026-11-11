@@ -1,0 +1,70 @@
+diff --git a/frontend/learning.js b/frontend/learning.js
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -72,0 +73 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
++    let octopusFinaleUntil=0,octopusFinishTimer=null;
+@@ -128 +129 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+-    const petName = () => ({starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
++    const petName = () => ({octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
+@@ -139 +140 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+-        if (!['starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
++        if (!['octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
+@@ -333 +334 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+-            ${heading('Chọn linh vật')}<div class="grid2">${[['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
++            ${heading('Chọn linh vật')}<div class="grid2">${[['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+@@ -686,0 +688,4 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
++        if(result.outcome!=='left'&&currentRoute==='battle'&&Date.now()<octopusFinaleUntil){
++            if(!octopusFinishTimer)octopusFinishTimer=setTimeout(()=>{octopusFinishTimer=null;if(currentBattle?.id===result.id&&currentRoute==='battle')finishBattle(result);},octopusFinaleUntil-Date.now()+40);
++            return;
++        }
+@@ -802,0 +808 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
++        if(final&&document.querySelector(target)?.querySelector('.battle-pet.octopus'))octopusFinaleUntil=Date.now()+4100;
+@@ -861,0 +868,15 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
++        if(sourcePet?.classList.contains('octopus')&&typeof OctopusAnimation!=='undefined'){
++            if(final)octopusFinaleUntil=Math.max(octopusFinaleUntil,Date.now()+3100);
++            sourcePet.dataset.mood=final?'ultimate':'attack';source?.classList.add('attacking');
++            const label=document.querySelector('#spell-announcement');if(label)label.textContent=final?'':'✦ Sóng tay Bạch tuộc';
++            const impact=()=>{if(!victim?.isConnected||!victimPet)return;victim.dataset.spell='ink';victimPet.dataset.mood=final?'lose':'hit';victim.classList.add('taking-hit');if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(victimPet,final?'lose':'hit');};
++            if(final)setTimeout(impact,1750);else impact();
++            ArenaAudio.effect(final?'beam':'rock');
++            setTimeout(()=>{
++                source?.classList.remove('attacking');victim?.classList.remove('taking-hit');
++                if(sourcePet.isConnected)sourcePet.dataset.mood='idle';
++                if(victimPet?.isConnected&&!final)victimPet.dataset.mood='idle';
++                if(label?.isConnected)label.textContent='';
++            },final?3000:1200);
++            return;
++        }
+@@ -1034,0 +1056 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
++        'choose-octopus':async () => { if(live)await mutate('mascot',{mascot:'octopus'});else {state.mascot = 'octopus';save();}refresh(); },
+@@ -1209,0 +1232 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
++        clearTimeout(octopusFinishTimer);octopusFinishTimer=null;octopusFinaleUntil=0;
+
+diff --git a/backend/platform_api.py b/backend/platform_api.py
+--- a/backend/platform_api.py
++++ b/backend/platform_api.py
+@@ -34,0 +35 @@ MASCOT_NAMES['starfish'] = 'Sao biển'
++MASCOT_NAMES['octopus'] = 'Bạch tuộc'
+
+diff --git a/frontend/index.html b/frontend/index.html
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -24,0 +25 @@
++    <link rel="stylesheet" href="octopus-animation.css">
+@@ -46,0 +48 @@
++    <script src="octopus-animation.js" defer></script>
+
+diff --git a/backend/server.py b/backend/server.py
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -63,0 +64,2 @@ ASSETS.update({"/" + file: file for file in
++ASSETS.update({"/" + file: file for file in
++               ("octopus-animation.js", "octopus-animation.css", "arena-art/bach-tuoc-frames.json")})
+
+diff --git a/scripts/build-pages.cjs b/scripts/build-pages.cjs
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -69,0 +70,3 @@ for (const asset of ['arena-bee-animation.js', 'arena-bee-animation.css']) {
++for (const asset of ['octopus-animation.js', 'octopus-animation.css']) {
++    fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
++}

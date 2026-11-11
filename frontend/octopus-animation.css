@@ -1,0 +1,8 @@
+body.learning-mode .mascot-art.octopus { background-image:url(arena-art/bach-tuoc-idle.webp); background-size:contain; background-position:center; }
+body.learning-mode .battle-pet.octopus .motion-sprite { display:none; }
+body.learning-mode .battle-pet.octopus:not(.octopus-ready) > .mascot-art { visibility:visible; }
+body.learning-mode .battle-pet.octopus.octopus-ready > .mascot-art { visibility:hidden; animation:none; }
+body.learning-mode .octopus-canvas { display:block; position:absolute; inset:0; width:100%; height:100%; }
+body.learning-mode .octopus-in-ultimate { visibility:hidden; }
+body.learning-mode .octopus-ultimate-canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4; }
+body.learning-mode .octopus-ultimate-active .energy-beam { display:none; }

@@ -1,0 +1,17 @@
+{
+  "generator": "built-in image_gen",
+  "generatedAt": "2026-11-11",
+  "intent": "16 transparent poses for the lavender eight-armed octopus",
+  "references": [
+    {"path":"design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/03-bien-va-ong-v3.png","role":"identity","cell":{"row":1,"col":0,"rows":2,"columns":3}},
+    {"path":"design/5bmath/linh-vat/mam-sach-cao-nau-goc.png","role":"material and style only"}
+  ],
+  "output":"poses.png",
+  "actualDimensions":{"width":1254,"height":1254},
+  "transparency":true,
+  "promptSummary":"One transparent RGBA 4-by-4 sheet for only the bottom-left lavender octopus in reference 1. Preserve soft matte handcrafted felt/clay material from reference 2, lavender round head/body, large shiny dark-brown eyes, warm apricot cheeks, cream suction cups. Exactly eight separate rounded/curling tips in every cell: four left and four right; no ninth center arm. Nearly frontal slight 3/4 toward right, consistent size, proportions, light and body center, generous transparent margins. No text/grid/shadows/background/effects, no clothes/leaves/books. Row 1 neutral smile, breathe, concentration/curl, puffed cheeks preparing ink. Row 2 eight-arm spread, focused wide extension, coordinated spell reach, smiling release. Row 3 basic attack windup/release, surprised hit recoil, worried recovery. Row 4 joyful victory, upper-arm wave, clearly sad head down, quiet sad with small blue tear. All eight tips countable even when sad or hurt; no wounds. Runtime adds ink/water effects separately.",
+  "finalPromptFile":"final-prompt.txt",
+  "promptRecordScope":"promptSummary is a summary; final-prompt.txt preserves the full successful prompt. Not a full chat/tool transcript.",
+  "frames":{"idleAndPreparation":[0,1,2,3],"ultimate":[4,5,6,7],"attack":[8,9],"hit":[10,11],"win":[12,13],"lose":[14,15]},
+  "notes":"Image inspected before prepare; independent visual review counted eight tips in all sixteen poses. Original PNG retained; WebP alpha matches source. No image generation fallback used."
+}

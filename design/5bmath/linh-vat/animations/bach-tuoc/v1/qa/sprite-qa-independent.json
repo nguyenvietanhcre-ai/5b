@@ -1,0 +1,33 @@
+{
+  "checkedAt": "2026-11-11T15:58:43.023Z",
+  "sourceBytes": 2119411,
+  "webpBytes": 415190,
+  "width": 1254,
+  "height": 1254,
+  "transparent": 287902,
+  "opaque": 2539,
+  "partial": 1282075,
+  "alphaExact": true,
+  "alphaMaximumError": 0,
+  "alphaMeanAbsoluteError": 0,
+  "visual": "Viewed16poses on cream/dark. All16 have8 distinct tips, no cropped limbs, real transparency, consistent lavender felt/clay character and apricot cheeks. Sad14/15 distinct; hit10 surprised. No independent model anatomy certification implied.",
+  "tipsPerPose": [
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8
+  ],
+  "lightDark": "webp-light-dark.png"
+}

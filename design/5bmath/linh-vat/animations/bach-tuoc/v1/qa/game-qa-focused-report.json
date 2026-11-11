@@ -1,0 +1,95 @@
+{
+  "origin": "http://127.0.0.1:8767",
+  "errors": [],
+  "assets": [
+    {
+      "file": "octopus-animation.js",
+      "status": 200,
+      "bytes": 14338,
+      "sha256": "5898b84645c07294e1860d808a67e546fabb5a49f529a6fa2ac503258043d6f0",
+      "matches": true
+    },
+    {
+      "file": "octopus-animation.css",
+      "status": 200,
+      "bytes": 802,
+      "sha256": "9fabc98e07af7c2e0dcf0355126e3bb34cb4bf173b03a5a10e9ac886d7d13438",
+      "matches": true
+    },
+    {
+      "file": "arena-art/bach-tuoc-poses.webp",
+      "status": 200,
+      "bytes": 415190,
+      "sha256": "c596aee15d3fcf634155b8362f04f780311b77bfda7d6872b2179ce00c1b3773",
+      "matches": true
+    },
+    {
+      "file": "arena-art/bach-tuoc-frames.json",
+      "status": 200,
+      "bytes": 1838,
+      "sha256": "f1fe7bc54208654827bc7fdcd9c2d9b7da160a37261a1f1ee84b0452aa9e14be",
+      "matches": true
+    },
+    {
+      "file": "arena-art/bach-tuoc-idle.webp",
+      "status": 200,
+      "bytes": 32720,
+      "sha256": "c43493d80f21797196ba87530875789e6c09c43efdbf8393006a6f0402ac11a5",
+      "matches": true
+    }
+  ],
+  "persisted": "octopus",
+  "milestones": {
+    "name": {
+      "time": 0.655100000000745,
+      "label": "✦ Tám Tay Ảo Thuật"
+    },
+    "spheres": {
+      "time": 0.955100000000745,
+      "spheres": 8,
+      "pose": 4
+    },
+    "impact": {
+      "time": 1.755200000000745,
+      "pose": 7
+    },
+    "reappear": {
+      "time": 1.9051000000007452,
+      "pose": 12
+    }
+  },
+  "result": {
+    "url": "/ket-qua-tran/",
+    "inspect": {
+      "loaded": true,
+      "pets": [
+        {
+          "action": "win",
+          "pose": 12,
+          "running": true
+        }
+      ],
+      "flights": 0,
+      "reducedMotion": false
+    }
+  },
+  "reduced": {
+    "loaded": true,
+    "pets": [
+      {
+        "action": "ultimate",
+        "pose": 13,
+        "running": false
+      }
+    ],
+    "flights": 0,
+    "reducedMotion": true
+  },
+  "afterLeaving": {
+    "loaded": false,
+    "pets": [],
+    "flights": 0,
+    "reducedMotion": true
+  },
+  "pass": true
+}

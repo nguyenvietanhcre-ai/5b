@@ -1,0 +1,674 @@
+{
+  "checkedAt": "2026-11-11T16:05:29.269Z",
+  "scope": "Independent demo sprite, timeline, controls, responsive and reduced-motion QA. Review exports are not game runtime.",
+  "errors": [],
+  "requests": [
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/bach-tuoc/v1/demo.html?export=1",
+      "type": "document"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/bach-tuoc/v1/config.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/bach-tuoc/v1/poses.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/bach-tuoc/v1/animation.js",
+      "type": "script"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/bach-tuoc/v1/assets/poses.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp",
+      "type": "image"
+    },
+    {
+      "url": "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp",
+      "type": "image"
+    }
+  ],
+  "timeline": [
+    {
+      "time": 0.63,
+      "t": 0.63,
+      "mode": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 3,
+      "actorAlpha": 1,
+      "spheres": 0,
+      "arms": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false,
+      "playing": false
+    },
+    {
+      "time": 0.67,
+      "t": 0.67,
+      "mode": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 4,
+      "actorAlpha": 0.9872592592592593,
+      "spheres": 0,
+      "arms": 0,
+      "nameVisible": true,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false,
+      "playing": false
+    },
+    {
+      "time": 0.97,
+      "t": 0.97,
+      "mode": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 5,
+      "actorAlpha": 0,
+      "spheres": 8,
+      "arms": 8,
+      "nameVisible": true,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false,
+      "playing": false
+    },
+    {
+      "time": 1.2,
+      "t": 1.2,
+      "mode": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 5,
+      "actorAlpha": 0,
+      "spheres": 8,
+      "arms": 8,
+      "nameVisible": true,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false,
+      "playing": false
+    },
+    {
+      "time": 1.77,
+      "t": 1.77,
+      "mode": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 7,
+      "actorAlpha": 0,
+      "spheres": 8,
+      "arms": 8,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false,
+      "playing": false
+    },
+    {
+      "time": 1.92,
+      "t": 1.92,
+      "mode": "ultimate",
+      "phase": "CHIẾN THẮNG",
+      "pose": 12,
+      "actorAlpha": 0.034293552812071394,
+      "spheres": 0,
+      "arms": 0,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true,
+      "playing": false
+    },
+    {
+      "time": 2.97,
+      "t": 2.97,
+      "mode": "ultimate",
+      "phase": "CHIẾN THẮNG",
+      "pose": 13,
+      "actorAlpha": 1,
+      "spheres": 0,
+      "arms": 0,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true,
+      "playing": false
+    }
+  ],
+  "modes": [
+    {
+      "mode": "ultimate",
+      "states": [
+        {
+          "time": 0.6,
+          "t": 0.6,
+          "mode": "ultimate",
+          "phase": "LẤY ĐÀ",
+          "pose": 3,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 1.2,
+          "t": 1.2,
+          "mode": "ultimate",
+          "phase": "ĐÒN QUYẾT ĐỊNH",
+          "pose": 5,
+          "actorAlpha": 0,
+          "spheres": 8,
+          "arms": 8,
+          "nameVisible": true,
+          "attackStarted": true,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 2.8,
+          "t": 2.8,
+          "mode": "ultimate",
+          "phase": "CHIẾN THẮNG",
+          "pose": 13,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": true,
+          "victory": true,
+          "playing": false
+        }
+      ]
+    },
+    {
+      "mode": "attack",
+      "states": [
+        {
+          "time": 0.6,
+          "t": 0.6,
+          "mode": "attack",
+          "phase": "TUNG BÓNG NƯỚC",
+          "pose": 9,
+          "actorAlpha": 1,
+          "spheres": 1,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 1.2,
+          "t": 1.2,
+          "mode": "attack",
+          "phase": "TUNG BÓNG NƯỚC",
+          "pose": 9,
+          "actorAlpha": 1,
+          "spheres": 1,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 2.8,
+          "t": 2.8,
+          "mode": "attack",
+          "phase": "SẴN SÀNG",
+          "pose": 0,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": true,
+          "victory": false,
+          "playing": false
+        }
+      ]
+    },
+    {
+      "mode": "hit",
+      "states": [
+        {
+          "time": 0.6,
+          "t": 0.6,
+          "mode": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 10,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 1.2,
+          "t": 1.2,
+          "mode": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 11,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 2.8,
+          "t": 2.8,
+          "mode": "hit",
+          "phase": "BÌNH TĨNH TRỞ LẠI",
+          "pose": 0,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": true,
+          "victory": false,
+          "playing": false
+        }
+      ]
+    },
+    {
+      "mode": "lose",
+      "states": [
+        {
+          "time": 0.6,
+          "t": 0.6,
+          "mode": "lose",
+          "phase": "THỬ LẠI NHÉ!",
+          "pose": 15,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 1.2,
+          "t": 1.2,
+          "mode": "lose",
+          "phase": "THỬ LẠI NHÉ!",
+          "pose": 15,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": false,
+          "victory": false,
+          "playing": false
+        },
+        {
+          "time": 2.8,
+          "t": 2.8,
+          "mode": "lose",
+          "phase": "THỬ LẠI NHÉ!",
+          "pose": 15,
+          "actorAlpha": 1,
+          "spheres": 0,
+          "arms": 0,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": true,
+          "victory": false,
+          "playing": false
+        }
+      ]
+    }
+  ],
+  "responsive": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "scroll": 390,
+      "canvas": {
+        "x": 12,
+        "y": 94,
+        "width": 366,
+        "height": 205.875,
+        "top": 94,
+        "right": 378,
+        "bottom": 299.875,
+        "left": 12
+      },
+      "controls": [
+        {
+          "id": "mode",
+          "height": 46,
+          "width": 155
+        },
+        {
+          "id": "replay",
+          "height": 46,
+          "width": 103.359375
+        },
+        {
+          "id": "pause",
+          "height": 46,
+          "width": 89.046875
+        },
+        {
+          "id": "speed",
+          "height": 46,
+          "width": 129
+        },
+        {
+          "id": "seek",
+          "height": 44,
+          "width": 225
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "width": 844,
+      "scroll": 844,
+      "canvas": {
+        "x": 20,
+        "y": 115,
+        "width": 804,
+        "height": 452.25,
+        "top": 115,
+        "right": 824,
+        "bottom": 567.25,
+        "left": 20
+      },
+      "controls": [
+        {
+          "id": "mode",
+          "height": 46,
+          "width": 165
+        },
+        {
+          "id": "replay",
+          "height": 46,
+          "width": 113.359375
+        },
+        {
+          "id": "pause",
+          "height": 46,
+          "width": 99.046875
+        },
+        {
+          "id": "speed",
+          "height": 46,
+          "width": 139
+        },
+        {
+          "id": "seek",
+          "height": 44,
+          "width": 143.59375
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "width": 768,
+      "scroll": 768,
+      "canvas": {
+        "x": 20,
+        "y": 114,
+        "width": 728,
+        "height": 409.5,
+        "top": 114,
+        "right": 748,
+        "bottom": 523.5,
+        "left": 20
+      },
+      "controls": [
+        {
+          "id": "mode",
+          "height": 46,
+          "width": 165
+        },
+        {
+          "id": "replay",
+          "height": 46,
+          "width": 113.359375
+        },
+        {
+          "id": "pause",
+          "height": 46,
+          "width": 99.046875
+        },
+        {
+          "id": "speed",
+          "height": 46,
+          "width": 139
+        },
+        {
+          "id": "seek",
+          "height": 44,
+          "width": 167.59375
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "width": 1024,
+      "scroll": 1024,
+      "canvas": {
+        "x": 20,
+        "y": 115,
+        "width": 984,
+        "height": 553.5,
+        "top": 115,
+        "right": 1004,
+        "bottom": 668.5,
+        "left": 20
+      },
+      "controls": [
+        {
+          "id": "mode",
+          "height": 46,
+          "width": 165
+        },
+        {
+          "id": "replay",
+          "height": 46,
+          "width": 113.359375
+        },
+        {
+          "id": "pause",
+          "height": 46,
+          "width": 99.046875
+        },
+        {
+          "id": "speed",
+          "height": 46,
+          "width": 139
+        },
+        {
+          "id": "seek",
+          "height": 44,
+          "width": 323.59375
+        }
+      ]
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "width": 1440,
+      "scroll": 1440,
+      "canvas": {
+        "x": 80,
+        "y": 115,
+        "width": 1280,
+        "height": 720,
+        "top": 115,
+        "right": 1360,
+        "bottom": 835,
+        "left": 80
+      },
+      "controls": [
+        {
+          "id": "mode",
+          "height": 46,
+          "width": 165
+        },
+        {
+          "id": "replay",
+          "height": 46,
+          "width": 113.359375
+        },
+        {
+          "id": "pause",
+          "height": 46,
+          "width": 99.046875
+        },
+        {
+          "id": "speed",
+          "height": 46,
+          "width": 139
+        },
+        {
+          "id": "seek",
+          "height": 44,
+          "width": 619.59375
+        }
+      ]
+    }
+  ],
+  "controls": {
+    "seek": {
+      "mode": "attack",
+      "clock": 1.25,
+      "playing": false,
+      "raf": false,
+      "speed": 1,
+      "reducedMotion": false
+    },
+    "speed": 0.5,
+    "replay": {
+      "mode": "attack",
+      "clock": 0.1269000000000924,
+      "playing": true,
+      "raf": true,
+      "speed": 0.5,
+      "reducedMotion": false
+    },
+    "pause": {
+      "mode": "attack",
+      "clock": 0.15190000000009243,
+      "playing": false,
+      "raf": false,
+      "speed": 0.5,
+      "reducedMotion": false
+    },
+    "resume": true,
+    "visibilityPause": true,
+    "playOnce": {
+      "mode": "attack",
+      "clock": 3,
+      "playing": false,
+      "raf": false,
+      "speed": 1,
+      "reducedMotion": false
+    },
+    "reducedMotion": {
+      "initial": {
+        "mode": "ultimate",
+        "clock": 0,
+        "playing": false,
+        "raf": false,
+        "speed": 1,
+        "reducedMotion": true
+      },
+      "change": {
+        "mode": "lose",
+        "clock": 0,
+        "playing": false,
+        "raf": false,
+        "speed": 1,
+        "reducedMotion": true
+      }
+    }
+  },
+  "exports": [
+    {
+      "mode": "attack",
+      "reviewOnly": true,
+      "canvasSamples": 90,
+      "webp": {
+        "frames": 58,
+        "durationMs": 3000,
+        "bytes": 376194
+      },
+      "gif": {
+        "frames": 90,
+        "durationMs": 3000,
+        "bytes": 1256071
+      }
+    },
+    {
+      "mode": "hit",
+      "reviewOnly": true,
+      "canvasSamples": 90,
+      "webp": {
+        "frames": 49,
+        "durationMs": 3000,
+        "bytes": 264214
+      },
+      "gif": {
+        "frames": 90,
+        "durationMs": 3000,
+        "bytes": 950354
+      }
+    },
+    {
+      "mode": "lose",
+      "reviewOnly": true,
+      "canvasSamples": 90,
+      "webp": {
+        "frames": 43,
+        "durationMs": 3000,
+        "bytes": 183326
+      },
+      "gif": {
+        "frames": 90,
+        "durationMs": 3000,
+        "bytes": 953979
+      }
+    }
+  ],
+  "status": "passed"
+}
