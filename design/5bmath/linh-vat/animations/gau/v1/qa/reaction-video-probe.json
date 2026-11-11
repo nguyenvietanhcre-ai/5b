@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "mode": "attack",
+      "duration": 3,
+      "width": 1280,
+      "height": 720,
+      "readyState": 4
+    },
+    {
+      "mode": "hit",
+      "duration": 3,
+      "width": 1280,
+      "height": 720,
+      "readyState": 4
+    },
+    {
+      "mode": "defeat",
+      "duration": 3,
+      "width": 1280,
+      "height": 720,
+      "readyState": 4
+    }
+  ],
+  "errors": [],
+  "checkedAt": "2026-11-11T16:16:53.322Z"
+}

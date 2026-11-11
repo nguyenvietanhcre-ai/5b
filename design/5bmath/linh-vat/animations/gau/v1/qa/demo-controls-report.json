@@ -1,0 +1,205 @@
+{
+  "checkedAt": "2026-11-11T16:02:00.236Z",
+  "errors": [],
+  "requests": [
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/demo.html?export=1",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/config.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/poses.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/reactions.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/animation.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/assets/poses.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/assets/reactions.webp"
+  ],
+  "controls": [
+    "seek pauses and renders exact requested time",
+    "mode selector updates Vietnamese title",
+    "replay, pause, 0.5x playback",
+    "play once stops on exact final frame",
+    "reduced motion starts paused; explicit replay available"
+  ],
+  "responsive": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "ultimate",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "attack",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "hit",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "defeat",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "mode": "ultimate",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "mode": "attack",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "mode": "hit",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "mode": "defeat",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mode": "ultimate",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mode": "attack",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mode": "hit",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mode": "defeat",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mode": "ultimate",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mode": "attack",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mode": "hit",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mode": "defeat",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "ultimate",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "attack",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "hit",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "defeat",
+      "overflow": false
+    }
+  ],
+  "reactions": {
+    "attack": {
+      "gifBytes": 731629,
+      "mp4Bytes": 1519552,
+      "frames": 90,
+      "durationMs": 3000
+    },
+    "hit": {
+      "gifBytes": 847464,
+      "mp4Bytes": 1474187,
+      "frames": 90,
+      "durationMs": 3000
+    },
+    "defeat": {
+      "gifBytes": 711285,
+      "mp4Bytes": 1503583,
+      "frames": 90,
+      "durationMs": 3000
+    }
+  },
+  "status": "passed"
+}

@@ -1,0 +1,10 @@
+body.learning-mode .mascot-art.gau { background-image:url('arena-art/gau-idle.webp');background-position:center;background-size:contain;background-repeat:no-repeat; }
+body.learning-mode .battle-pet.gau > canvas[data-bear] { display:block;position:absolute;inset:0;width:100%;height:100%;visibility:hidden; }
+body.learning-mode .battle-pet.gau.bear-ready > canvas[data-bear] { visibility:visible; }
+body.learning-mode .battle-pet.gau > .motion-sprite { display:none!important; }
+body.learning-mode .battle-pet.gau:not(.bear-ready) > .mascot-art { visibility:visible; }
+body.learning-mode .battle-pet.gau.bear-ready > .mascot-art { visibility:hidden;animation:none; }
+body.learning-mode .bear-ultimate-overlay { position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none; }
+body.learning-mode .bear-ultimate .energy-beam { display:none; }
+body.learning-mode .fighter:has(.battle-pet.gau).attacking .pet-body,
+body.learning-mode .fighter:has(.battle-pet.gau).taking-hit .pet-body { animation:none; }

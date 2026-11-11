@@ -1,0 +1,295 @@
+{
+  "status": "passed",
+  "checkedAt": "2026-11-11T16:28:16.254Z",
+  "copies": [
+    {
+      "name": "garden.webp",
+      "sha256": "42ebe4c472353bf90027866978e532e1b31e42a6c77067659eef4dfba7be9d8c",
+      "sourceSha256": "42ebe4c472353bf90027866978e532e1b31e42a6c77067659eef4dfba7be9d8c"
+    },
+    {
+      "name": "opponents.webp",
+      "sha256": "461078546815405f0475600198ffeba322c28dfec2a98fd3f647659ccc64307c",
+      "sourceSha256": "461078546815405f0475600198ffeba322c28dfec2a98fd3f647659ccc64307c"
+    }
+  ],
+  "requests": [
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/demo.html?export=1",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/config.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/poses.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/reactions.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/animation.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/assets/poses.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/assets/garden.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/assets/opponents.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/gau/v1/assets/reactions.webp"
+  ],
+  "samples": [
+    {
+      "time": 0,
+      "t": 0,
+      "phase": "LẤY ĐÀ",
+      "mode": "ultimate",
+      "pose": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0.67,
+      "t": 0.67,
+      "phase": "LẤY ĐÀ",
+      "mode": "ultimate",
+      "pose": 4,
+      "nameVisible": true,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.3,
+      "t": 1.3,
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "mode": "ultimate",
+      "pose": 7,
+      "nameVisible": true,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.6,
+      "t": 1.6,
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "mode": "ultimate",
+      "pose": 9,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.77,
+      "t": 1.77,
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "mode": "ultimate",
+      "pose": 10,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false
+    },
+    {
+      "time": 2.8,
+      "t": 2.8,
+      "phase": "CHIẾN THẮNG",
+      "mode": "ultimate",
+      "pose": 15,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true
+    },
+    {
+      "time": 0,
+      "t": 0,
+      "phase": "TẤN CÔNG",
+      "mode": "attack",
+      "pose": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0.67,
+      "t": 0.67,
+      "phase": "TẤN CÔNG",
+      "mode": "attack",
+      "pose": 2,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.3,
+      "t": 1.3,
+      "phase": "TẤN CÔNG",
+      "mode": "attack",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.6,
+      "t": 1.6,
+      "phase": "TẤN CÔNG",
+      "mode": "attack",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.77,
+      "t": 1.77,
+      "phase": "TẤN CÔNG",
+      "mode": "attack",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 2.8,
+      "t": 2.8,
+      "phase": "TẤN CÔNG",
+      "mode": "attack",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0,
+      "t": 0,
+      "phase": "CHỊU ĐÒN",
+      "mode": "hit",
+      "pose": 4,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0.67,
+      "t": 0.67,
+      "phase": "CHỊU ĐÒN",
+      "mode": "hit",
+      "pose": 7,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.3,
+      "t": 1.3,
+      "phase": "CHỊU ĐÒN",
+      "mode": "hit",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.6,
+      "t": 1.6,
+      "phase": "CHỊU ĐÒN",
+      "mode": "hit",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.77,
+      "t": 1.77,
+      "phase": "CHỊU ĐÒN",
+      "mode": "hit",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 2.8,
+      "t": 2.8,
+      "phase": "CHỊU ĐÒN",
+      "mode": "hit",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0,
+      "t": 0,
+      "phase": "BUỒN BÃ KHI THUA CUỘC",
+      "mode": "defeat",
+      "pose": 8,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0.67,
+      "t": 0.67,
+      "phase": "BUỒN BÃ KHI THUA CUỘC",
+      "mode": "defeat",
+      "pose": 10,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.3,
+      "t": 1.3,
+      "phase": "BUỒN BÃ KHI THUA CUỘC",
+      "mode": "defeat",
+      "pose": 11,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.6,
+      "t": 1.6,
+      "phase": "BUỒN BÃ KHI THUA CUỘC",
+      "mode": "defeat",
+      "pose": 11,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.77,
+      "t": 1.77,
+      "phase": "BUỒN BÃ KHI THUA CUỘC",
+      "mode": "defeat",
+      "pose": 11,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 2.8,
+      "t": 2.8,
+      "phase": "BUỒN BÃ KHI THUA CUỘC",
+      "mode": "defeat",
+      "pose": 11,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    }
+  ],
+  "errors": [],
+  "note": "After review exports, config now points to byte-identical local copies of garden/opponents; render images unchanged, standalone folder no longer depends on shared."
+}

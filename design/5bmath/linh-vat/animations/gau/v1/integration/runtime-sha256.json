@@ -1,0 +1,8 @@
+{
+  "frontend/bear-animation.js": "0050f28c4876b3a104a4906488fc6994520f47cc6af591548e08d840d9cc1826",
+  "frontend/bear-animation.css": "0b97131a7b9195e1254372f76dfcf55ec823404057caa04c595e3b6307a8fe75",
+  "frontend/bear-frames.js": "b6a67dc8595ec91a3964fd7b2f772afa5efa92e6bb9e66c5b9480ca102bed19f",
+  "frontend/arena-art/gau-idle.webp": "fdc02f4f3a4fd1cbe367ed81166228a8d1b60c3780362dfd2265f1ed0f6d38c1",
+  "frontend/arena-art/gau-reactions.webp": "85741afa2d15a10debe2183245365b0dfedda3c12dcd7b846ac4820ba0160777",
+  "frontend/arena-art/gau-ultimate.webp": "c48406e2bc46fa1fec75f0635b667a820e9197b81e3895139007b437f457fca2"
+}

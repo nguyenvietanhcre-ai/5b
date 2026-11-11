@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "gau",
+  "variant": "v1",
+  "owner": "gau-01a1cb4b",
+  "createdAt": "2026-11-11T15:48:43.156Z",
+  "updatedAt": "2026-11-11T16:32:39.715Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "gau",
+    "name": "Gấu",
+    "ultimateName": "Chưởng Gấu Đại Lực",
+    "description": "Đứng bằng hai chân sau, giơ cao đôi bàn chân trước rồi đập xuống đất. Mặt sân nảy lên thành một dải sóng đá, hất đối thủ vào đám bụi hình bàn chân gấu.",
+    "speciesType": "mammal",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 1,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Gấu con nâu ấm, tai tròn, mõm và bụng kem.",
+      "Thân chắc tròn, bốn chi ngắn, đuôi nhỏ.",
+      "Không thêm bờm/vằn hoặc tay chân người; bàn chân trước cần nối đúng với thân."
+    ],
+    "beats": {
+      "windup": "Đứng vững hai chân sau, nâng hai chân trước để lấy lực.",
+      "decisive": "Giáng chưởng xuống sân; dải sóng đá bo tròn lan tới mục tiêu.",
+      "victory": "Bụi hình chân gấu bung sao; gấu giơ một chân trước ăn mừng."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/gau.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1896101,
+      "webpBytes": 357232,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "7f1962321c22472459296cc2ae181eaaf896ade1e09ec8b0eee2ddc83b4642fc",
+      "bytes": 1414250
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "7174042a170accde4a08b55c8c3381eca5d9a6b3b676abeb6ff7d84822bebbe7",
+      "bytes": 1910214
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "5c1c5a6f4ed10584fa7bfd164a94dad67dd33aef26d77d72e9d7d97acc25ed00",
+      "bytes": 1846520
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:24:47.444Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "gau-01a1cb4b",
+  "lastReleasedAt": "2026-11-11T16:32:39.715Z"
+}

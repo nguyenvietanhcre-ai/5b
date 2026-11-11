@@ -1,0 +1,146 @@
+{
+  "checks": [
+    "No motion atlas loads before mount",
+    "Two bears share two lazily loaded WebP motion atlases",
+    "Ultimate plays once on either side; layer and RAF cleaned at end",
+    "data-mood observer handles other character hit/lose dispatch",
+    "Reduced motion shows terminal pose with no RAF or overlay",
+    "Hidden-tab event cancels RAF and removes stage overlay",
+    "Unmount empties record map",
+    "Failed WebP loads keep CSS static-poster fallback visible"
+  ],
+  "states": [
+    {
+      "mode": "idle",
+      "time": 0,
+      "sheet": "reactions",
+      "index": 12,
+      "dx": 0,
+      "dy": 0,
+      "angle": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "mode": "attack",
+      "time": 0.5,
+      "sheet": "reactions",
+      "index": 2,
+      "dx": 33.48346360241507,
+      "dy": 0,
+      "angle": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "mode": "hit",
+      "time": 0.55,
+      "sheet": "reactions",
+      "index": 6,
+      "dx": -19.753766811902754,
+      "dy": 0,
+      "angle": -0.06913818384165964,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "mode": "defeat",
+      "time": 2.2,
+      "sheet": "reactions",
+      "index": 11,
+      "dx": 0,
+      "dy": 0,
+      "angle": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "mode": "win",
+      "time": 1.8,
+      "sheet": "reactions",
+      "index": 15,
+      "dx": 0,
+      "dy": 0,
+      "angle": 0,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "mode": "ultimate",
+      "time": 1.2,
+      "sheet": "ultimate",
+      "index": 7,
+      "dx": 0,
+      "dy": 0,
+      "angle": 0,
+      "nameVisible": true,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "mode": "ultimate",
+      "time": 1.75,
+      "sheet": "ultimate",
+      "index": 10,
+      "dx": 0,
+      "dy": 0,
+      "angle": 0,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false
+    }
+  ],
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "requests": [
+    "file:///F:/ChatGPT%20Math%20Project/work/mascot-animation/gau/v1/qa-runtime/fixture.html",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/styles.css",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/learning.css",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/bear-animation.css",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/bear-frames.js",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/bear-animation.js",
+    "https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/arena-art/gau-idle.webp",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/arena-art/gau-ultimate.webp",
+    "file:///F:/ChatGPT%20Math%20Project/frontend/arena-art/gau-reactions.webp"
+  ],
+  "status": "passed"
+}

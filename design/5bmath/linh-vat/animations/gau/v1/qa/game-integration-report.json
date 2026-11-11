@@ -1,0 +1,67 @@
+{
+  "startedAt": "2026-11-11T16:27:28.079Z",
+  "base": "http://127.0.0.1:8796",
+  "isolatedDatabase": "work/mascot-animation/gau/v1/qa-runtime/game.sqlite3",
+  "hashesBefore": {
+    "frontend/learning.js": "a2c430225583f77d22d9501e21c67bcb17c506a2c3da536329e7622754eef4d4",
+    "frontend/bear-animation.js": "0050f28c4876b3a104a4906488fc6994520f47cc6af591548e08d840d9cc1826",
+    "frontend/bear-animation.css": "0b97131a7b9195e1254372f76dfcf55ec823404057caa04c595e3b6307a8fe75",
+    "backend/platform_api.py": "8ba46bf97b22a9238b4fd79fa9e3c89ac1843cbfdc6c4e8bbe6ed5d1bee8d878"
+  },
+  "checks": [
+    "Real UI selects Gấu; API snapshot and reload preserve Gấu",
+    "Navigation away leaves no Bear animation records"
+  ],
+  "screenshots": [
+    "real-mascot-desktop.png",
+    "real-attack-desktop.png",
+    "real-hit-desktop.png",
+    "real-ultimate-me-title.png",
+    "real-ultimate-me-impact.png",
+    "real-victory.png",
+    "real-ultimate-opponent-title.png",
+    "real-ultimate-opponent-impact.png",
+    "real-defeat-desktop.png",
+    "real-defeat-390x844.png",
+    "real-battle-390x844.png",
+    "real-defeat-844x390.png",
+    "real-battle-844x390.png",
+    "real-defeat-768x1024.png",
+    "real-battle-768x1024.png",
+    "real-defeat-1024x768.png",
+    "real-battle-1024x768.png"
+  ],
+  "scenarios": [
+    {
+      "scenario": "attack",
+      "hp": 100,
+      "opponentHp": 80
+    },
+    {
+      "scenario": "hit",
+      "hp": 80,
+      "opponentHp": 100
+    },
+    {
+      "scenario": "ultimate-me",
+      "outcome": "win",
+      "resultReached": true
+    },
+    {
+      "scenario": "ultimate-opponent",
+      "outcome": "lose",
+      "resultReached": true
+    }
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "hashesAfter": {
+    "frontend/learning.js": "a2c430225583f77d22d9501e21c67bcb17c506a2c3da536329e7622754eef4d4",
+    "frontend/bear-animation.js": "0050f28c4876b3a104a4906488fc6994520f47cc6af591548e08d840d9cc1826",
+    "frontend/bear-animation.css": "0b97131a7b9195e1254372f76dfcf55ec823404057caa04c595e3b6307a8fe75",
+    "backend/platform_api.py": "8ba46bf97b22a9238b4fd79fa9e3c89ac1843cbfdc6c4e8bbe6ed5d1bee8d878"
+  },
+  "sourceChangedDuringQA": false,
+  "status": "passed",
+  "finishedAt": "2026-11-11T16:28:58.183Z"
+}
