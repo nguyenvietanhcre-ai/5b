@@ -1,0 +1,47 @@
+{
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "requests": [
+    "http://eagle.test/",
+    "http://eagle.test/eagle-animation.css",
+    "http://eagle.test/eagle-animation.js",
+    "http://eagle.test/arena-art/eagle/poses.webp",
+    "http://eagle.test/arena-art/eagle/states.webp"
+  ],
+  "checks": [
+    "attack→idle",
+    "hit row",
+    "defeat final row",
+    "ultimate finite 3s",
+    "five viewports",
+    "reduced motion",
+    "destroy",
+    "no video/GIF loads"
+  ]
+}

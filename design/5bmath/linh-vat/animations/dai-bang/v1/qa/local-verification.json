@@ -1,0 +1,36 @@
+{
+  "base": "http://127.0.0.1:8765",
+  "assets": [
+    {
+      "path": "eagle-animation.js",
+      "bytes": 11954,
+      "sha256": "e8f2cfa8f70f4323af84256f7fe5ba6054f0b1de92a8cf2a9e15e4649c7e6995",
+      "match": true
+    },
+    {
+      "path": "eagle-animation.css",
+      "bytes": 1369,
+      "sha256": "79096db256ea6015d1d5777f38af4d2263524da1f53cbb83e9de418f51c0aa94",
+      "match": true
+    },
+    {
+      "path": "arena-art/eagle/poses.webp",
+      "bytes": 424824,
+      "sha256": "ba5fa524f0b5c2263e7710e9a73e70057bd928dd6416d6bfcfc44aa0ab3f4b68",
+      "match": true
+    },
+    {
+      "path": "arena-art/eagle/states.webp",
+      "bytes": 493666,
+      "sha256": "76cd701cbf05a17f025c149688df3c3d4d2a25113fa767c0c7b937fa1e6e2fd9",
+      "match": true
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "backend": "python",
+    "mode": "demo"
+  },
+  "sampleScore": 10.0,
+  "scope": "Health/assets plus stateless sample grade. No private database or session data collected."
+}

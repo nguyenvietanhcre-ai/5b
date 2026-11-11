@@ -1,0 +1,321 @@
+{
+  "passed": true,
+  "errors": [],
+  "requests": [
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/demo.html?export",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/config.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/poses.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/states.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/eagle-demo.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/assets/poses.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/assets/states.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/demo.html?export",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/config.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/poses.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/states.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/eagle-demo.js",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/assets/poses.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/dai-bang/v1/assets/states.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/garden.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/shared/opponents.webp"
+  ],
+  "viewport": [
+    {
+      "width": 390,
+      "height": 844,
+      "scroll": 390,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "width": 103.359375,
+          "height": 46
+        },
+        {
+          "tag": "BUTTON",
+          "width": 89.046875,
+          "height": 46
+        },
+        {
+          "tag": "SELECT",
+          "width": 129,
+          "height": 46
+        },
+        {
+          "tag": "INPUT",
+          "width": 274,
+          "height": 44
+        },
+        {
+          "tag": "SELECT",
+          "width": 155,
+          "height": 46
+        }
+      ]
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scroll": 844,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "width": 113.359375,
+          "height": 46
+        },
+        {
+          "tag": "BUTTON",
+          "width": 99.046875,
+          "height": 46
+        },
+        {
+          "tag": "SELECT",
+          "width": 139,
+          "height": 46
+        },
+        {
+          "tag": "INPUT",
+          "width": 318.59375,
+          "height": 44
+        },
+        {
+          "tag": "SELECT",
+          "width": 165,
+          "height": 46
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "scroll": 768,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "width": 113.359375,
+          "height": 46
+        },
+        {
+          "tag": "BUTTON",
+          "width": 99.046875,
+          "height": 46
+        },
+        {
+          "tag": "SELECT",
+          "width": 139,
+          "height": 46
+        },
+        {
+          "tag": "INPUT",
+          "width": 242.59375,
+          "height": 44
+        },
+        {
+          "tag": "SELECT",
+          "width": 165,
+          "height": 46
+        }
+      ]
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "scroll": 1024,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "width": 113.359375,
+          "height": 46
+        },
+        {
+          "tag": "BUTTON",
+          "width": 99.046875,
+          "height": 46
+        },
+        {
+          "tag": "SELECT",
+          "width": 139,
+          "height": 46
+        },
+        {
+          "tag": "INPUT",
+          "width": 498.59375,
+          "height": 44
+        },
+        {
+          "tag": "SELECT",
+          "width": 165,
+          "height": 46
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "width": 113.359375,
+          "height": 46
+        },
+        {
+          "tag": "BUTTON",
+          "width": 99.046875,
+          "height": 46
+        },
+        {
+          "tag": "SELECT",
+          "width": 139,
+          "height": 46
+        },
+        {
+          "tag": "INPUT",
+          "width": 794.59375,
+          "height": 44
+        },
+        {
+          "tag": "SELECT",
+          "width": 165,
+          "height": 46
+        }
+      ]
+    }
+  ],
+  "controls": {
+    "seek": true,
+    "slow": true,
+    "pause": true,
+    "playOnce": true,
+    "simulatedVisibilityPause": true,
+    "reducedMotion": true
+  },
+  "states": [
+    "attack",
+    "hit",
+    "defeat"
+  ],
+  "timeline": [
+    {
+      "time": 0.64,
+      "t": 0.64,
+      "mode": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 3,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0.67,
+      "t": 0.67,
+      "mode": "ultimate",
+      "phase": "LẤY ĐÀ",
+      "pose": 4,
+      "nameVisible": true,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0.96,
+      "t": 0.96,
+      "mode": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 4,
+      "nameVisible": true,
+      "attackStarted": true,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 1.76,
+      "t": 1.76,
+      "mode": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 10,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false
+    },
+    {
+      "time": 1.92,
+      "t": 1.92,
+      "mode": "ultimate",
+      "phase": "CHIẾN THẮNG",
+      "pose": 12,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true
+    },
+    {
+      "time": 2.97,
+      "t": 2.97,
+      "mode": "ultimate",
+      "phase": "CHIẾN THẮNG",
+      "pose": 15,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": true
+    }
+  ],
+  "bannerRecheck": {
+    "checkedAt": "2026-11-11T16:29:14.793Z",
+    "frames": [
+      {
+        "time": 0.93,
+        "state": {
+          "time": 0.93,
+          "t": 0.93,
+          "mode": "ultimate",
+          "phase": "LẤY ĐÀ",
+          "pose": 7,
+          "nameVisible": true,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        "screenshot": "eagle-banner-0.93.png"
+      },
+      {
+        "time": 1.3,
+        "state": {
+          "time": 1.3,
+          "t": 1.3,
+          "mode": "ultimate",
+          "phase": "ĐÒN QUYẾT ĐỊNH",
+          "pose": 6,
+          "nameVisible": true,
+          "attackStarted": true,
+          "impact": false,
+          "victory": false
+        },
+        "screenshot": "eagle-banner-1.3.png"
+      },
+      {
+        "time": 1.4,
+        "state": {
+          "time": 1.4,
+          "t": 1.4,
+          "mode": "ultimate",
+          "phase": "ĐÒN QUYẾT ĐỊNH",
+          "pose": 8,
+          "nameVisible": true,
+          "attackStarted": true,
+          "impact": false,
+          "victory": false
+        },
+        "screenshot": "eagle-banner-recheck.png"
+      }
+    ],
+    "errors": [],
+    "screenshot": "eagle-banner-recheck.png",
+    "placement": "bottom of arena y630, separate from phase footer",
+    "manualReview": "passed: inspected screenshots at t=0.93, 1.30 and 1.40 with banner below the action at y630; whole Eagle and face visible, title legible"
+  }
+}

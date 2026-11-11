@@ -1,0 +1,124 @@
+diff --git a/frontend/index.html b/frontend/index.html
+index 5fe1e9a..2215e4f 100644
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -18,6 +18,7 @@
+     <link rel="stylesheet" href="butterfly-animation.css">
+     <link rel="stylesheet" href="horse-animation.css">
+     <link rel="stylesheet" href="arena-voi.css">
++    <link rel="stylesheet" href="eagle-animation.css">
+     <link rel="stylesheet" href="arena-lion.css">
+     <link rel="stylesheet" href="arena-cat-animation.css">
+     <link rel="stylesheet" href="arena-crab-animation.css">
+@@ -37,6 +38,7 @@
+     <script src="arena-voi-renderer.js" defer></script>
+     <script src="arena-voi-poses.js" defer></script>
+     <script src="arena-voi.js" defer></script>
++    <script src="eagle-animation.js" defer></script>
+     <script src="arena-lion.js" defer></script>
+     <script src="rabbit-animation.js" defer></script>
+     <script src="owl-animation.js" defer></script>
+diff --git a/frontend/learning.js b/frontend/learning.js
+index 4282de6..d7353bc 100644
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -126,7 +126,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+     const selectedLesson = () => lessonList().find(lesson => lesson.id === query('id')) || lessonList()[0];
+     const submittedExams = () => Object.values(state.exams).filter(exam => exam.submittedAt);
+     const level = () => Math.floor((state.points - 1000) / 20) + 1;
+-    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
++    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
+
+     function load() {
+         if(live)return;
+@@ -137,7 +137,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+         for (const property of ['completed','exams','battles','activity']) {
+             if (!state[property] || typeof state[property] !== 'object' || Array.isArray(state[property])) state[property] = {};
+         }
+-        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
++        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
+         state.points = Math.max(1000, Number(state.points) || 1000);
+         if (!Number.isInteger(state.birthYear)) state.birthYear = null;
+     }
+@@ -331,7 +331,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+             return `${intro('Linh vật của em','Chọn bạn đồng hành và xem kinh nghiệm sau mỗi trận.')}
+             <section class="card feature-row sage mascot-feature"><div>${badge('Đang đồng hành · Cấp ' + level(),'white')}<h2>${escape(petName())}</h2><p>${content.format(state.points)} / ${content.format(1000 + level() * 20)} điểm kinh nghiệm để lên cấp ${level() + 1}</p>${meter((state.points - 1000) % 20 * 5,'Tiến độ lên cấp tiếp theo')}<small>Còn ${20 - (state.points - 1000) % 20} điểm để lên cấp tiếp theo.</small></div>${art(state.mascot,petName())}</section>
+             <div class="grid3 stats">${stat('cup',history.filter(item => item.outcome === 'win').length + ' trận','Thắng · +2 điểm','sand')}${stat('flag',history.filter(item => item.outcome === 'lose').length + ' trận','Thua · −1 điểm','peach')}${stat('users',history.filter(item => item.outcome === 'draw').length + ' trận','Hòa · 0 điểm')}</div>
+-            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
++            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+         },
+
+         rank() { return liveRank(); },
+@@ -900,6 +900,17 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+             });
+             return;
+         }
++        if(sourcePet?.classList.contains('eagle')&&window.EagleAnimation){
++            if(final)catFinaleUntil=Date.now()+3100;
++            if(victim)victim.dataset.spell='eagle';
++            const impact=()=>{if(!victim?.isConnected)return;victimPet.dataset.mood=final?'lose':'hit';victim.classList.add('taking-hit');};
++            if(final)setTimeout(impact,1750);else impact();
++            source.classList.add('attacking');window.EagleAnimation.hit({source,victim,final});
++            const label=document.querySelector('#spell-announcement');if(label)label.textContent='';
++            ArenaAudio.effect(final?'beam':'rock');
++            setTimeout(()=>{victim?.classList.remove('taking-hit');source?.classList.remove('attacking');if(sourcePet.isConnected)window.EagleAnimation.play(sourcePet,final?'win':'idle');},final?3000:1100);
++            return;
++        }
+         if(sourcePet?.classList.contains('octopus')&&typeof OctopusAnimation!=='undefined'){
+             if(final)octopusFinaleUntil=Math.max(octopusFinaleUntil,Date.now()+3100);
+             sourcePet.dataset.mood=final?'ultimate':'attack';source?.classList.add('attacking');
+@@ -1091,6 +1102,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+         'choose-starfish':async () => { if(live)await mutate('mascot',{mascot:'starfish'});else {state.mascot = 'starfish';save();}refresh(); },
+         'choose-fox':async () => { if(live)await mutate('mascot',{mascot:'fox'});else {state.mascot = 'fox';save();}refresh(); },
+         'choose-tiger':async () => { if(live)await mutate('mascot',{mascot:'tiger'});else {state.mascot = 'tiger';save();}refresh(); },
++        'choose-eagle':async () => { if(live)await mutate('mascot',{mascot:'eagle'});else {state.mascot = 'eagle';save();}refresh(); },
+         'choose-ca-map':async () => { if(live)await mutate('mascot',{mascot:'ca-map'});else {state.mascot = 'ca-map';save();}refresh(); },
+         'choose-bee':async () => { if(live)await mutate('mascot',{mascot:'bee'});else {state.mascot = 'bee';save();}refresh(); },
+         'choose-octopus':async () => { if(live)await mutate('mascot',{mascot:'octopus'});else {state.mascot = 'octopus';save();}refresh(); },
+diff --git a/backend/server.py b/backend/server.py
+index e1f9521..b21415e 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -34,7 +34,7 @@ ASSETS.update({"/arena-art/ca-heo-v1/" + file: "arena-art/ca-heo-v1/" + file
+ ASSETS.update({"/" + file: file for file in ("bear-animation.js", "bear-animation.css", "bear-frames.js")})
+ ASSETS.update({"/" + file: file for file in
+                ("learning.css", "learning.js", "learning-content.js", "platform-api.js", "arena-audio.js", "arena-voi.css", "arena-voi.js", "arena-voi-renderer.js", "arena-voi-poses.js", "rabbit-animation.js", "mascots.webp",
+-                "staff.js", "staff.css", "admissions.js", "admissions.css", "arena-cat-animation.js", "arena-cat-animation.css")})
++                "staff.js", "staff.css", "admissions.js", "admissions.css", "arena-cat-animation.js", "arena-cat-animation.css", "eagle-animation.js", "eagle-animation.css")})
+ ASSETS.update({"/" + file: file for file in
+                ("butterfly-renderer.js", "butterfly-animation.js", "butterfly-animation.css")})
+ # Only packaged game artwork, never arbitrary paths or private design originals.
+@@ -62,6 +62,8 @@ ASSETS.update({"/" + file: file for file in
+                ("arena-sparrow-animation.js", "arena-sparrow-animation.css",
+                 "arena-art/chim-se/poses.webp", "arena-art/chim-se/idle.webp",
+                 "arena-art/chim-se/poses.json")})
++for file in ("poses.webp", "states.webp"):
++    ASSETS["/arena-art/eagle/" + file] = "arena-art/eagle/" + file
+ ASSETS["/shark-animation.js"] = "shark-animation.js"
+ for file in ("poses.webp", "actions.webp", "idle.webp", "manifest.json"):
+     ASSETS["/arena-art/shark/" + file] = "arena-art/shark/" + file
+diff --git a/backend/platform_api.py b/backend/platform_api.py
+index 1050666..750dabc 100644
+--- a/backend/platform_api.py
++++ b/backend/platform_api.py
+@@ -23,6 +23,7 @@ COOKIE = '5bmath_session'
+ ITERATIONS = 600_000
+ MASCOT_NAMES = {'voi': 'Voi', 'sprout': 'Mầm Sách', 'fox': 'Cáo Nâu', 'cat': 'Mèo', 'rabbit': 'Thỏ', 'gau': 'Gấu'}
+ MASCOT_NAMES['sparrow'] = 'Chim sẻ'
++MASCOT_NAMES['eagle'] = 'Đại bàng'
+ MASCOT_NAMES['tiger'] = 'Hổ'
+ MASCOT_NAMES['lion'] = 'Sư tử'
+ MASCOT_NAMES['cu-meo'] = 'Cú mèo'
+diff --git a/scripts/build-pages.cjs b/scripts/build-pages.cjs
+index aa2eef7..09a6c54 100644
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -50,7 +50,7 @@ for (const asset of ['mam-sach-animation.js', 'mam-sach-animation.css']) {
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
+ for (const asset of ['app.js', 'styles.css', '5bmath-logo.svg', '5bmath-icon.svg', 'demo-rectangle.svg',
+-    'learning.css', 'learning.js', 'learning-content.js', 'platform-api.js', 'arena-audio.js', 'arena-voi.css', 'arena-voi.js', 'arena-voi-renderer.js', 'arena-voi-poses.js', 'rabbit-animation.js', 'shark-animation.js', 'arena-cat-animation.js', 'arena-cat-animation.css', 'mascots.webp', 'staff.js', 'staff.css', 'admissions.js', 'admissions.css']) {
++    'learning.css', 'learning.js', 'learning-content.js', 'platform-api.js', 'arena-audio.js', 'arena-voi.css', 'arena-voi.js', 'arena-voi-renderer.js', 'arena-voi-poses.js', 'eagle-animation.js', 'eagle-animation.css', 'rabbit-animation.js', 'shark-animation.js', 'arena-cat-animation.js', 'arena-cat-animation.css', 'mascots.webp', 'staff.js', 'staff.css', 'admissions.js', 'admissions.css']) {
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
+ for (const asset of ['arena-lion.js', 'arena-lion.css', 'arena-crab-animation.js', 'arena-crab-animation.css']) {

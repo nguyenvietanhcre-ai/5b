@@ -1,0 +1,7 @@
+{
+  "tool": "built-in image_gen",
+  "reason": "Rejected v1 states had wingtip overlap at frame6→7. Regenerated with transparent margins.",
+  "preservedRejectedSource": "states-v1-spacing-rejected.png",
+  "finalSource": "states.png",
+  "prompt": "Edit target image 1: preserve this exact Eagle 4x4 state spritesheet and poses, fix only sprite spacing. Reference image 2 Eagle identity bottom-left only. Exactly 16 separate full body same Eagle poses on truly transparent square alpha, no background or text.\nMake EVERY eagle 22% smaller inside its existing equal 4x4 cell, centered in its own cell, leaving at least 30 pixels of fully transparent margin from all four cell edges, especially the attack wings in row2 col3. NO sprite part may cross a cell boundary or touch the next sprite. Keep equal cell grid 4 columns x4 rows. Keep anatomy and colors, material, right-facing view. Row1 idle four subtle poses, row2 normal wing gust attack four poses, row3 startled/recoil/recover four poses, row4 sad defeat four poses ending seated head bowed eyes closed. All exactly two wings, two feet, one tail, cream head brown body yellow beak/feet apricot cheeks. Keep each face expression and motion group. Return transparent corrected sheet, do not draw grid lines/checkerboard/shadows."
+}

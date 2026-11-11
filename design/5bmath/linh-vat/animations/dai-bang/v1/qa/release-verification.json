@@ -1,0 +1,11 @@
+{
+  "dateAsiaSaigon": "2026-11-11",
+  "windowsUnittest": {"passed": true, "count": 72, "seconds": 678.015, "scope": "Current suite snapshot during Eagle integration; concurrent chats subsequently added other tests."},
+  "javascriptSyntax": {"passed": true, "files": ["frontend/app.js", "frontend/learning.js", "frontend/eagle-animation.js", "design/5bmath/linh-vat/animations/dai-bang/v1/eagle-demo.js"]},
+  "cloudflareStaticBuild": {"passed": true, "folder": "work/eagle-pages-20261111", "seoCheckPassed": true, "publicPages": 8},
+  "dockerLocal": {"buildPassed": true, "healthy": true, "compose": "compose.yaml", "verifiedBinding": "127.0.0.1:8765", "volumePreserved": true, "fullDockerTestSuiteRunByThisChat": false},
+  "httpLocal": {"passed": true, "health": "ok", "sampleGrade": 10, "asset200AndHashMatches": 4, "report": "local-verification.json"},
+  "artifactIntegrity": {"passed": true, "mainFrames": 90, "mainFps": 30, "mainDurationSeconds": 3, "stateGifFrames": [30,33,90], "runtimeWebpBytes": 918490, "checks": "GIF/MP4/poster SHA256 match export reports; demo/game WebP byte-identical."},
+  "scope": {"commit": "Only Eagle package/runtime/assets, reused standalone-demo background dependencies and Eagle-only shared integration patch; shared application source remains outside this commit.", "push": false, "publicDeployment": false, "ciRun": false, "artApproval": "pending_review", "physicalPhonePerformanceMeasured": false},
+  "limitations": ["HTTP QA server on port8794 timed out in this environment; actual game source is additionally tested through browser mock-route without private database writes.", "Automatic review rejected preserving LAN192.168.1.2; used default localhost-only Compose instead."]
+}

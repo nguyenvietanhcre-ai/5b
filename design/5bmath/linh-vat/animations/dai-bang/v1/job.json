@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "dai-bang",
+  "variant": "v1",
+  "owner": "dai-bang-01a1cb4c",
+  "createdAt": "2026-11-11T15:49:43.111Z",
+  "updatedAt": "2026-11-11T16:46:00.119Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "dai-bang",
+    "name": "Đại bàng",
+    "ultimateName": "Sải Cánh Bão Táp",
+    "description": "Vút lên cao, dang rộng cánh rồi bổ nhào với vệt sáng hình chữ V. Ngay trước đối thủ, đại bàng tung cánh hãm lại, tạo hai luồng gió khổng lồ hợp thành một cơn bão lông vũ.",
+    "speciesType": "bird",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png",
+    "referenceCell": {
+      "row": 1,
+      "col": 0,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Đại bàng đầu kem, thân và cánh nâu, mỏ vàng cong.",
+      "Hai cánh lớn, hai chân vàng với móng bo mềm và một đuôi.",
+      "Không mọc tay riêng, không đổi mỏ thành mõm thú hoặc thêm cánh thứ ba."
+    ],
+    "beats": {
+      "windup": "Hạ thân rồi dang hai cánh, lấy đà vút lên.",
+      "decisive": "Bổ nhào theo vệt chữ V, tung cánh hãm; hai luồng gió hợp bão tại mục tiêu.",
+      "victory": "Bão tan thành lông vũ sáng; đại bàng đáp vững với đôi cánh tự hào."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/dai-bang.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1788308,
+      "webpBytes": 424824,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "5d0b03375f5503c7bc1c180b55ac4d30e637d92fa03d2d49e4a82444ef045558",
+      "bytes": 1526528
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "b2b09e508b75eae6be8995cc2e2e94ae99cb8edd4c00c8dab027963edb823653",
+      "bytes": 1816433
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "bbee05db751f3df801af0a17887fed0f2913f287f5673235b8e856e813c35ad2",
+      "bytes": 1841191
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:31:34.691Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "dai-bang-01a1cb4c",
+  "lastReleasedAt": "2026-11-11T16:46:00.119Z"
+}

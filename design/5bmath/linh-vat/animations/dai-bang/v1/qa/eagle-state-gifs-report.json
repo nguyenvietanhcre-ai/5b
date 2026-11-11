@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-11-11T16:26:45.097Z",
+  "passed": true,
+  "errors": [],
+  "outputs": [
+    {
+      "mode": "attack",
+      "path": "exports/attack.gif",
+      "count": 30,
+      "durationMs": 1000,
+      "width": 768,
+      "height": 432,
+      "bytes": 591424,
+      "sha256": "10a30d81f8dea4f5cca0b8723394ab43026ea616c6e71dd79d6a3d8bc003ad12"
+    },
+    {
+      "mode": "hit",
+      "path": "exports/hit.gif",
+      "count": 33,
+      "durationMs": 1100,
+      "width": 768,
+      "height": 432,
+      "bytes": 608833,
+      "sha256": "cb93f6eb9dadb255f1ed66a7849f7140b51719cd471c5bcb33d7c826082071db"
+    },
+    {
+      "mode": "defeat",
+      "path": "exports/defeat.gif",
+      "count": 90,
+      "durationMs": 3000,
+      "width": 768,
+      "height": 432,
+      "bytes": 897619,
+      "sha256": "7fb56e0be24e9ec3660bb46a9e6b36922154d0fdfa3a690b6f5193e58197bc03"
+    }
+  ],
+  "contactSheet": "qa/eagle-state-gifs-contact-sheet.png",
+  "manualReview": "passed: inspected first/middle/final decoded GIF frames for attack, hit and defeat; correct pose groups, expressions, full bodies and Vietnamese labels"
+}
