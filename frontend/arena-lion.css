@@ -1,0 +1,14 @@
+/* Shared Vườn Toán colours come from styles.css. Lion assets are loaded only
+   where the lion is displayed; combat sheets are requested by the Canvas module. */
+body.learning-mode .mascot-art.lion {
+  background-image:url(arena-art/lion-idle.webp); background-size:contain;
+  background-position:center; background-repeat:no-repeat;
+}
+body.learning-mode .battle-pet.lion .motion-sprite { display:none !important; }
+body.learning-mode .battle-pet.lion > .mascot-art { visibility:visible; animation:none; }
+body.learning-mode .battle-pet.lion.lion-ready > .mascot-art { visibility:hidden; }
+body.learning-mode .lion-pose-canvas { position:absolute; inset:0; display:block; width:100%; height:100%; }
+body.learning-mode .lion-ultimate-canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4; }
+body.learning-mode .fighter[data-spell="lion"] .spell-effect { display:none; }
+body.learning-mode .mascot-preview { margin-top:14px; }
+body.learning-mode .mascot-preview summary { color:var(--green); cursor:pointer; font-weight:700; }

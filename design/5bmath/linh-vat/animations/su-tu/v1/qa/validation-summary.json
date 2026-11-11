@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-11",
+  "timezone": "Asia/Saigon",
+  "windows": {"tests":77,"passed":true,"seconds":343.077,"log":"work/lion-animation/unittest-windows-verified.log"},
+  "docker": {"tests":77,"passed":true,"seconds":75.278,"image":"mam-toan:lion-local-01a1cb4a","log":"work/lion-animation/unittest-docker-final.log"},
+  "javascriptSyntax": ["frontend/app.js","frontend/learning.js","frontend/learning-content.js","frontend/arena-lion.js"],
+  "staticBuilds": {"github":"work/lion-animation/pages-verified","cloudflare":"work/lion-animation/cloudflare-verified","publicPages":8,"seoChecksPassed":true},
+  "demoActions":"qa/demo-actions-qa.json",
+  "gameOffline":"qa/game-offline-report.json",
+  "gameLive":"qa/game-live-report.json",
+  "selfContainedDemo":"qa/self-contained-report.json",
+  "localHTTP":"qa/local-verification.json",
+  "deployment": {"origin":"http://localhost:8768/","container":"mam-toan-lion-web-1","status":"healthy","databaseVolume":"mam-toan_demo-db"},
+  "commitScope":"Only isolated lion files and integration.patch; shared application files stay in working tree as explicitly selected by user.",
+  "notMeasured":["physical phone FPS/CPU","slow network","Core Web Vitals"],
+  "artApproval":"pending_review"
+}

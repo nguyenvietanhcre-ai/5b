@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "mode": "file offline actual game",
+  "layouts": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    }
+  ],
+  "finalTransitionMs": 3229,
+  "checks": [
+    "mascot select reload",
+    "attack reduces20HP",
+    "idle rAF stops",
+    "ultimate name before impact",
+    "result waits complete ultimate",
+    "win result",
+    "bot hit",
+    "lose result",
+    "reduced motion"
+  ],
+  "errors": []
+}

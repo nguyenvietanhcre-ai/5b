@@ -1,0 +1,25 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "createdDate": "2026-11-11",
+  "transparent_background": true,
+  "references": [
+    "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png — top-left lion, row 0 column 0",
+    "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png — material/style reference only"
+  ],
+  "generations": [
+    {
+      "file": "poses.png",
+      "generatedOriginal": "exec-01f01571-2895-4798-935e-751d14edeb54.png",
+      "prompt": "Create a production sprite sheet PNG with TRUE TRANSPARENT alpha background. Exactly 4 columns x 4 rows, 16 evenly spaced square cells, equal cell sizes, canvas preferably 1536x1536. Only the LION from FIRST reference TOP LEFT cell. Other animals and the second reference's mascots are STYLE reference only; do not include them. Match this lion's identity exactly: round caramel brown scalloped mane, honey golden yellow body, cream muzzle/belly, orange apricot cheeks, shiny big dark brown eyes, tiny round ears, short rounded arms and feet, long tail with caramel tuft. Adorable matte tactile felt and soft clay 3D toy style of approved Fox/Sprout, warm studio lighting. No tiger stripes, no clothing, no letters/text/numbers, no weapons, no crown props. Full body and entire tail visible in EVERY cell with at least 12 percent transparent margin, consistent camera and scale, feet on common baseline. Face toward right in a 3/4 angle, bipedal friendly mascot with two arms and two legs, exactly four limbs, matching reference. Animation key poses for 'Lion King's Roar': ROW1 cells0-3 windup: calm ready, lowers stance to plant feet, deep breath cheeks puff/chest expanding, head lifts mane ready. ROW2 cells4-7 charge: steady strong stance, forepaws gather near chest, mane subtly fans out, open chest lifts chin ready to roar. ROW3 cells8-11 roar: mouth opens in big round friendly roar aimed right, forepaws wide planted feet, maximum roar mouth, ending exhale head forward. No composited magical effects; Canvas adds them. ROW4 cells12-15 victory: roar relaxes to smile, confident upright proud pose, raises one paw in joy with short bounce, settled warm triumphant friendly smile waving paw. Maintain believable consistent anatomy and mane design in all sixteen. No background or cell grid lines, no floor, no cast ground shadow, NO checkerboard painted into transparency. Distinct dynamic keyframes while retaining exact character identity. Save selected image for project animation assets."
+    },
+    {
+      "file": "combat.png",
+      "generatedOriginal": "exec-41b08b3e-765c-4934-8659-9c37617ac1e6.png",
+      "additionalReference": "source/poses.png",
+      "prompt": "Create matching game sprite sheet of EXACT SAME golden lion as FIRST image. TRUE transparent alpha background. Exactly 4columns x4rows 16square equal cells in preferably1536x1536 square canvas. Only lion, no other animals. Camera right-facing3/4 like first sheet. Preserve identity and proportions: caramel scalloped round mane, two round ears, four short limbs total(two paws+two feet), honey yellow body, cream muzzle/belly, apricot cheeks, large dark brown eyes, long tufted tail. Matte soft clay/felt3D toy polished warm lighting, same as lion in second reference TOP LEFT and style of third reference only. No painted checkerboard, no text, lines, floor or shadows. Keep ENTIRE lion + mane + ears + tail + feet INSIDE EACH cell, with12percent transparent margin. Exact frame organization: ROW1 indices0-3 ATTACK: leans back with one front paw raised, twists shoulders in windup, steps forward and makes friendly short paw swat toward RIGHT, retracts to balanced stance. No claws/weapons. ROW2 indices4-7 TAKING HIT: eyes wide startled small recoil, leans backward with forepaws tucked protectively eyes squint, settles with slightly sad surprised expression, regains balanced stance. No bruises or injuries, still cute. ROW3 indices8-11 SAD LOSING: shoulders slump and eyes look down sadly mouth closed frowning, knees bend lowers into sitting, sits with head bowed and ears lowered sad dark eyes, holds sad seated pose with tufted tail resting beside it; small clear tear okay but no excessive crying. ROW4 indices12-15 IDLE: four subtly breathing calm standing neutral friendly smile poses, paws at sides, tiny chest expansion, head attentive facing right. All16 distinct hand-authored keyposes, identical body scale and camera. No crowns/glows/fx; those drawn separately. This is complementary combat emotions sheet to existing lion ultimate sheet."
+    }
+  ],
+  "actualOutput": {"width":1254,"height":1254,"grid":"4x4","alpha":true},
+  "processing": "PNG sources preserved unchanged. Sharp WebP quality82 alphaQuality100 effort6. Idle thumbnail from combat pose12, quality85. Canvas metadata uses integer cell boundaries and alpha bounding boxes; no character redrawing during compression.",
+  "visualQA": "Inspected all32 poses, four action contact sheets and compressed rendering on garden background. No severed limbs/tail; two ears, two forepaws, two feet, caramel mane retained. AI interpolation/key poses can contain minor texture differences. Not a physical-device FPS measurement."
+}

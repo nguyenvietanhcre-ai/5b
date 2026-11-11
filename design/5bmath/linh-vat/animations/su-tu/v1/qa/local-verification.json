@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "origin": "http://127.0.0.1:8768",
+  "checks": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/api/health",
+      "status": 200
+    },
+    {
+      "route": "/linh-vat/",
+      "status": 200
+    },
+    {
+      "route": "/dau-tri/",
+      "status": 200
+    },
+    {
+      "asset": "arena-lion.js",
+      "bytes": 13461,
+      "sha256": "c5658fa199cc3bb4467aae04e8148149159941c27cf168c41995482371e26c52",
+      "sourceMatches": true
+    },
+    {
+      "asset": "arena-lion.css",
+      "bytes": 1069,
+      "sha256": "fc1da3cc31a90693048bf3d6f715db29cd739ddbb3fccfe07a2c41db1082ee48",
+      "sourceMatches": true
+    },
+    {
+      "asset": "arena-art/lion-ultimate.webp",
+      "bytes": 370108,
+      "sha256": "91343d531c972ec400306555469e1b219d692507cf0a353ebb82ed72ec4c0b4e",
+      "sourceMatches": true
+    },
+    {
+      "asset": "arena-art/lion-combat.webp",
+      "bytes": 393322,
+      "sha256": "4f2904100c3ce79a5553927e9fc9a6d10a1d8031e78e31be5fce594df660b71f",
+      "sourceMatches": true
+    },
+    {
+      "asset": "arena-art/lion-idle.webp",
+      "bytes": 25544,
+      "sha256": "823da0119c11467e954bd5ab292650c3860016ca185ca30a046502682222aff7",
+      "sourceMatches": true
+    }
+  ],
+  "internalFiles": "404"
+}

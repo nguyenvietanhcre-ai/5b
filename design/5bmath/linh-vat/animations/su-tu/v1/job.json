@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "su-tu",
+  "variant": "v1",
+  "owner": "su-tu-01a1cb4a",
+  "createdAt": "2026-11-11T15:48:19.387Z",
+  "updatedAt": "2026-11-11T16:42:08.358Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "su-tu",
+    "name": "Sư tử",
+    "ultimateName": "Tiếng Gầm Sư Vương",
+    "description": "Bờm xòe sáng như mặt trời, sư tử đứng vững và gầm vang. Từng vòng sóng vàng lan tới đối thủ; vòng cuối hóa thành chiếc vương miện khổng lồ rồi bùng sáng toàn sân.",
+    "speciesType": "mammal",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 0,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Sư tử vàng với bờm nâu caramel tròn bao quanh mặt.",
+      "Hai tai tròn nhỏ, bốn chi ngắn, đuôi dài có chùm lông ở cuối.",
+      "Giữ bờm nhất quán; không thêm vằn hổ hoặc đổi bờm thành tóc người."
+    ],
+    "beats": {
+      "windup": "Bờm xòe và sáng dần; sư tử đứng trụ chân, lấy hơi.",
+      "decisive": "Gầm tung các vòng sóng vàng; vòng cuối thành vương miện chạm mục tiêu.",
+      "victory": "Vương miện bùng thành sao; sư tử đứng tư thế chiến thắng, bờm dịu sáng."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/su-tu.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 2039491,
+      "webpBytes": 370108,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "7cc20f499a6c5a20248a3d43b21ce7a46a423d3a28f5f83c839d05374178021c",
+      "bytes": 3376950
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "4f1f4f3ad26628fa6dd2655a614c2ff30479a3672443c4f036b3369aa74f9b19",
+      "bytes": 2018019
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "baeebfb59d567ec7dc1f399eab890a58a86304a27f79c13e5996f74ce01bcfda",
+      "bytes": 1835083
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:00:45.679Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "su-tu-01a1cb4a",
+  "lastReleasedAt": "2026-11-11T16:42:08.358Z"
+}

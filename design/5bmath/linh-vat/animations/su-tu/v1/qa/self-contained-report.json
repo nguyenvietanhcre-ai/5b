@@ -1,0 +1,87 @@
+{
+  "checkedAt": "2026-11-11T16:36:43.524Z",
+  "status": "passed",
+  "copyAfterExistingExports": true,
+  "exportsReencoded": false,
+  "exportNote": "After exporting GIF/MP4, copied shared WebP assets byte-for-byte into own assets and changed only file paths; visual inputs are identical.",
+  "copies": [
+    {
+      "name": "garden.webp",
+      "source": "F:\\ChatGPT Math Project\\design\\5bmath\\linh-vat\\animations\\shared\\garden.webp",
+      "copy": "F:\\ChatGPT Math Project\\design\\5bmath\\linh-vat\\animations\\su-tu\\v1\\assets\\garden.webp",
+      "sourceSHA256": "42ebe4c472353bf90027866978e532e1b31e42a6c77067659eef4dfba7be9d8c",
+      "copySHA256": "42ebe4c472353bf90027866978e532e1b31e42a6c77067659eef4dfba7be9d8c",
+      "bytes": 185430,
+      "equal": true
+    },
+    {
+      "name": "opponents.webp",
+      "source": "F:\\ChatGPT Math Project\\design\\5bmath\\linh-vat\\animations\\shared\\opponents.webp",
+      "copy": "F:\\ChatGPT Math Project\\design\\5bmath\\linh-vat\\animations\\su-tu\\v1\\assets\\opponents.webp",
+      "sourceSHA256": "461078546815405f0475600198ffeba322c28dfec2a98fd3f647659ccc64307c",
+      "copySHA256": "461078546815405f0475600198ffeba322c28dfec2a98fd3f647659ccc64307c",
+      "bytes": 150518,
+      "equal": true
+    }
+  ],
+  "samples": [
+    {
+      "time": 1.77,
+      "t": 1.77,
+      "action": "ultimate",
+      "phase": "ĐÒN QUYẾT ĐỊNH",
+      "pose": 11,
+      "nameVisible": false,
+      "attackStarted": true,
+      "impact": true,
+      "victory": false
+    },
+    {
+      "time": 1.25,
+      "t": 1.25,
+      "action": "attack",
+      "phase": "TẤN CÔNG",
+      "pose": 2,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 0.97,
+      "t": 0.97,
+      "action": "hit",
+      "phase": "CHỊU ĐÒN",
+      "pose": 5,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    },
+    {
+      "time": 2.97,
+      "t": 2.97,
+      "action": "defeat",
+      "phase": "BUỒN KHI THUA · MÌNH THỬ LẠI NHÉ",
+      "pose": 11,
+      "nameVisible": false,
+      "attackStarted": false,
+      "impact": false,
+      "victory": false
+    }
+  ],
+  "runtimeImages": [
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/su-tu/v1/assets/poses.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/su-tu/v1/assets/combat.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/su-tu/v1/assets/garden.webp",
+    "file:///F:/ChatGPT%20Math%20Project/design/5bmath/linh-vat/animations/su-tu/v1/assets/opponents.webp"
+  ],
+  "errors": [],
+  "checks": [
+    "Shared/copied image SHA-256 equal for both files",
+    "All dependencies remain within own job directory",
+    "Four WebP runtime images only",
+    "All4actions render representative frames",
+    "No JS/resource errors"
+  ]
+}

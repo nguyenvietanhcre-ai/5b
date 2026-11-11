@@ -1,0 +1,49 @@
+{
+  "passed": true,
+  "layouts": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "selected": "Sư tử"
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false,
+      "selected": "Sư tử"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false,
+      "selected": "Sư tử"
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false,
+      "selected": "Sư tử"
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false,
+      "selected": "Sư tử"
+    }
+  ],
+  "finalTransitionMs": 3197,
+  "checks": [
+    "live DB mascot select and reload",
+    "real bot correct answer reduces20HP",
+    "idle rAF stops",
+    "ultimate name before impact",
+    "result waits complete ultimate",
+    "win result XP0",
+    "bot damage and hit",
+    "lose result sad pose",
+    "reduced motion"
+  ],
+  "errors": [],
+  "failed": []
+}
