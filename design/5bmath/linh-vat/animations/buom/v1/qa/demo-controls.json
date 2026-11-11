@@ -1,0 +1,82 @@
+{
+  "status": "passed",
+  "checkedAt": "2026-11-11T16:09:25.451Z",
+  "checks": [
+    {
+      "mode": "ultimate",
+      "time": 1.48,
+      "pose": 10
+    },
+    {
+      "mode": "attack",
+      "time": 0.55,
+      "pose": 5
+    },
+    {
+      "mode": "hit",
+      "time": 0.4,
+      "pose": 12
+    },
+    {
+      "mode": "lose",
+      "time": 2.4,
+      "pose": 15
+    }
+  ],
+  "responsive": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "scroll": 390,
+      "width": 390,
+      "minButton": 46
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "scroll": 844,
+      "width": 844,
+      "minButton": 46
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "scroll": 768,
+      "width": 768,
+      "minButton": 46
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "scroll": 1024,
+      "width": 1024,
+      "minButton": 46
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scroll": 1440,
+      "width": 1440,
+      "minButton": 46
+    }
+  ],
+  "controls": [
+    "seek",
+    "pause/replay",
+    "mode selection",
+    "speed selection",
+    "reduced motion starts paused"
+  ],
+  "runtimeImages": "WebP only",
+  "errors": []
+}

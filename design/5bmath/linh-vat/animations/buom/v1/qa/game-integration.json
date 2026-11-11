@@ -1,0 +1,58 @@
+{
+  "scope": "Actual source UI with Playwright local-file route fulfillment, demo profile; backend API verified separately on8796",
+  "status": "passed",
+  "checks": [
+    "source UI demo profile displays butterfly",
+    "five responsive viewport layouts",
+    "both sides attack hit lose adapter",
+    "opponent ultimate title impact cleanup",
+    "actual bot answer final animation result delayed >=2.9s",
+    "reduced motion no RAF/overlay",
+    "route away cleanup"
+  ],
+  "viewports": [
+    {
+      "vp": {
+        "width": 390,
+        "height": 844
+      },
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "vp": {
+        "width": 844,
+        "height": 390
+      },
+      "scroll": 844,
+      "width": 844
+    },
+    {
+      "vp": {
+        "width": 768,
+        "height": 1024
+      },
+      "scroll": 768,
+      "width": 768
+    },
+    {
+      "vp": {
+        "width": 1024,
+        "height": 768
+      },
+      "scroll": 1024,
+      "width": 1024
+    },
+    {
+      "vp": {
+        "width": 1440,
+        "height": 900
+      },
+      "scroll": 1440,
+      "width": 1440
+    }
+  ],
+  "errors": [],
+  "failed": [],
+  "ultimateResultDelayMs": 3603
+}

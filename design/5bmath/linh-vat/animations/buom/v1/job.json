@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "buom",
+  "variant": "v1",
+  "owner": "buom-01a1cb4c-root",
+  "createdAt": "2026-11-11T15:51:00.003Z",
+  "updatedAt": "2026-11-11T16:36:17.409Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "buom",
+    "name": "Bướm",
+    "ultimateName": "Vũ Điệu Ngàn Cánh",
+    "description": "Vỗ cánh tạo hàng trăm bóng bướm nhiều màu bay quanh đối thủ. Đàn bướm ghép thành đôi cánh khổng lồ rồi mở bung, đẩy ra làn sóng cầu vồng phủ đầy sân.",
+    "speciesType": "insect",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png",
+    "referenceCell": {
+      "row": 1,
+      "col": 2,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Bướm nhỏ màu kem–đào; hai râu và bốn cánh: hai trên lớn, hai dưới nhỏ.",
+      "Hoa văn cam mơ và xanh lá trên cánh; sáu chân nhỏ được cách điệu.",
+      "Không thêm mỏ/lông vũ hoặc tay người; đếm bốn cánh trên mỗi bướm gốc, bản sao là hiệu ứng."
+    ],
+    "beats": {
+      "windup": "Vỗ cánh chậm, hoa văn sáng; các bóng bướm bắt đầu tách ra.",
+      "decisive": "Đàn bướm ghép thành đôi cánh khổng lồ rồi mở, tung làn sóng cầu vồng.",
+      "victory": "Cầu vồng bung sao; bướm gốc bay nhẹ ở tư thế ăn mừng."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/buom.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1254,
+      "height": 1254,
+      "sourceBytes": 1598330,
+      "webpBytes": 356800,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "212fa63f7f268413c467be9943d02fae46f79b23b776e573bcc54bb7d173cf0c",
+      "bytes": 2413941
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "ed66bd937e62feecadf3177681885a57dd1e62edac1bf06081dac98bcfb99aa4",
+      "bytes": 2033526
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "2d08288749e764ef37b7e7bb9cffb1c17bd5b8ddad1b83755845ce964411b954",
+      "bytes": 1785297
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:14:02.185Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "buom-01a1cb4c-root",
+  "lastReleasedAt": "2026-11-11T16:36:17.409Z"
+}

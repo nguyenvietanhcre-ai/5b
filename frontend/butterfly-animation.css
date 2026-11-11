@@ -1,0 +1,11 @@
+body.learning-mode .mascot-art.butterfly { display:block; aspect-ratio:1; background-image:url('arena-art/butterfly-poses.webp'); background-size:400% 400%; background-position:0 0; background-repeat:no-repeat; }
+body.learning-mode .battle-pet.butterfly .motion-sprite { display:none !important; }
+body.learning-mode .battle-pet.butterfly > .mascot-art { visibility:visible; animation:none; }
+body.learning-mode .battle-pet.butterfly.butterfly-ready > .mascot-art { visibility:hidden; }
+body.learning-mode .butterfly-pose-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
+body.learning-mode .butterfly-in-ultimate { visibility:hidden; }
+body.learning-mode .butterfly-ultimate-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:7; pointer-events:none; }
+body.learning-mode .butterfly-ultimate-active .energy-beam,
+body.learning-mode .butterfly-ultimate-active .spell-effect,
+body.learning-mode .fighter[data-spell="butterfly"] .spell-effect { display:none; }
+@media(prefers-reduced-motion:reduce) { body.learning-mode .battle-pet.butterfly,body.learning-mode .battle-pet.butterfly * { animation:none !important; transition:none !important; } }
