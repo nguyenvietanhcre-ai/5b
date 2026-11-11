@@ -1,0 +1,2 @@
+# Unified-diff context for an empty source line is one literal space.
+integration.patch -whitespace

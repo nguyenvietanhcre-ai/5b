@@ -1,0 +1,124 @@
+diff --git a/backend/platform_api.py b/backend/platform_api.py
+--- a/backend/platform_api.py
++++ b/backend/platform_api.py
+@@ -22,6 +22,7 @@
+ COOKIE = '5bmath_session'
+ ITERATIONS = 600_000
+ MASCOT_NAMES = {'voi': 'Voi', 'sprout': 'Mầm Sách', 'fox': 'Cáo Nâu', 'cat': 'Mèo', 'rabbit': 'Thỏ', 'gau': 'Gấu'}
++MASCOT_NAMES['sparrow'] = 'Chim sẻ'
+ MASCOT_NAMES['eagle'] = 'Đại bàng'
+ MASCOT_NAMES['tiger'] = 'Hổ'
+ MASCOT_NAMES['lion'] = 'Sư tử'
+diff --git a/backend/server.py b/backend/server.py
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -52,6 +52,10 @@
+ ASSETS["/tiger-animation.js"] = "tiger-animation.js"
+ ASSETS.update({"/arena-art/ho-v1/" + file: "arena-art/ho-v1/" + file
+                for file in ("poses.webp", "reactions.webp", "poses.json", "reactions.json", "tiger-renderer.js")})
++ASSETS.update({"/" + file: file for file in
++               ("arena-sparrow-animation.js", "arena-sparrow-animation.css",
++                "arena-art/chim-se/poses.webp", "arena-art/chim-se/idle.webp",
++                "arena-art/chim-se/poses.json")})
+ for file in ("poses.webp", "states.webp"):
+     ASSETS["/arena-art/eagle/" + file] = "arena-art/eagle/" + file
+ ASSETS["/shark-animation.js"] = "shark-animation.js"
+diff --git a/frontend/index.html b/frontend/index.html
+--- a/frontend/index.html
++++ b/frontend/index.html
+@@ -43,6 +43,8 @@
+     <script src="rabbit-animation.js" defer></script>
+     <script src="owl-animation.js" defer></script>
+     <script src="shark-animation.js" defer></script>
++    <link rel="stylesheet" href="arena-sparrow-animation.css">
++    <script src="arena-sparrow-animation.js" defer></script>
+     <script src="arena-bee-animation.js" defer></script>
+     <script src="octopus-animation.js" defer></script>
+     <script src="mam-sach-animation.js" defer></script>
+diff --git a/scripts/build-pages.cjs b/scripts/build-pages.cjs
+--- a/scripts/build-pages.cjs
++++ b/scripts/build-pages.cjs
+@@ -54,6 +54,9 @@
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
+ for (const asset of ['arena-lion.js', 'arena-lion.css', 'arena-crab-animation.js', 'arena-crab-animation.css']) {
++    fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
++}
++for (const asset of ['arena-sparrow-animation.js', 'arena-sparrow-animation.css']) {
+     fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+ }
+ fs.copyFileSync(path.join(frontend, 'tiger-animation.js'), path.join(output, 'tiger-animation.js'));
+diff --git a/frontend/learning.js b/frontend/learning.js
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -126,7 +126,7 @@
+     const selectedLesson = () => lessonList().find(lesson => lesson.id === query('id')) || lessonList()[0];
+     const submittedExams = () => Object.values(state.exams).filter(exam => exam.submittedAt);
+     const level = () => Math.floor((state.points - 1000) / 20) + 1;
+-    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
++    const petName = () => ({'cu-meo':'Cú mèo',dolphin:'Cá heo',octopus:'Bạch tuộc',starfish:'Sao biển',bee:'Ong',butterfly:'Bướm',crab:'Cua biển','ca-map':'Cá mập',tiger:'Hổ',sparrow:'Chim sẻ',lion:'Sư tử',eagle:'Đại bàng',fox:'Cáo Nâu',voi:'Voi',rabbit:'Thỏ',cat:'Mèo',gau:'Gấu',sprout:'Mầm Sách'}[state.mascot] || 'Mầm Sách');
+ 
+     function load() {
+         if(live)return;
+@@ -137,7 +137,7 @@
+         for (const property of ['completed','exams','battles','activity']) {
+             if (!state[property] || typeof state[property] !== 'object' || Array.isArray(state[property])) state[property] = {};
+         }
+-        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle'].includes(state.mascot)) state.mascot = 'sprout';
++        if (!['cu-meo','dolphin','octopus','starfish','bee','butterfly','tiger','crab','ca-map','lion','sprout','fox','voi','rabbit','cat','gau','eagle','sparrow'].includes(state.mascot)) state.mascot = 'sprout';
+         state.points = Math.max(1000, Number(state.points) || 1000);
+         if (!Number.isInteger(state.birthYear)) state.birthYear = null;
+     }
+@@ -331,7 +331,7 @@
+             return `${intro('Linh vật của em','Chọn bạn đồng hành và xem kinh nghiệm sau mỗi trận.')}
+             <section class="card feature-row sage mascot-feature"><div>${badge('Đang đồng hành · Cấp ' + level(),'white')}<h2>${escape(petName())}</h2><p>${content.format(state.points)} / ${content.format(1000 + level() * 20)} điểm kinh nghiệm để lên cấp ${level() + 1}</p>${meter((state.points - 1000) % 20 * 5,'Tiến độ lên cấp tiếp theo')}<small>Còn ${20 - (state.points - 1000) % 20} điểm để lên cấp tiếp theo.</small></div>${art(state.mascot,petName())}</section>
+             <div class="grid3 stats">${stat('cup',history.filter(item => item.outcome === 'win').length + ' trận','Thắng · +2 điểm','sand')}${stat('flag',history.filter(item => item.outcome === 'lose').length + ' trận','Thua · −1 điểm','peach')}${stat('users',history.filter(item => item.outcome === 'draw').length + ' trận','Hòa · 0 điểm')}</div>
+-            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
++            ${heading('Chọn linh vật')}<div class="grid2">${[['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+         },
+ 
+         rank() { return liveRank(); },
+@@ -936,26 +936,30 @@
+         if(beeUltimate)catFinaleUntil=Date.now()+3100;
+         const catAttack=sourcePet?.classList.contains('cat')&&Boolean(window.ArenaCatAnimation);
+         const catUltimate=final&&catAttack;
++        const sparrowAttack=sourcePet?.classList.contains('sparrow')&&Boolean(window.ArenaSparrowAnimation);
++        const sparrowUltimate=final&&sparrowAttack;
++        if(sparrowUltimate)catFinaleUntil=Date.now()+3100;
+         if(catUltimate)catFinaleUntil=Date.now()+3100;
+         victim?.classList.remove('taking-hit');source?.classList.remove('attacking');if(victim)void victim.offsetWidth;
+         const spells=[['rock','Đá rơi'],['vine','Dây leo trói'],['lightning','Sét đánh']];
+         const spell=spells[(artSeed(currentBattle?.id||'')+(currentBattle?.index||0))%spells.length];
+         const hit=()=>{if(!victim?.isConnected||!victimPet)return;victim.dataset.spell=beeAttack?'bee':catAttack?'cat':rabbitUltimate?'moon':bearUltimate?'bear':spell[0];victimPet.dataset.mood=final&&!victimPet.classList.contains('gau')?'lose':'hit';victim.classList.add('taking-hit');playBear(victimPet,'hit',()=>{if(final&&victimPet.isConnected){victimPet.dataset.mood='lose';playBear(victimPet,'defeat');}});};
+-        if(beeUltimate||rabbitUltimate||catUltimate||bearUltimate)setTimeout(hit,1750);else hit();
+-        if(sourcePet)sourcePet.dataset.mood=beeUltimate||rabbitUltimate||catUltimate||bearUltimate?'ultimate':'attack';
++        if(beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate)setTimeout(hit,1750);else hit();
++        if(sourcePet)sourcePet.dataset.mood=beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate?'ultimate':'attack';
++        if(sparrowUltimate)window.ArenaSparrowAnimation.ultimate({source,victim});
+         if(beeAttack)window.ArenaBeeAnimation.hit({source,victim,final,animateVictim:false});
+         window.ArenaCatAnimation?.hit({source,victim,final});
+         source?.classList.add('attacking');
+         if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(sourcePet,rabbitUltimate?'ultimate':'attack');
+         playBear(sourcePet,bearUltimate?'ultimate':'attack');
+         const announcement=document.querySelector('#spell-announcement');
+-        if(announcement)announcement.textContent=beeAttack||rabbitUltimate||catAttack||bearUltimate?'':'✦ '+spell[1];
+-        if(final){if(!beeUltimate&&!rabbitUltimate&&!catUltimate&&!bearUltimate)stage?.classList.add(attacker==='#fighter-me'?'ultimate-right':'ultimate-left');ArenaAudio.effect('beam');}else ArenaAudio.effect(catAttack?'rock':spell[0]);
++        if(announcement)announcement.textContent=beeAttack||rabbitUltimate||catAttack||bearUltimate||sparrowAttack?'':'✦ '+spell[1];
++        if(final){if(!beeUltimate&&!rabbitUltimate&&!catUltimate&&!bearUltimate&&!sparrowUltimate)stage?.classList.add(attacker==='#fighter-me'?'ultimate-right':'ultimate-left');ArenaAudio.effect('beam');}else ArenaAudio.effect(catAttack?'rock':spell[0]);
+         setTimeout(()=>{
+             victim?.classList.remove('taking-hit');source?.classList.remove('attacking');
+             for(const node of [victim,source])if(node?.isConnected){const pet=node.querySelector('.battle-pet');const mood=final&&node===victim?'lose':'idle';pet.dataset.mood=mood;if(pet!==victimPet&&typeof RabbitAnimation!=='undefined')RabbitAnimation.play(pet,mood);const bearMode=final?(node===victim?'defeat':'win'):'idle';playBear(pet,bearMode);if(pet?.classList.contains('gau'))pet.dataset.mood=bearMode==='defeat'?'lose':bearMode;}
+             if(announcement?.isConnected)announcement.textContent='';
+-        },beeUltimate||rabbitUltimate||catUltimate||bearUltimate?3000:1600);
++        },beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate?3000:1600);
+     }
+     function dispatchBattleHit(target,attacker,final) {
+         window.HorseAnimation?.notifyVictim(target,attacker,final);
+@@ -1088,6 +1092,7 @@
+                 await pollRoom();
+             }
+         },
++        'choose-sparrow':async () => { if(live)await mutate('mascot',{mascot:'sparrow'});else {state.mascot = 'sparrow';save();}refresh(); },
+         'choose-butterfly':async () => { if(live)await mutate('mascot',{mascot:'butterfly'});else {state.mascot = 'butterfly';save();}refresh(); },
+         'choose-dolphin':async () => { if(live)await mutate('mascot',{mascot:'dolphin'});else {state.mascot = 'dolphin';save();}refresh(); },
+         'choose-cu-meo':async () => { if(live)await mutate('mascot',{mascot:'cu-meo'});else {state.mascot = 'cu-meo';save();}refresh(); },

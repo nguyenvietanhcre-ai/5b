@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUTC": "2026-11-11T16:33:43.642522+00:00",
+  "baseHead": "a8221fac7af8ba48b16768366d130c1e7d3403a1",
+  "purpose": "Only Chim sẻ integration against the concurrent local development baseline, not against HEAD.",
+  "normalization": "beforeSha256LF/afterSha256LF hash UTF-8 text after CRLF is replaced with LF; afterSha256Raw hashes captured bytes.",
+  "files": [
+    {
+      "path": "backend/platform_api.py",
+      "beforeSha256LF": "3884f3b5b5ba03331f7df1f9a2172aea0d5f5399c6c398d59a90844ac0493804",
+      "afterSha256LF": "8ba46bf97b22a9238b4fd79fa9e3c89ac1843cbfdc6c4e8bbe6ed5d1bee8d878",
+      "afterSha256Raw": "8ba46bf97b22a9238b4fd79fa9e3c89ac1843cbfdc6c4e8bbe6ed5d1bee8d878",
+      "addedLines": 1,
+      "removedLines": 0
+    },
+    {
+      "path": "backend/server.py",
+      "beforeSha256LF": "ba4aa72269689e6cf0329bbe3b3448e40166484077c002ea15d02379bc7c3f53",
+      "afterSha256LF": "f318d59440b97d3f4d435e4e16d1c2133e09bc9bedd3cd9ad939dd327cfbbf4c",
+      "afterSha256Raw": "f318d59440b97d3f4d435e4e16d1c2133e09bc9bedd3cd9ad939dd327cfbbf4c",
+      "addedLines": 4,
+      "removedLines": 0
+    },
+    {
+      "path": "frontend/index.html",
+      "beforeSha256LF": "0130789a32bfdf901612db83ce30059a2f59c6b2c68bd82a63e4ffd9d95a1966",
+      "afterSha256LF": "be62998d49c1e4a211bea6bc2cfd384b5020655f7d85240851237cd88ff6278c",
+      "afterSha256Raw": "be62998d49c1e4a211bea6bc2cfd384b5020655f7d85240851237cd88ff6278c",
+      "addedLines": 2,
+      "removedLines": 0
+    },
+    {
+      "path": "scripts/build-pages.cjs",
+      "beforeSha256LF": "cd8c198c507c6baf7f1eef4ea929b354e1a8cce45705015e972fcbb331d2d815",
+      "afterSha256LF": "379d11ba1ff0a0ce3e2107cf32091ccb21dc46ef6193655ed2942b9944ce1aef",
+      "afterSha256Raw": "379d11ba1ff0a0ce3e2107cf32091ccb21dc46ef6193655ed2942b9944ce1aef",
+      "addedLines": 3,
+      "removedLines": 0
+    },
+    {
+      "path": "frontend/learning.js",
+      "beforeSha256LF": "01f11b9bcf55ec6f63af31bea3e74f8cc2a8763d706c1890ef6eaf3317bce044",
+      "afterSha256LF": "a2c430225583f77d22d9501e21c67bcb17c506a2c3da536329e7622754eef4d4",
+      "afterSha256Raw": "a2c430225583f77d22d9501e21c67bcb17c506a2c3da536329e7622754eef4d4",
+      "addedLines": 13,
+      "removedLines": 8
+    }
+  ],
+  "patchSha256": "a5878061cd39367f422291bb44f8e629d6e9870536ca643a1eb5e1295345245c",
+  "capturedBaselineCheck": {
+    "forward": "passed",
+    "reverse": "passed",
+    "temporaryCopiesRemoved": true
+  },
+  "workspaceDriftAtCheck": []
+}

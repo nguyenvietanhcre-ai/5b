@@ -1,0 +1,115 @@
+{
+  "base": "http://127.0.0.1:18947",
+  "startedAt": "2026-11-11T16:25:49.696Z",
+  "checks": [
+    "Actual API registration and UI selection; sparrow persists after reload",
+    "Real LearningApp correct-answer event triggers sparrow attack",
+    "Real bot tick damage triggers sparrow hit",
+    "Real final correct-answer triggers 3s ultimate and delayed result",
+    "Actual bot defeat route holds sad sparrow pose",
+    "Five desktop/tablet/mobile portrait-landscape viewports, no horizontal overflow"
+  ],
+  "viewports": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "scroll": 390,
+      "canvas": {
+        "x": 43.625,
+        "y": 445.75,
+        "width": 112.625,
+        "height": 112.625,
+        "top": 445.75,
+        "right": 156.25,
+        "bottom": 558.375,
+        "left": 43.625
+      }
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "width": 844,
+      "scroll": 844,
+      "canvas": {
+        "x": 131.3125,
+        "y": 541.125,
+        "width": 216.3125,
+        "height": 216.3125,
+        "top": 541.125,
+        "right": 347.625,
+        "bottom": 757.4375,
+        "left": 131.3125
+      }
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "width": 768,
+      "scroll": 768,
+      "canvas": {
+        "x": 93.3125,
+        "y": 537.84375,
+        "width": 216.3125,
+        "height": 216.3125,
+        "top": 537.84375,
+        "right": 309.625,
+        "bottom": 754.15625,
+        "left": 93.3125
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "width": 1024,
+      "scroll": 1024,
+      "canvas": {
+        "x": 311.3125,
+        "y": 571.890625,
+        "width": 216.3125,
+        "height": 216.3125,
+        "top": 571.890625,
+        "right": 527.625,
+        "bottom": 788.203125,
+        "left": 311.3125
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "width": 1440,
+      "scroll": 1440,
+      "canvas": {
+        "x": 328.265625,
+        "y": 561.109375,
+        "width": 197.796875,
+        "height": 197.796875,
+        "top": 561.109375,
+        "right": 526.0625,
+        "bottom": 758.90625,
+        "left": 328.265625
+      }
+    }
+  ],
+  "errors": [],
+  "httpFailures": [],
+  "requestFailures": [],
+  "staticRouting": "Source frontend files fulfilled directly to avoid Python connection backlog; HTML and API are live QA server",
+  "initialGlobals": {
+    "content": "object",
+    "app": "object",
+    "api": "object"
+  },
+  "ultimateToResultMs": 3633,
+  "status": "passed"
+}

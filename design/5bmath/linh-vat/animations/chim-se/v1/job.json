@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "chim-se",
+  "variant": "v1",
+  "owner": "chim-se-01a1cb4c-root",
+  "createdAt": "2026-11-11T15:49:59.133Z",
+  "updatedAt": "2026-11-11T16:33:44.398Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "chim-se",
+    "name": "Chim sẻ",
+    "ultimateName": "Lốc Xoáy Ríu Rít",
+    "description": "Ríu rít gọi một đàn chim sẻ bay thành vòng xoắn quanh đối thủ. Cả đàn đồng loạt đổi hướng, tạo cơn lốc lông vũ và nốt nhạc, kết thúc bằng một tiếng “chíp!” thật giòn.",
+    "speciesType": "bird",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png",
+    "referenceCell": {
+      "row": 0,
+      "col": 2,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Chim sẻ tròn nhỏ màu nâu–kem, mỏ ngắn hình nón.",
+      "Hai cánh, hai chân nhỏ và một đuôi ngắn.",
+      "Không thêm đôi tay ngoài hai cánh; các chim trong đàn là bản sao hiệu ứng riêng."
+    ],
+    "beats": {
+      "windup": "Rướn người, vỗ cánh và ríu rít gọi đàn; lông vũ sáng xuất hiện.",
+      "decisive": "Đàn chim bay vòng xoắn rồi đổi hướng; lốc nốt nhạc chạm đối thủ.",
+      "victory": "Lốc bung thành lông vũ và sao; chim sẻ gốc đáp/vỗ cánh vui."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/chim-se.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1262,
+      "height": 1246,
+      "sourceBytes": 1970798,
+      "webpBytes": 431226,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "844bf168811593b7be718f19a39dc3caaeddd9abddc03222c8788a4bbcc6a87f",
+      "bytes": 2091999
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "1e29a513e799f6b0de73a454da318160adfd0d60c08cef5c90340300aa470564",
+      "bytes": 2097794
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "1ed640e952ffb33258181c4701d05082ebe91517a6256e608224554bce5cee80",
+      "bytes": 1873135
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:30:44.230Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "chim-se-01a1cb4c-root",
+  "lastReleasedAt": "2026-11-11T16:33:44.398Z"
+}

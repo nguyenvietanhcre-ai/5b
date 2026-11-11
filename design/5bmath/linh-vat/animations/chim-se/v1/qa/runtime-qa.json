@@ -1,0 +1,60 @@
+{
+  "idlePending": 0,
+  "attack": {
+    "mood": "attack",
+    "pending": 0
+  },
+  "hit": {
+    "mood": "hit",
+    "pending": 0
+  },
+  "lose": {
+    "mood": "lose",
+    "pending": 0
+  },
+  "win": {
+    "mood": "win",
+    "pending": 0
+  },
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "canvases": 1
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false,
+      "canvases": 1
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false,
+      "canvases": 1
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false,
+      "canvases": 1
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false,
+      "canvases": 1
+    }
+  ],
+  "hiddenCleanup": true,
+  "reducedMotion": true,
+  "removedStageCleanup": true,
+  "errors": [],
+  "requestedMedia": [
+    "/arena-art/chim-se/idle.webp",
+    "/arena-art/chim-se/poses.json",
+    "/arena-art/chim-se/poses.webp"
+  ]
+}

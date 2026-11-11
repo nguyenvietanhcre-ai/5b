@@ -1,0 +1,15 @@
+{
+  "startedAt": "2026-11-11T16:29:28.274Z",
+  "main": "http://127.0.0.1:8765",
+  "source": "http://127.0.0.1:18947",
+  "mode": "Read-only main8765: mock all API with ephemeral authenticated source QA snapshot; natural main HTML/static requests",
+  "errors": [],
+  "failedRequests": [],
+  "httpFailures": [],
+  "overlay": {
+    "width": 622,
+    "height": 622,
+    "nonTransparentPixels": 42074
+  },
+  "status": "passed"
+}

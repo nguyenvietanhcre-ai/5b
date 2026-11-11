@@ -1,0 +1,28 @@
+{
+  "tool": "built-in image_gen",
+  "createdAt": "2026-11-11",
+  "prompt": "Use case: stylized-concept. Asset type: game animation sprite atlas for 5BMath. Reference image 1 is character identity: ONLY the little brown cream SPARROW in top row, rightmost cell. Reference image 2 is material/style ONLY, do not add its leaves, books, scarf or fox features. Create exactly sixteen full-body poses of that SAME round sparrow in an evenly spaced four by four atlas, row major, consistent size, centered in each equal square cell with transparent gutters. Real transparent background. No text, grid lines, labels, shadows on ground or effects. Soft tactile matte clay/felt 3D toy, chestnut brown head/back/wings, cream face/chest, large glossy dark brown eyes, apricot cheeks, tiny short conical golden beak, exactly two wings, two small golden feet, one short brown tail. No hands. Keep identity precisely. Facing screen right in three-quarter view in every pose, both eyes readable where possible. Poses: row1 columns1-4 neutral cheerful standing, crouched preparing flight, wings lifted high, wings down midflight. Row2 columns1-4 banking right midflight, banking left midflight, fast gliding leaning forward, strong wing flap with beak open chirping. Row3 columns1-4 attack windup, wing swoosh attack reaching forward, impact recoil startled with wings lifted protectively, recovering from hit with ruffled feathers. Row4 columns1-4 landing happily, celebration with raised wings, sad defeated looking down with wings drooping, sad seated with eyes closed and head bowed. Each pose entirely within own cell, no clipped wings or feet, same scale and warm light, no extra animals.",
+  "referenceImages": [
+    "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/02-thu-va-canh.png (row0 col2 identity)",
+    "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png (material/style)"
+  ],
+  "source": "poses.png",
+  "poseMap": [
+    "idle",
+    "crouch",
+    "wings-up",
+    "flap-down",
+    "bank-right",
+    "bank-left",
+    "glide",
+    "chirp",
+    "attack-windup",
+    "attack",
+    "hit",
+    "recover",
+    "land",
+    "celebrate",
+    "sad-standing",
+    "sad-seated"
+  ]
+}

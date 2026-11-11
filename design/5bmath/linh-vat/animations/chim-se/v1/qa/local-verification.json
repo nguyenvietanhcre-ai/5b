@@ -1,0 +1,51 @@
+{
+  "origin": "http://127.0.0.1:8765",
+  "assets": [
+    {
+      "file": "arena-sparrow-animation.js",
+      "status": 200,
+      "mime": "text/javascript",
+      "bytes": 15312,
+      "matchesSource": true,
+      "sha256": "5784ea6e0c6fbdf1333218978e48c89e81dfd4e051ae7f50345e71f5c7c6b8c9"
+    },
+    {
+      "file": "arena-sparrow-animation.css",
+      "status": 200,
+      "mime": "text/css",
+      "bytes": 1353,
+      "matchesSource": true,
+      "sha256": "b97bd4271d9aa19365b568dde494c7a839e11f214712e6eae29526a1e770d007"
+    },
+    {
+      "file": "arena-art/chim-se/poses.json",
+      "status": 200,
+      "mime": "application/json",
+      "bytes": 1009,
+      "matchesSource": true,
+      "sha256": "c55b2466339496a8b0ac807b8a4f4a4c13cd0c8189db5ff4b52d1ab451ab1602"
+    },
+    {
+      "file": "arena-art/chim-se/poses.webp",
+      "status": 200,
+      "mime": "image/webp",
+      "bytes": 431226,
+      "matchesSource": true,
+      "sha256": "7c4bba8afe62f4dab06f59ba39aae61f8786ceb1e29f09b85f16c1d5ad3ef6f8"
+    },
+    {
+      "file": "arena-art/chim-se/idle.webp",
+      "status": 200,
+      "mime": "image/webp",
+      "bytes": 21806,
+      "matchesSource": true,
+      "sha256": "a22cdd2c21ec2ff6e949ef6cc157d70327f9d6c47608c335329bd424f0bf4c0b"
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "backend": "python",
+    "mode": "demo"
+  },
+  "indexHasModule": true
+}
