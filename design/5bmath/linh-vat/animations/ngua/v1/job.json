@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "characterId": "ngua",
+  "variant": "v1",
+  "owner": "ngua-01a1cb49",
+  "createdAt": "2026-11-11T15:47:19.806Z",
+  "updatedAt": "2026-11-11T16:45:32.042Z",
+  "status": "pending_review",
+  "duration": 3,
+  "fps": 30,
+  "frames": 90,
+  "character": {
+    "id": "ngua",
+    "name": "Ngựa",
+    "ultimateName": "Vó Ngựa Cuồng Phong",
+    "description": "Cất tiếng hí rồi phi nước đại, mỗi nhịp vó để lại một dấu móng ngựa phát sáng. Các dấu móng cuộn thành cơn lốc hình ngựa, lao qua và cuốn đối thủ xoay một vòng.",
+    "speciesType": "mammal",
+    "referenceImage": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/01-thu-tren-can.png",
+    "referenceCell": {
+      "row": 1,
+      "col": 0,
+      "rows": 2,
+      "columns": 3
+    },
+    "anatomyInvariants": [
+      "Ngựa nhỏ màu nâu hạt dẻ, bờm và đuôi nâu sẫm.",
+      "Mõm dài bo tròn, hai tai nhỏ và bốn chi kết thúc bằng móng guốc.",
+      "Không thêm sừng kỳ lân, cánh hoặc đôi tay riêng; giữ dáng ngựa bốn chân."
+    ],
+    "beats": {
+      "windup": "Hất bờm, hí nhẹ, nhấc một vó rồi dồn trọng tâm chuẩn bị chạy.",
+      "decisive": "Phi nước đại; dấu móng sáng nối thành lốc hình ngựa chạm mục tiêu.",
+      "victory": "Lốc tan thành dấu móng và sao; ngựa dừng vững, hất bờm tự hào."
+    },
+    "brief": "design/5bmath/linh-vat/animations/briefs/ngua.md"
+  },
+  "paths": {
+    "demo": "demo.html",
+    "config": "config.js",
+    "poses": "poses.js",
+    "source": "source/poses.png",
+    "webp": "assets/poses.webp",
+    "exports": "exports",
+    "qa": "qa"
+  },
+  "timeline": {
+    "nameStart": 0.65,
+    "attackStart": 0.95,
+    "impact": 1.75,
+    "victoryStart": 1.9
+  },
+  "approval": null,
+  "assets": {
+    "sprite": {
+      "source": "source/poses.png",
+      "webp": "assets/poses.webp",
+      "width": 1261,
+      "height": 1247,
+      "sourceBytes": 1632787,
+      "webpBytes": 342812,
+      "hasAlpha": true,
+      "poseCount": 16
+    }
+  },
+  "exports": {
+    "demo.gif": {
+      "path": "exports/demo.gif",
+      "sha256": "5432328c56db2536b1df0e8038eb6114f6093a42bca96938b5795b4f9f1d5ab9",
+      "bytes": 2090939
+    },
+    "demo.mp4": {
+      "path": "exports/demo.mp4",
+      "sha256": "d05d82c6e99a877bb9685e5607ebf70a6c41bb3e5f5dc9a0a3e4cb7aab3f7563",
+      "bytes": 2036895
+    },
+    "poster.png": {
+      "path": "exports/poster.png",
+      "sha256": "2e8241424c86209dfe02170276d2db151ae701bc50d221320a28acbaa62b871e",
+      "bytes": 1876636
+    }
+  },
+  "qa": {
+    "status": "passed",
+    "report": "qa/qa-report.json",
+    "contactSheet": "qa/contact-sheet.png",
+    "checkedAt": "2026-11-11T16:06:26.852Z",
+    "duration": 3,
+    "frames": 90,
+    "fps": 30
+  },
+  "lastReleasedBy": "ngua-01a1cb49",
+  "lastReleasedAt": "2026-11-11T16:45:32.042Z"
+}

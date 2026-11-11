@@ -1,0 +1,190 @@
+{
+  "base": "http://127.0.0.1:8791",
+  "kind": "static browser-local QA; no production database",
+  "checks": [
+    "Appearance button persists across reload while account mascot remains sprout",
+    "Actual bot correct-answer flow: attack at ordinary 20 damage, ultimate only at final zero HP, existing win/result and zero bot XP preserved",
+    "Actual bot scheduled answers cause hit on each HP drop, sad defeat at zero HP and defeated result; no production fixtures",
+    "Mirrored controller API runs; simulated hidden visibility event stops RAF/effect; dispose stops its controller",
+    "Profile appearance can be restored with the second button",
+    "Reduced motion renders final static pose without scheduling frames",
+    "Failed horse WebP/metadata leaves original Mầm Sách available as fallback"
+  ],
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "panelOverflow": false
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "panelOverflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "panelOverflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "panelOverflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "panelOverflow": false
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-choice-390.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-choice-844.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-game-landscape.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-game-attack.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-game-ultimate-name.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-game-ultimate-impact.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-game-hit.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-game-defeat.png",
+    "F:\\ChatGPT Math Project\\work\\mascot-animation\\ngua\\v1\\release\\horse-game-defeat-result.png"
+  ],
+  "frontend": "F:/ChatGPT Math Project/work/mascot-animation/ngua/v1/release/scoped-context/frontend",
+  "unavailableSiblingScripts": [],
+  "transport": "Playwright route.fulfill reads isolated local static files; no network listener or database",
+  "battleViewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    }
+  ],
+  "botHitRounds": [
+    {
+      "round": 0,
+      "index": 0,
+      "hp": 100,
+      "resolved": false,
+      "botAt": 1794414521220.394,
+      "now": 1794414370249,
+      "difficulty": 1
+    },
+    {
+      "round": 1,
+      "index": 1,
+      "hp": 80,
+      "resolved": false,
+      "botAt": 1794414666160.8748,
+      "now": 1794414525021,
+      "difficulty": 1
+    },
+    {
+      "round": 2,
+      "index": 2,
+      "hp": 60,
+      "resolved": false,
+      "botAt": 1794414842111.7952,
+      "now": 1794414669961,
+      "difficulty": 1
+    },
+    {
+      "round": 3,
+      "index": 3,
+      "hp": 40,
+      "resolved": false,
+      "botAt": 1794415009877.5916,
+      "now": 1794414845912,
+      "difficulty": 1
+    },
+    {
+      "round": 4,
+      "index": 4,
+      "hp": 20,
+      "resolved": false,
+      "botAt": 1794415173593.9138,
+      "now": 1794415013678,
+      "difficulty": 1
+    }
+  ],
+  "controller": {
+    "started": true,
+    "hiddenStops": true,
+    "disposedStops": true
+  },
+  "reducedMotion": {
+    "running": false,
+    "state": "ultimate",
+    "time": "3.000",
+    "active": 0
+  },
+  "horseRequests": [
+    "http://127.0.0.1:8791/arena-art/horse/v1/poses.json",
+    "http://127.0.0.1:8791/arena-art/horse/v1/reactions.json",
+    "http://127.0.0.1:8791/arena-art/horse/v1/poses.webp",
+    "http://127.0.0.1:8791/arena-art/horse/v1/reactions.webp"
+  ],
+  "status": "passed",
+  "checkedAt": "2026-11-11T16:25:52.807Z",
+  "inputHashes": {
+    "index.html": {
+      "testedSHA256": "79523de7fd5d143fca76105cf600bde2eb9173fda24eb77ab8ae895d1e3169c1",
+      "scopedSHA256": "e5bfe2bcd1eb0b8a8e31373c6ea9061e880d0fcbadb74a224568f5e78c5d9a88",
+      "bytes": 6012
+    },
+    "learning.js": {
+      "testedSHA256": "2e8b049e01f05511e30d5a503d516f842be18360dac979219618227c0a9aed81",
+      "scopedSHA256": "2e8b049e01f05511e30d5a503d516f842be18360dac979219618227c0a9aed81",
+      "bytes": 112978
+    },
+    "horse-animation.js": {
+      "testedSHA256": "7824a2b40fa337f31dd7de8394a6953ed9183adcc467647c28be03bb632be68c",
+      "scopedSHA256": "7824a2b40fa337f31dd7de8394a6953ed9183adcc467647c28be03bb632be68c",
+      "bytes": 20466
+    },
+    "horse-animation.css": {
+      "testedSHA256": "35c7c7509b65fad645b87c9558a4fb6241a2eccaaa455104bedcf16d2211af15",
+      "scopedSHA256": "35c7c7509b65fad645b87c9558a4fb6241a2eccaaa455104bedcf16d2211af15",
+      "bytes": 2436
+    },
+    "arena-art/horse/v1/poses.json": {
+      "testedSHA256": "44bbe84b0e84e363584ca5ff8e1d85a63dd83a2769d258dd40b5f567228a2a36",
+      "scopedSHA256": "44bbe84b0e84e363584ca5ff8e1d85a63dd83a2769d258dd40b5f567228a2a36",
+      "bytes": 1840
+    },
+    "arena-art/horse/v1/poses.webp": {
+      "testedSHA256": "22a6ac9665d432c61dbd8758f5c55b4c58bce1294cd822fc92bee5b9b2ac0243",
+      "scopedSHA256": "22a6ac9665d432c61dbd8758f5c55b4c58bce1294cd822fc92bee5b9b2ac0243",
+      "bytes": 342812
+    },
+    "arena-art/horse/v1/reactions.json": {
+      "testedSHA256": "f4f2e5a34817fdc1b8ca7bf825d578bde592004434dbf93265365eeec1dd26b7",
+      "scopedSHA256": "f4f2e5a34817fdc1b8ca7bf825d578bde592004434dbf93265365eeec1dd26b7",
+      "bytes": 1840
+    },
+    "arena-art/horse/v1/reactions.webp": {
+      "testedSHA256": "0055de88e1ec74f7747b6f7b2e21bf07508519de5edfda2df0718269b99549e6",
+      "scopedSHA256": "0055de88e1ec74f7747b6f7b2e21bf07508519de5edfda2df0718269b99549e6",
+      "bytes": 323338
+    }
+  }
+}

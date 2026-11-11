@@ -1,0 +1,59 @@
+{
+  "assets": [
+    {
+      "name": "horse-animation.js",
+      "status": 200,
+      "mime": "text/javascript",
+      "bytes": 20466,
+      "sha256": "7824a2b40fa337f31dd7de8394a6953ed9183adcc467647c28be03bb632be68c"
+    },
+    {
+      "name": "horse-animation.css",
+      "status": 200,
+      "mime": "text/css",
+      "bytes": 2436,
+      "sha256": "35c7c7509b65fad645b87c9558a4fb6241a2eccaaa455104bedcf16d2211af15"
+    },
+    {
+      "name": "learning.js",
+      "status": 200,
+      "mime": "text/javascript",
+      "bytes": 129264,
+      "sha256": "d67ba58a879cb238198480cfd6a01453c71ad945250c2f4b519c0955a3da64f7"
+    },
+    {
+      "name": "arena-art/horse/v1/poses.webp",
+      "status": 200,
+      "mime": "image/webp",
+      "bytes": 342812,
+      "sha256": "22a6ac9665d432c61dbd8758f5c55b4c58bce1294cd822fc92bee5b9b2ac0243"
+    },
+    {
+      "name": "arena-art/horse/v1/poses.json",
+      "status": 200,
+      "mime": "application/json",
+      "bytes": 1840,
+      "sha256": "44bbe84b0e84e363584ca5ff8e1d85a63dd83a2769d258dd40b5f567228a2a36"
+    },
+    {
+      "name": "arena-art/horse/v1/reactions.webp",
+      "status": 200,
+      "mime": "image/webp",
+      "bytes": 323338,
+      "sha256": "0055de88e1ec74f7747b6f7b2e21bf07508519de5edfda2df0718269b99549e6"
+    },
+    {
+      "name": "arena-art/horse/v1/reactions.json",
+      "status": 200,
+      "mime": "application/json",
+      "bytes": 1840,
+      "sha256": "f4f2e5a34817fdc1b8ca7bf825d578bde592004434dbf93265365eeec1dd26b7"
+    }
+  ],
+  "checks": [
+    "Home, learning, arena and health return 200 with horse includes",
+    "Private design originals and unknown paths return 404",
+    "Existing grade API returns 10/10 for the CI exam fixture"
+  ],
+  "status": "passed"
+}

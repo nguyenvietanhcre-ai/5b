@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-11",
+  "tool": "built-in image_gen",
+  "character": "Ngựa",
+  "references": [
+    {"path": "design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/01-thu-tren-can.png", "role": "Horse identity, row 2 column 1 of 2x3 board"},
+    {"path": "design/5bmath/linh-vat/mam-sach-cao-nau-goc.png", "role": "Approved felt/clay material, lighting, palette"}
+  ],
+  "outputs": [
+    {
+      "file": "poses.png",
+      "generatedFile": "exec-153b160f-c4f1-4863-bfb2-f827bf2f3ddb.png",
+      "transparentBackground": true,
+      "prompt": "Create a production-quality transparent sprite sheet of ONLY the chestnut HORSE from LOWER LEFT cell (row 2 column 1) of reference board. Second reference is MATERIAL/STYLE only (soft tactile felt-clay 3D toys). Preserve this exact little horse: chestnut body, dark brown swept mane and long tail, cream rounded long muzzle, apricot cheeks, large brown eyes, two ears, FOUR legs with dark hooves, stout cute proportions. No hands, horns, wings, clothes, book or leaves. EXACTLY SIXTEEN full-body horse poses in an evenly spaced 4 columns x 4 rows sheet, genuinely transparent alpha background, no checkerboard, no gridlines, no letters/text/labels, no shadow, no effects. All poses same size, facing right in a consistent 3/4 view so all four legs are visible naturally, at least 12% empty margin in each equal cell, no overlap, no cropped ears/tail/hooves. Row1 frames0-3: relaxed standing; toss mane and raise chin for gentle neigh; lift front hoof ready; crouch weight back ready to gallop. Row2 frames4-7: four coherent quadruped gallop cycle phases, horse running fast to RIGHT, natural horse anatomy, mane and tail flow backwards, legs visibly change phase. Row3 frames8-11: powerful running brace; forward galloping leap; strong decisive forward hoof stamp with TWO forelegs ahead and two hind legs behind; controlled landing all hooves. Row4 frames12-15: happy head lift; small proud rear with ONLY two forelegs raised and two hind legs grounded; settle to all fours with joyful smile; final proud friendly standing. Four legs in every pose, even in overlapping views. Warm soft lighting, matte chestnut felt/clay with subtle fuzz, exact reference identity. This sheet is for Vó Ngựa Cuồng Phong ultimate. NO composited magical effects; Canvas adds horseshoes and wind later. Clean separated alpha silhouettes."
+    },
+    {
+      "file": "reactions.png",
+      "generatedFile": "exec-161ef046-4448-4301-99eb-e6044894352f.png",
+      "additionalReference": "source/poses.png",
+      "transparentBackground": true,
+      "prompt": "Make the SECOND sprite sheet for the very same chestnut HORSE: identity from lower-left of image1, soft matte tactile felt/clay style from image2, match sprite horse material/proportions of image3. Image3 is character reference only, do NOT copy its stray background speckles. Exactly SIXTEEN separate full-body horse poses in a regular 4 columns x4 rows grid. ALL horses face RIGHT, nose on the RIGHT and tail on LEFT, same right-facing 3/4 view, same size in every cell. Genuinely transparent alpha with completely clean empty space, no painted black/white/checkerboard, NO dust/no dots/no stars/NO ground shadow/no grid/no text. Generous 12% cell margin, entire ears mane tail hooves within own cell. Horse has chestnut brown body, dark brown swept mane, large long dark tail, cream long round muzzle, apricot cheeks, shiny brown eyes, two ears and exactly FOUR legs with dark hooves. Quadruped anatomy, NO extra arms or hands. Row1 frames0-3 NORMAL ATTACK: weight shifts back with alert expression; short bounding charge with forelegs extended; decisive front-hoof stomp landing; settle all four hooves on ground. Row2 frames4-7 TAKING HIT: startled eyes and ears; gentle recoil leaning backward with one forehoof raised; eyes squeezed shut and head lowered; recover standing with a brave little smile. No injury no bruises no violence. Row3 frames8-11 SAD DEFEAT: head starts lowering and ears droop; eyes glossy and mouth softly downturned; head lowered sadly with ears fully down; sitting on folded hindlegs, forelegs grounded, head lowered and sad but cute expression, FOUR limbs naturally visible. NO tears falling/particles, Canvas adds those. Row4 frames12-15 IDLE: happy all-four standing; gentle breathing pose; blink with eyes softly closed; proud friendly all-four standing head slightly raised. Clean small animation changes and coherent silhouettes. Do NOT repeat only happy faces on defeat/hit row: distinct sad and startled expressions required. Preserve reference tiny toy horse identity. Crisp clean alpha without stray pixels."
+    }
+  ],
+  "processing": "Original PNGs preserved unchanged. WebP quality82 alphaQuality100 effort6. Equal 4x4 cell boundaries, bounding boxes from largest connected alpha silhouette plus 2px margin. Apparent red speckles in transparent preview do not appear when composited; reviewed WebP on cream and dark backgrounds.",
+  "limitations": "Windup first poses are frontal three-quarter and turn into a right-facing gallop. Silent visual animation; no device FPS claim."
+}

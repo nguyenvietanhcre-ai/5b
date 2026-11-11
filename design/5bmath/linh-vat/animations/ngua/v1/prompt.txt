@@ -1,0 +1,13 @@
+Use case: stylized-concept. Asset type: animation sprite sheet for a standalone review demo.
+Character: Ngựa. Ultimate: Vó Ngựa Cuồng Phong.
+Reference image: design/5bmath/linh-vat/bo-nhan-vat-demo-2026-11-11/01-thu-tren-can.png. Use ONLY the 2th row / 1th column subject of a 2 by 3 review board.
+Keep the exact reference identity and the soft matte felt/clay 3D material, rounded proportions, large dark-brown expressive eyes, apricot cheeks, warm lighting of Cáo Nâu and Mầm Sách. Do not add fox tails, sprout leaves, books or clothes to unrelated species.
+Anatomy invariants: Ngựa nhỏ màu nâu hạt dẻ, bờm và đuôi nâu sẫm.; Mõm dài bo tròn, hai tai nhỏ và bốn chi kết thúc bằng móng guốc.; Không thêm sừng kỳ lân, cánh hoặc đôi tay riêng; giữ dáng ngựa bốn chân.
+Action idea (not yet approved choreography): Cất tiếng hí rồi phi nước đại, mỗi nhịp vó để lại một dấu móng ngựa phát sáng. Các dấu móng cuộn thành cơn lốc hình ngựa, lao qua và cuốn đối thủ xoay một vòng.
+Create EXACTLY SIXTEEN full-body poses, 4 columns × 4 rows, on genuinely transparent alpha, no checkerboard, grid, labels or shadows. Each pose stays inside its cell with generous margin. Keep consistent size/camera/markings. Face right in 3/4 view.
+Row 1, frames 1–4: neutral → notice/track target → windup → compressed ready pose, adapted to this species.
+Row 2, frames 5–8: four sequential approach/movement poses adapted to the action idea (walk/run/fly/swim/float, never add legs or wings that do not belong to the species).
+Row 3, frames 9–12: brace → anticipate → decisive species-specific action → follow-through. No composited beams/particles or text; effects are layered later by Canvas.
+Row 4, frames 13–16: joyful reaction → small celebration motion → settle → final proud friendly pose.
+Timeline for the separate animation: total 3.000 s / 90 frames at 30 fps. Windup 0–0.95; name appears at 0.65 before charge/action starts 0.95; impact at about 1.75; victory 1.90–3.00. Keep family-friendly toy motion and no injuries.
+This request creates only the selected character's review assets, never production game changes.

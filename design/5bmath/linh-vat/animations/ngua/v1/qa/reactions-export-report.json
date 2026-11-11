@@ -1,0 +1,199 @@
+{
+  "duration": 3,
+  "frames": 90,
+  "fps": 30,
+  "actions": [
+    {
+      "action": "attack",
+      "gif": {
+        "path": "exports/attack.gif",
+        "bytes": 737557,
+        "frames": 90,
+        "durationMs": 3000
+      },
+      "mp4": {
+        "path": "exports/attack.mp4",
+        "bytes": 1169103,
+        "duration": 3,
+        "width": 1280,
+        "height": 720,
+        "ready": 4
+      },
+      "states": [
+        {
+          "time": 0,
+          "t": 0,
+          "action": "attack",
+          "phase": "LẤY ĐÀ",
+          "pose": 0,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 0.5,
+          "t": 0.5,
+          "action": "attack",
+          "phase": "CÚ VÓ NHANH",
+          "pose": 1,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 1,
+          "t": 1,
+          "action": "attack",
+          "phase": "SẴN SÀNG",
+          "pose": 3,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": true,
+          "victory": false
+        },
+        {
+          "time": 2.8,
+          "t": 2.8,
+          "action": "attack",
+          "phase": "SẴN SÀNG",
+          "pose": 12,
+          "nameVisible": false,
+          "attackStarted": true,
+          "impact": true,
+          "victory": false
+        }
+      ]
+    },
+    {
+      "action": "hit",
+      "gif": {
+        "path": "exports/hit.gif",
+        "bytes": 576457,
+        "frames": 90,
+        "durationMs": 3000
+      },
+      "mp4": {
+        "path": "exports/hit.mp4",
+        "bytes": 1079754,
+        "duration": 3,
+        "width": 1280,
+        "height": 720,
+        "ready": 4
+      },
+      "states": [
+        {
+          "time": 0,
+          "t": 0,
+          "action": "hit",
+          "phase": "BẤT NGỜ",
+          "pose": 4,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 0.5,
+          "t": 0.5,
+          "action": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 5,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 1,
+          "t": 1,
+          "action": "hit",
+          "phase": "CHỊU ĐÒN",
+          "pose": 6,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 2.8,
+          "t": 2.8,
+          "action": "hit",
+          "phase": "BÌNH TĨNH TRỞ LẠI",
+          "pose": 12,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        }
+      ]
+    },
+    {
+      "action": "defeat",
+      "gif": {
+        "path": "exports/defeat.gif",
+        "bytes": 775161,
+        "frames": 90,
+        "durationMs": 3000
+      },
+      "mp4": {
+        "path": "exports/defeat.mp4",
+        "bytes": 1096468,
+        "duration": 3,
+        "width": 1280,
+        "height": 720,
+        "ready": 4
+      },
+      "states": [
+        {
+          "time": 0,
+          "t": 0,
+          "action": "defeat",
+          "phase": "BUỒN BÃ",
+          "pose": 8,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 0.5,
+          "t": 0.5,
+          "action": "defeat",
+          "phase": "BUỒN BÃ",
+          "pose": 8,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 1,
+          "t": 1,
+          "action": "defeat",
+          "phase": "BUỒN BÃ",
+          "pose": 9,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        },
+        {
+          "time": 2.8,
+          "t": 2.8,
+          "action": "defeat",
+          "phase": "MÌNH SẼ THỬ LẠI!",
+          "pose": 11,
+          "nameVisible": false,
+          "attackStarted": false,
+          "impact": false,
+          "victory": false
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "status": "passed",
+  "checkedAt": "2026-11-11T16:13:38.514Z"
+}

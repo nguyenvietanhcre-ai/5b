@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Ngựa — Vó Ngựa Cuồng Phong · 5BMath</title>
+<style>
+:root{color-scheme:light;--green:#1f6248;--ink:#203a32;--cream:#fff9ed;--peach:#ffbe73}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif}main{max-width:1320px;margin:auto;padding:20px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px}h1{font-size:clamp(22px,4vw,32px);margin:5px 0}.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--green);font-weight:800}header p{margin:5px 0;font-size:14px;line-height:1.5}.badge{background:#e7efdd;border:1px solid #c7d6c0;border-radius:24px;padding:10px 16px;font-size:13px;white-space:nowrap}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}button,select{min-height:46px;border-radius:14px;border:1px solid #b7c6ad;background:#fffdf5;color:var(--ink);padding:10px 18px;font:inherit;font-weight:700;cursor:pointer}.actions button[aria-pressed=true],button.primary{background:var(--green);color:white;border-color:var(--green)}.actions button[aria-pressed=true]{box-shadow:inset 0 -3px #164b36}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--peach);outline-offset:3px}canvas{display:block;width:100%;height:auto;border-radius:24px;box-shadow:0 16px 44px #203a3225;background:#264734}.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0 12px}input[type=range]{accent-color:var(--green);flex:1;min-width:140px;min-height:44px}.clock{font-variant-numeric:tabular-nums;min-width:90px;font-size:14px}.beats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.beat{padding:12px 16px;background:#edf1e3;border-radius:14px;font-size:13px;line-height:1.6}.beat strong{display:block}.note{font-size:13px;color:#52705f;line-height:1.6;margin-bottom:0}@media(max-width:600px){main{padding:12px}header{align-items:flex-start}.badge{font-size:11px;padding:8px 10px;white-space:normal;max-width:100px}canvas{border-radius:16px}.controls{gap:8px}button,select{padding:10px 13px}.actions{display:grid;grid-template-columns:1fr 1fr}.actions button{font-size:14px}.beats{grid-template-columns:1fr}.beat strong{display:inline;margin-right:6px}.clock{min-width:80px}header p{font-size:12px}.controls label{flex:1}.controls select{width:100%}.controls input{flex-basis:60%}}
+</style>
+<main>
+  <header><div><div class="eyebrow">5BMATH · BỘ CHUYỂN ĐỘNG NGỰA</div><h1>Vó Ngựa Cuồng Phong</h1><p>Hất bờm → phi nước đại → lốc vó ngựa → tự hào</p></div><span class="badge">Canvas + WebP<br>3 giây · 30 fps</span></header>
+  <nav class="actions" aria-label="Chọn hoạt cảnh Ngựa"><button data-action="ultimate" aria-pressed="true">Chiêu cuối</button><button data-action="attack" aria-pressed="false">Tấn công</button><button data-action="hit" aria-pressed="false">Chịu đòn</button><button data-action="defeat" aria-pressed="false">Buồn khi thua</button></nav>
+  <canvas id="stage" width="1280" height="720" aria-label="Ngựa lấy đà, tung Vó Ngựa Cuồng Phong và ăn mừng.">Hoạt cảnh Ngựa. Dùng các nút phía trên để chọn chiêu cuối, tấn công, chịu đòn hoặc buồn khi thua cuộc.</canvas>
+  <div class="controls"><button id="replay" class="primary">↻ Phát lại</button><button id="pause">Tạm dừng</button><label><select id="speed" aria-label="Tốc độ xem"><option value="1">Tốc độ 1×</option><option value="0.5">Chậm 0,5×</option></select></label><input id="seek" type="range" min="0" max="3" step="0.01" value="0" aria-label="Vị trí trong hoạt cảnh"><span id="clock" class="clock">0,00 / 3,00 s</span></div>
+  <div class="beats"><div class="beat"><strong>0–0,95 s · Lấy đà</strong>Hất bờm, nhấc vó. Tên chiêu hiện từ 0,65 giây.</div><div class="beat"><strong>0,95–1,90 s · Cuồng phong</strong>Dấu móng sáng hợp thành lốc hình ngựa, cuốn đối thủ một vòng.</div><div class="beat"><strong>1,90–3,00 s · Chiến thắng</strong>Lốc tan thành dấu móng và sao. Ngựa dừng vững, tự hào.</div></div>
+  <p class="note">Bản xem riêng của bộ chuyển động Ngựa. Đã yêu cầu tích hợp vào game local; tạo hình và chuyển động vẫn chờ bạn xem. Canvas chỉ tải WebP, các bản GIF/MP4 dùng để duyệt. Hoạt cảnh chiêu cuối có kết thúc thắng minh họa; game dùng kết quả trận thực tế.</p>
+</main>
+<script src="config.js"></script>
+<script src="poses.js"></script>
+<script src="reactions.js"></script>
+<script src="animation.js"></script>
+</html>

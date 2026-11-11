@@ -1,0 +1,23 @@
+diff --git a/frontend/learning.js b/frontend/learning.js
+index 7a93d06..057a45a 100644
+--- a/frontend/learning.js
++++ b/frontend/learning.js
+@@ -842,6 +842,10 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+             if(final)owlFinaleUntil=Date.now()+3100;
+             ArenaAudio.effect(final?'beam':'next');return;
+         }
++        if(window.HorseAnimation?.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
++            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
++            ArenaAudio.effect(final?'beam':'rock');return;
++        }
+         if(typeof ArenaStarfish!=='undefined' && ArenaStarfish.animate(target,attacker,final)){
+             if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
+             ArenaAudio.effect(final?'beam':'next');return;
+@@ -958,6 +962,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
+         },beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate?3000:1600);
+     }
+     function dispatchBattleHit(target,attacker,final) {
++        window.HorseAnimation?.notifyVictim(target,attacker,final);
+         if(typeof RabbitAnimation!=='undefined')RabbitAnimation.notifyVictim(target,attacker,final);
+         if(typeof ArenaVoi!=='undefined')ArenaVoi.notifyVictim(target,attacker,final);
+         animateHit(target,attacker,final);
