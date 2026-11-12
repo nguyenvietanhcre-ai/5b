@@ -9,7 +9,7 @@ Tất cả tệp dự án đặt tại F:\ChatGPT Math Project.
 |---|---|
 | Python/Docker cục bộ | API tài khoản, học tập, Zoom và VIP dùng SQLite riêng; volume Docker giữ dữ liệu qua các lần dựng lại image. |
 | Cloudflare Pages | HTML công khai dựng sẵn, CSS/JS/ảnh; bản `cloudflare-live` gọi binding `BACKEND` cùng Origin. |
-| Python Workers + Durable Object | Adapter mới trong `cloudflare/`, SQLite tách theo trường; cần đạt QA, preview và kiểm chuyển dữ liệu trước khi bật production. |
+| Python Workers + Durable Object | API tài khoản, học tập, Zoom và VIP trên `5bmath.vn`; SQLite bền vững tách theo trường. Đã chuyển dữ liệu và đối chiếu bản xuất độc lập ngày 12/11/2026. |
 | D1 `5bmath-demo` | Chỉ API mẫu `/api/database-demo`; tách khỏi database tài khoản |
 | GitHub Pages và bản mở tệp | Trải nghiệm offline/trình duyệt, không tạo tài khoản thật hoặc xác nhận thanh toán |
 

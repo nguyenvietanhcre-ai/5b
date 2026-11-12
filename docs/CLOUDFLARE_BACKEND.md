@@ -45,7 +45,7 @@ Lệnh kiểm này chỉ xác minh Git và CI, không triển khai. Chỉ dùng 
 
 Làm theo [BACKUPS.md](BACKUPS.md). Tạo snapshot SQLite nhất quán, khôi phục thử trên tệp mới và so sánh từng giá trị trước khi chuyển. Chỉ nhập vào object trống, bật `TRANSFER_ENABLED` tạm thời và dùng secret `OPERATOR_TOKEN`. Khi đang chờ nhập, API tài khoản trả 503 và không tự tạo database. Sau nhập, kiểm số bản ghi, xuất ngược về SQLite độc lập và so sánh trước khi mở website.
 
-Tắt lại cổng nhập sau khi hoàn tất. Cổng xuất sao lưu vẫn cần operator secret; secret không nằm trong mã, URL, log hoặc tin nhắn. Không dùng tài khoản thật để chạy bộ kiểm thử.
+Tắt lại cổng nhập sau khi hoàn tất. Cấu hình đã phát hành mặc định `TRANSFER_ENABLED=false` cho cả production và preview. Khi chuyển vào một tenant mới hoàn toàn, lần deploy chuẩn bị phải dùng `--var TRANSFER_ENABLED:true` để giữ API chờ nhập; sau import/export/compare phải deploy lại với cấu hình mặc định đóng. Không mở lại cổng nhập khi triển khai cập nhật thông thường. Cổng xuất sao lưu vẫn cần operator secret; secret không nằm trong mã, URL, log hoặc tin nhắn. Không dùng tài khoản thật để chạy bộ kiểm thử.
 
 SQLite Durable Objects hỗ trợ PITR tới các mốc trong 30 ngày; bản xuất độc lập vẫn cần để phục hồi khi mất quyền truy cập tài khoản. [PITR API](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/#pitr-point-in-time-recovery-api). Công cụ chuyển/xuất phiên bản 1 giới hạn một payload 16 MiB; nếu dữ liệu vượt mức, cần quy trình xuất phân trang trước khi tiếp tục dùng công cụ này. Không cắt bớt tệp hoặc lịch sử để làm vừa giới hạn.
 
