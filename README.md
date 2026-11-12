@@ -80,7 +80,7 @@ Script chỉ tạo/cập nhật luật `5BMath-LAN-8765`, không tắt firewall 
 
 Kiểm thử trong đúng image (chạy tại thư mục gốc dự án trên Windows):
 
-    docker compose run --rm --no-deps -T --volume "F:\ChatGPT Math Project\tests:/app/tests:ro" --tmpfs /app/work:uid=65532,gid=65532 web python -m unittest discover -s tests -v
+    docker compose -f compose.yaml -f compose.test.yaml run --rm --no-deps -T web python -m unittest discover -s tests -v
 
 Ngày 08/11/2026, container healthy, trang chủ/JS/CSS/health trả về HTTP 200, đề mẫu đạt 10/10 và 10 kiểm thử Python đều đạt trong image lẫn trên Windows. Kiểm tra cú pháp JavaScript cũng đạt.
 Nguồn cách dùng Compose: https://docs.docker.com/reference/cli/docker/compose/up/

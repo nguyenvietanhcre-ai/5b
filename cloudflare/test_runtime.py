@@ -42,6 +42,21 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'tests'))
 
 
+def assert_loopback_port_available(port):
+    with socket.socket() as probe:
+        # Linux retains recently closed connections in TIME_WAIT after the
+        # intentional workerd restart. Match Node's Unix reuse behavior while
+        # still calling listen(), so an actual listener is never accepted.
+        # Windows SO_REUSEADDR has different sharing semantics; leave it off.
+        if os.name != 'nt':
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            probe.bind(('127.0.0.1', port))
+            probe.listen(1)
+        except OSError as error:
+            raise RuntimeError('QA port is already occupied; choose an unused non-production port') from error
+
+
 class HTTPClient:
     def __init__(self, origin):
         self.origin, self.csrf = origin, ''
@@ -179,11 +194,7 @@ class LocalWorker:
         self.starts = 0
 
     def start(self):
-        with socket.socket() as probe:
-            try:
-                probe.bind(('127.0.0.1', self.port))
-            except OSError as error:
-                raise RuntimeError('QA port is already occupied; choose an unused non-production port') from error
+        assert_loopback_port_available(self.port)
         self.starts += 1
         self.log = (self.directory / ('worker-' + str(self.starts) + '.log')).open('wb')
         node = os.environ.get('NODE_BIN') or shutil.which('node')

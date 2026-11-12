@@ -1,0 +1,7 @@
+services:
+  web:
+    tmpfs:
+      - /tmp
+      - /app/work:uid=65532,gid=65532
+    volumes:
+      - ./tests:/app/tests:ro
