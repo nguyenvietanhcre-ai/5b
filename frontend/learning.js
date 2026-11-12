@@ -278,7 +278,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     function accountGate() {
         return `${intro('Góc Học Tập 5BMath','Học theo tuần, luyện chuyên đề và chơi cùng Mầm Sách.')}
             <section class="hero-app"><div class="hero-copy"><h2>Gieo một hạt mầm Toán</h2><p>${live ? 'Đăng nhập hoặc tạo tài khoản để lưu tiến độ học theo khối của em.' : 'Đặt tên và năm sinh để thử khu học tập theo khối của em.'}</p><button class="btn orange" data-login type="button">${live ? 'Đăng nhập / Đăng ký' : 'Vào học thử'} ${icon('arrow',17)}</button></div><div class="hero-art">${art('sprout','Mầm Sách đang đọc sách')}</div></section>
-            ${notice(live ? 'Tài khoản và tiến độ được lưu tại máy chủ localhost. Học liệu là các bài mẫu tự biên soạn.' : 'Tài khoản trải nghiệm lưu trên trình duyệt này. Học liệu trong khu học tập là các bài mẫu tự biên soạn.')}`;
+            ${notice(live ? 'Tài khoản và tiến độ được lưu trên hệ thống 5BMath. Học liệu là các bài mẫu tự biên soạn.' : 'Tài khoản trải nghiệm lưu trên trình duyệt này. Học liệu trong khu học tập là các bài mẫu tự biên soạn.')}`;
     }
 
     function homeworkPanel() {
