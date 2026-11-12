@@ -8,10 +8,20 @@ services:
     ports:
       - "127.0.0.1:${MAM_TOAN_PORT:-8765}:8000"
     init: true
+    environment:
+      MAM_TOAN_REVIEW_UPGRADES: ${MAM_TOAN_REVIEW_UPGRADES:-0}
+      MAM_TOAN_BANK_ID: ${MAM_TOAN_BANK_ID:-}
+      MAM_TOAN_BANK_ACCOUNT: ${MAM_TOAN_BANK_ACCOUNT:-}
+      MAM_TOAN_BANK_NAME: ${MAM_TOAN_BANK_NAME:-}
+      MAM_TOAN_SEPAY_ENABLED: ${MAM_TOAN_SEPAY_ENABLED:-0}
+      MAM_TOAN_SEPAY_WEBHOOK_SECRET: ${MAM_TOAN_SEPAY_WEBHOOK_SECRET:-}
+      MAM_TOAN_PUBLIC_ORIGIN: ${MAM_TOAN_PUBLIC_ORIGIN:-}
     restart: unless-stopped
     read_only: true
     tmpfs:
       - /tmp
+    volumes:
+      - demo-db:/data
     cap_drop:
       - ALL
     security_opt:
@@ -21,3 +31,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  demo-db:

@@ -238,12 +238,12 @@
     }
     function start() {
         suspended=false;
-        if(!observer)observer=new MutationObserver(scheduleSync);
-        observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});sync();
+        if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed)){if(!observer)observer=new MutationObserver(scheduleSync);
+        observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});}sync();
     }
     function inspect() {return {loaded:Boolean(atlas),pets:[...pets.values()].map(e=>({mood:e.mode,pose:Number(e.canvas.dataset.pose),running:Boolean(e.raf),connected:e.node.isConnected})),flights:flights.size,reducedMotion:reduced.matches};}
     window.ArenaBeeAnimation={ready,configure,sync,hit,stop,destroy,start,renderUltimate,drawSprite:sprite,sample,inspect};
-    document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
+    if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed))document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else if(!suspended)for(const entry of pets.values())play(entry,entry.node.dataset.mood||'idle',true);});
     window.addEventListener('pagehide',stop);
     window.addEventListener('resize',()=>{stop();if(atlas)for(const entry of pets.values())paintPet(entry,(durations[entry.mode]||0)/1000);});

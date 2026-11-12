@@ -1,0 +1,23 @@
+name = "5bmath"
+compatibility_date = "2026-11-12"
+pages_build_output_dir = "./work/pages-release"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "5bmath-demo"
+database_id = "3a611823-88ba-4feb-8e93-09d7609e59ee"
+migrations_dir = "backend/migrations"
+
+[[services]]
+binding = "BACKEND"
+service = "5bmath-api"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "5bmath-demo"
+database_id = "3a611823-88ba-4feb-8e93-09d7609e59ee"
+migrations_dir = "backend/migrations"
+
+[[env.preview.services]]
+binding = "BACKEND"
+service = "5bmath-api-preview"

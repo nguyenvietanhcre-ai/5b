@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "characterId": "ca-map",
+  "ultimateName": "Vây Xé Đại Dương",
+  "poses": {
+    "width": 1254,
+    "height": 1254,
+    "cellW": 313.5,
+    "cellH": 313.5,
+    "hasAlpha": true,
+    "frames": [
+      {
+        "left": 43,
+        "top": 52,
+        "width": 252,
+        "height": 223,
+        "index": 0,
+        "facing": "left"
+      },
+      {
+        "left": 352,
+        "top": 53,
+        "width": 250,
+        "height": 225,
+        "index": 1,
+        "facing": "left"
+      },
+      {
+        "left": 645,
+        "top": 79,
+        "width": 275,
+        "height": 210,
+        "index": 2,
+        "facing": "left"
+      },
+      {
+        "left": 956,
+        "top": 64,
+        "width": 260,
+        "height": 225,
+        "index": 3,
+        "facing": "left"
+      },
+      {
+        "left": 35,
+        "top": 369,
+        "width": 264,
+        "height": 197,
+        "index": 4,
+        "facing": "left"
+      },
+      {
+        "left": 330,
+        "top": 376,
+        "width": 269,
+        "height": 184,
+        "index": 5,
+        "facing": "left"
+      },
+      {
+        "left": 635,
+        "top": 385,
+        "width": 305,
+        "height": 181,
+        "index": 6,
+        "facing": "left"
+      },
+      {
+        "left": 940,
+        "top": 399,
+        "width": 286,
+        "height": 155,
+        "index": 7,
+        "facing": "left"
+      },
+      {
+        "left": 50,
+        "top": 695,
+        "width": 237,
+        "height": 194,
+        "index": 8,
+        "facing": "right"
+      },
+      {
+        "left": 343,
+        "top": 677,
+        "width": 251,
+        "height": 221,
+        "index": 9,
+        "facing": "right"
+      },
+      {
+        "left": 654,
+        "top": 637,
+        "width": 241,
+        "height": 262,
+        "index": 10,
+        "facing": "right"
+      },
+      {
+        "left": 946,
+        "top": 683,
+        "width": 253,
+        "height": 217,
+        "index": 11,
+        "facing": "right"
+      },
+      {
+        "left": 43,
+        "top": 993,
+        "width": 253,
+        "height": 184,
+        "index": 12,
+        "facing": "right"
+      },
+      {
+        "left": 351,
+        "top": 982,
+        "width": 248,
+        "height": 200,
+        "index": 13,
+        "facing": "right"
+      },
+      {
+        "left": 654,
+        "top": 988,
+        "width": 243,
+        "height": 204,
+        "index": 14,
+        "facing": "right"
+      },
+      {
+        "left": 958,
+        "top": 972,
+        "width": 242,
+        "height": 216,
+        "index": 15,
+        "facing": "right"
+      }
+    ]
+  },
+  "actions": {
+    "width": 1254,
+    "height": 1254,
+    "hasAlpha": true,
+    "frames": [
+      {
+        "left": 28,
+        "top": 61,
+        "width": 264,
+        "height": 222,
+        "index": 0,
+        "facing": "right"
+      },
+      {
+        "left": 324,
+        "top": 65,
+        "width": 281,
+        "height": 210,
+        "index": 1,
+        "facing": "right"
+      },
+      {
+        "left": 631,
+        "top": 78,
+        "width": 296,
+        "height": 182,
+        "index": 2,
+        "facing": "right"
+      },
+      {
+        "left": 944,
+        "top": 73,
+        "width": 255,
+        "height": 208,
+        "index": 3,
+        "facing": "right"
+      },
+      {
+        "left": 30,
+        "top": 351,
+        "width": 269,
+        "height": 223,
+        "index": 4,
+        "facing": "right"
+      },
+      {
+        "left": 337,
+        "top": 345,
+        "width": 258,
+        "height": 219,
+        "index": 5,
+        "facing": "right"
+      },
+      {
+        "left": 651,
+        "top": 358,
+        "width": 242,
+        "height": 216,
+        "index": 6,
+        "facing": "right"
+      },
+      {
+        "left": 949,
+        "top": 349,
+        "width": 265,
+        "height": 230,
+        "index": 7,
+        "facing": "right"
+      },
+      {
+        "left": 27,
+        "top": 660,
+        "width": 268,
+        "height": 236,
+        "index": 8,
+        "facing": "right"
+      },
+      {
+        "left": 336,
+        "top": 672,
+        "width": 262,
+        "height": 228,
+        "index": 9,
+        "facing": "right"
+      },
+      {
+        "left": 644,
+        "top": 682,
+        "width": 256,
+        "height": 222,
+        "index": 10,
+        "facing": "right"
+      },
+      {
+        "left": 952,
+        "top": 667,
+        "width": 256,
+        "height": 228,
+        "index": 11,
+        "facing": "right"
+      },
+      {
+        "left": 30,
+        "top": 974,
+        "width": 269,
+        "height": 231,
+        "index": 12,
+        "facing": "right"
+      },
+      {
+        "left": 332,
+        "top": 971,
+        "width": 268,
+        "height": 231,
+        "index": 13,
+        "facing": "right"
+      },
+      {
+        "left": 640,
+        "top": 969,
+        "width": 265,
+        "height": 221,
+        "index": 14,
+        "facing": "right"
+      },
+      {
+        "left": 957,
+        "top": 962,
+        "width": 260,
+        "height": 213,
+        "index": 15,
+        "facing": "right"
+      }
+    ]
+  },
+  "modes": {
+    "attack": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "hit": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "lose": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "idle": [
+      12,
+      13
+    ],
+    "win": [
+      14,
+      15
+    ]
+  },
+  "duration": 3
+}

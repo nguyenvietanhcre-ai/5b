@@ -210,9 +210,9 @@
         enabled=false;observer?.disconnect();stop();
         for(const entry of pets.values()){entry.canvas.remove();entry.node.classList.remove('sparrow-canvas-ready');}pets.clear();
     }
-    window.ArenaSparrowAnimation={configure,sync,play,hit,ultimate,stop,destroy,ready:()=>load().then(Boolean)};
+    window.ArenaSparrowAnimation={mountManaged(root=document){enabled=true;sync(root);},configure,sync,play,hit,ultimate,stop,destroy,ready:()=>load().then(Boolean)};
     function start() {observer=new MutationObserver(scheduleSync);observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});sync();}
-    document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
+    if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed))document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else for(const entry of pets.values())playEntry(entry,entry.node.dataset.mood||'idle',true);});
     window.addEventListener('pagehide',stop);
     window.addEventListener('resize',()=>{stop();for(const entry of pets.values()){if(entry.image)paint(entry,duration[entry.mood]||0);else playEntry(entry,entry.node.dataset.mood||'idle',true);}});

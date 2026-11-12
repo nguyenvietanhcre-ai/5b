@@ -317,9 +317,9 @@
         for(const entry of pets.values()){entry.canvas.remove();entry.node.classList.remove('crab-canvas-ready');}pets.clear();
     }
     const inspect=()=>({loaded:Boolean(atlas),pets:[...pets.values()].map(e=>({mood:e.mood,pose:Number(e.canvas.dataset.pose),time:Number(e.canvas.dataset.time),running:Boolean(e.raf),connected:e.node.isConnected})),flights:flights.size,visuals:visuals.size,timers:timers.size,reducedMotion:reduced.matches});
-    window.ArenaCrabAnimation={configure,sync,play,hit,stop,destroy,ready:load,renderUltimate,drawSprite:sprite,inspect};
+    window.ArenaCrabAnimation={mountManaged(root=document){active=true;sync(root);},configure,sync,play,hit,stop,destroy,ready:load,renderUltimate,drawSprite:sprite,inspect};
     function start(){observer=new MutationObserver(scheduleSync);observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});sync();}
-    document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
+    if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed))document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else for(const entry of pets.values())playPet(entry,entry.node.dataset.mood||'idle',true);});
     window.addEventListener('pagehide',stop);
     window.addEventListener('resize',()=>{stop();for(const entry of pets.values())if(atlas)paintPet(entry,duration[entry.mood]||0);});

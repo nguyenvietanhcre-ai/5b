@@ -1,0 +1,7 @@
+# Optional LAN access; keep compose.yaml's localhost mapping and database volume.
+# PowerShell: $env:MAM_TOAN_LAN_IP = '192.168.1.2'
+# docker compose -f compose.yaml -f compose.lan.yaml up --build --wait --wait-timeout 120
+services:
+  web:
+    ports:
+      - "${MAM_TOAN_LAN_IP:?Set MAM_TOAN_LAN_IP to this computer's LAN IPv4 address}:${MAM_TOAN_PORT:-8765}:8000"

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="vi" data-backend="database" data-grading="server" data-page="entrance" data-theme="garden-adventure">
+<head>
+    <base href="../">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#1f6248">
+    <title>Đăng Ký Kiểm Tra Đầu Vào | 5BMath</title>
+    <meta name="description" content="Đăng ký kiểm tra đầu vào Toán tại 5BMath để được tư vấn lộ trình và lớp Zoom phù hợp với học sinh tiểu học.">
+    <link rel="canonical" href="https://5bmath.vn/dang-ky-kiem-tra-dau-vao/">
+    <link rel="icon" href="5bmath-icon.svg" type="image/svg+xml">
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admissions.css">
+    <link rel="stylesheet" href="themes.css">
+    <script src="admissions.js" defer></script>
+</head>
+<body class="admissions-page">
+    <header class="intake-header"><div><a href="./"><img src="5bmath-logo.svg" width="314" height="84" alt="5BMath Gieo Mầm Toán"></a><a class="btn outline" href="dang-ky-hoc-zoom/">Thông tin học Zoom</a></div></header>
+    <main id="app">
+        <div class="intake-wrap">
+            <section class="intake-intro" aria-labelledby="intake-title"><span class="pill">CÙNG CON BẮT ĐẦU</span><h1 id="intake-title">Đăng Ký Kiểm Tra Đầu Vào</h1><p>Chia sẻ một chút về con để 5BMath tư vấn bài kiểm tra và lộ trình học Toán phù hợp.</p><div class="intake-steps" aria-label="Nội dung khảo sát"><span>01 · Người liên hệ</span><span>02 · Học sinh</span><span>03 · Nhu cầu học</span></div><p class="intake-hint">Khoảng 3 phút · Dấu * là thông tin bắt buộc. Phụ huynh hoặc người giám hộ vui lòng điền biểu mẫu.</p></section>
+            <form id="intake-form" class="intake-form">
+                <fieldset><legend><span>01</span> Thông tin phụ huynh</legend><div class="intake-grid">
+                    <label>Họ tên phụ huynh/người giám hộ *<input name="parentName" autocomplete="name" required maxlength="100"></label>
+                    <label>Số điện thoại liên hệ *<input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="Ví dụ: 09xxxxxxxx" required maxlength="30"></label>
+                    <label>Email <small>(không bắt buộc)</small><input name="email" type="email" autocomplete="email" maxlength="160"></label>
+                    <label>Ưu tiên liên hệ qua *<select name="contact" required><option value="">Chọn cách liên hệ</option><option>Zalo</option><option>Điện thoại</option><option>Facebook</option></select></label>
+                </div><p class="intake-hint">Nếu chọn Facebook, vui lòng để lại tên hoặc liên kết trang cá nhân ở phần ghi chú.</p></fieldset>
+                <fieldset><legend><span>02</span> Thông tin học sinh</legend><div class="intake-grid">
+                    <label>Họ tên học sinh *<input name="studentName" required maxlength="100" autocomplete="off"></label>
+                    <label>Khối lớp đang học *<select name="grade" required><option value="">Chọn khối lớp</option><option value="1">Lớp 1</option><option value="2">Lớp 2</option><option value="3">Lớp 3</option><option value="4">Lớp 4</option><option value="5">Lớp 5</option></select></label>
+                    <label>Trường đang học <small>(không bắt buộc)</small><input name="school" maxlength="160"></label>
+                    <label>Tỉnh/thành phố đang sinh sống *<input name="city" required maxlength="100" autocomplete="address-level1"></label>
+                </div></fieldset>
+                <fieldset><legend><span>03</span> Mong muốn & thời gian</legend><div class="intake-grid">
+                    <label>Mục tiêu học Toán *<select name="goal" required><option value="">Chọn mục tiêu chính</option><option>Củng cố kiến thức nền tảng</option><option>Phát triển tư duy Toán</option><option>Bồi dưỡng học sinh giỏi</option><option>Ôn thi vào trường cấp 2 chất lượng cao</option><option>Cần giáo viên tư vấn lộ trình</option></select></label>
+                    <label>Khả năng hiện tại của con *<select name="level" required><option value="">Chọn mô tả gần nhất</option><option>Cần hỗ trợ kiến thức cơ bản</option><option>Nắm kiến thức cơ bản, cần luyện vận dụng</option><option>Học khá tốt, muốn học nâng cao</option><option>Chưa rõ, cần kiểm tra để đánh giá</option></select></label>
+                    <label class="intake-wide">Ngày & khung giờ thuận tiện *<input name="schedule" required maxlength="300" placeholder="Ví dụ: Tối thứ 3, thứ 5 sau 19h; sáng cuối tuần"><small>Đây là nguyện vọng. Giáo viên sẽ liên hệ để thống nhất lịch kiểm tra; chưa phải lịch đã xác nhận.</small></label>
+                    <label class="intake-wide">Điều thầy cô cần biết thêm <small>(không bắt buộc)</small><textarea name="notes" rows="4" maxlength="1500" placeholder="Phần con còn khó, trường mục tiêu, mong muốn của gia đình hoặc tài khoản Facebook để liên hệ…"></textarea></label>
+                </div></fieldset>
+                <div class="intake-hidden" aria-hidden="true"><label>Không điền mục này<input name="website" tabindex="-1" autocomplete="off"></label></div>
+                <div class="intake-consent"><label><input name="consent" type="checkbox" required><span>Tôi là phụ huynh/người giám hộ và đồng ý để 5BMath lưu thông tin trên, liên hệ về kiểm tra đầu vào và tư vấn học tập cho con. *</span></label><p>Thông tin chỉ hiển thị cho quản trị viên được cấp quyền. Vui lòng không gửi mật khẩu, giấy tờ định danh hoặc thông tin sức khỏe. Có thể liên hệ Zalo 5BMath để yêu cầu chỉnh sửa hoặc xóa đăng ký.</p></div>
+                <div id="intake-error" class="intake-error" role="alert" tabindex="-1"></div>
+                <div class="intake-submit"><button class="btn dark" id="intake-submit" type="submit" disabled>Gửi đăng ký kiểm tra đầu vào</button><span id="intake-status" role="status">Đang kiểm tra kết nối…</span></div>
+                <noscript><p class="intake-error">Cần bật JavaScript để gửi biểu mẫu. Bạn có thể đăng ký trực tiếp qua Zalo hoặc Facebook bên dưới.</p></noscript>
+            </form>
+            <section id="intake-success" class="intake-success" tabindex="-1" hidden><span aria-hidden="true">✓</span><h2>Đã nhận đăng ký của gia đình</h2><p>Mã đăng ký: <strong id="intake-reference"></strong></p><p>5BMath sẽ liên hệ theo thông tin đã cung cấp để thống nhất bước kiểm tra đầu vào. Lịch kiểm tra và việc xếp lớp sẽ được xác nhận sau khi trao đổi.</p><a class="btn dark" href="dang-ky-hoc-zoom/">Về thông tin học Zoom</a></section>
+            <aside class="intake-contact"><h2>Cần trao đổi trước?</h2><p>Phụ huynh có thể đăng ký tư vấn trực tiếp với 5BMath.</p><div class="actions"><a class="btn outline" href="https://zalo.me/0984763971" target="_blank" rel="noopener noreferrer">Đăng ký tư vấn · Zalo</a><a class="btn outline" href="https://www.facebook.com/5bmath" target="_blank" rel="noopener noreferrer">Đăng ký tư vấn · Facebook</a></div></aside>
+        </div>
+    </main>
+    <footer class="intake-footer">5BMath · Ươm mầm tư duy - Khơi nguồn tri thức</footer>
+</body>
+</html>

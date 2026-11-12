@@ -1,12 +1,30 @@
 .venv/
+node_modules/
+.wrangler/
+.python-workers-venv/
+/cloudflare/runtime/
+/cloudflare/.venv/
+python_modules/
 __pycache__/
 *.py[cod]
 work/
 .env
 .env.*
 !.env.example
+# This computer's phone-testing LAN binding is refreshed by docker-demo.ps1.
+/compose.override.yaml
 .DS_Store
 Thumbs.db
+
+# User-provided books, exam archives, private briefs and generated local exports.
+/Learn/
+/Exams/
+/outputs/
+/req/
+/Req.md
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
 
 # Detailed chat history stays local unless explicitly approved for publication.
 /docs/chat/*.md

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi" data-grading="server" data-backend="database" data-page="learn-arena" data-theme="garden-adventure">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#1f6248">
+    <base href="../">
+    <title>Đấu trí toán học | 5BMath</title>
+    <meta name="description" content="Khu học tập 5BMath · Đấu trí toán học.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="5bmath-icon.svg" type="image/svg+xml">
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes.css">
+    <script src="nickname-policy.js" defer></script>
+    <script src="platform-api.js" defer></script>
+    <script src="runtime-assets.js" defer></script>
+    <script src="app.js" defer></script>
+</head>
+<body class="learning-mode">
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="#home" class="brand"><img src="5bmath-logo.svg" alt="5BMath — Gieo Mầm Toán" width="628" height="168"></a>
+            <button id="menu" type="button" aria-label="Mở menu" aria-controls="primary-nav" aria-expanded="false">☰</button>
+            <nav id="primary-nav" aria-label="Điều hướng trang chủ">
+                <a href="#home">Trang chủ</a>
+                <a href="#quy-trinh-hoc">Quy trình học</a>
+                <a href="#chuong-trinh-hoc">Chương trình học</a>
+                <a href="#tai-nguyen">Tài nguyên</a>
+                <a href="#thi-thu">Thi Thử</a>
+                <a href="#tin-tuc">Tin Tức</a>
+                <a href="#tuyen-sinh">Tuyển sinh</a>
+                <a href="#tuyen-dung">Tuyển dụng</a>
+            </nav>
+            <button id="account" class="btn outline small" type="button" disabled aria-busy="true">Đăng nhập</button>
+        </div>
+    </header>
+    <main id="app"><div id="learning-app"><button type="button" class="learning-menu-backdrop" id="learning-menu-backdrop" tabindex="-1" aria-label="Đóng menu" hidden></button><aside class="sidebar" id="learning-navigation" aria-label="Menu Góc học tập"><div class="learning-drawer-head"><strong>Góc Học Tập</strong><button type="button" id="learning-menu-close" aria-label="Đóng menu">×</button></div><a class="app-logo" href="./"><img src="5bmath-logo.svg" alt="5BMath Gieo Mầm Toán" width="628" height="168"></a><nav class="navigation" aria-label="Góc Học Tập"><a href="goc-hoc-tap/"   ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7v10H3z M9 20v-7h6v7"/></svg><span>Tổng quan</span></a><a href="hoc-theo-tuan/"   ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6C9 3 5 3 3 4v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-2-1-6-1-9 2zm0 0v14"/></svg><span>Học online</span></a><a href="thi-thu/"   ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z M10 10h5m-5 4h5m-5 4h4"/></svg><span>Luyện tập</span></a><a href="dau-tri/"   aria-current="page"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg><span>Đấu trí</span></a><a href="xep-hang/"   ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0z M7 5H3v2a4 4 0 0 0 4 4m10-6h4v2a4 4 0 0 1-4 4m-5 3v6m-4 1h8"/></svg><span>Xếp hạng</span></a><a href="linh-vat/"   ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21v-9m0 2C7 14 4 10 4 6c5 0 8 3 8 7m0-2c0-5 3-8 8-8 0 5-3 8-8 8"/></svg><span>Linh vật</span></a><a href="tai-khoan/" data-account-nav aria-label="Tài khoản"  ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m15-6a4 4 0 0 1 4 4v2M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm4-4a4 4 0 0 1 0 8"/></svg><span>Tài khoản</span><span class="account-unread-badge" data-unread-count hidden aria-hidden="true">0</span></a><a href="nang-cap/"   ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2c0 6 4 10 10 10-6 0-10 4-10 10 0-6-4-10-10-10 6 0 10-4 10-10z"/></svg><span>Nâng cấp gói</span></a><a href="dang-ky-hoc-zoom/"   ><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v16H4z M8 3v4m8-4v4M4 10h16"/></svg><span>Đăng ký học Zoom</span></a></nav><a class="sidebar-pet" href="linh-vat/"><svg class="mascot-art sprout" style="background:none;height:auto" viewBox="0 0 379 521" aria-hidden="true"><svg width="379" height="521" viewBox="131 44 379 521" overflow="hidden"><image href="mascots.webp" width="1200" height="600"/></svg></svg><div><b>Mầm Sách</b><small>Cấp 1 · 1.000 điểm</small></div><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></aside>
+        <div class="app-main"><header class="topbar"><button type="button" class="learning-menu-toggle" id="learning-menu-toggle" aria-label="Mở menu học tập" aria-expanded="false" aria-controls="learning-navigation"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><a class="mobile-logo" href="./"><img src="5bmath-logo.svg" alt="5BMath Gieo Mầm Toán" width="628" height="168"></a><span class="top-title">Góc Học Tập <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg> <b>Đấu trí toán học</b></span><div class="top-right"><span class="tag sage">Free</span><a class="profile" href="tai-khoan/"><span class="avatar mascot-avatar" data-mascot="sprout" role="img" aria-label="Linh vật Mầm Sách"><svg viewBox="0 0 379 521" aria-hidden="true" focusable="false"><svg width="379" height="521" viewBox="131 44 379 521" overflow="hidden"><image href="mascots.webp" width="1200" height="600"/></svg></svg></span><span><b>Học sinh</b><small>Khối 5</small></span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a></div></header><div class="content"><header class="intro"><div><h1>Đấu trí toán học</h1><p>Chọn cách chơi và đồng hành cùng linh vật của em.</p></div><button class="btn outline" type="button" data-learning="toggle-music" >🎵 Nhạc: Bật</button></header>
+            <div class="arena-lobby"><section class="card card-pad arena-player"><a href="linh-vat/" class="arena-player-pet"><svg class="mascot-art sprout" style="background:none;height:auto" viewBox="0 0 379 521" aria-hidden="true"><svg width="379" height="521" viewBox="131 44 379 521" overflow="hidden"><image href="mascots.webp" width="1200" height="600"/></svg></svg><div><strong>Hạt mầm</strong><small>Cấp 1 · 1.000 kinh nghiệm</small></div></a><div class="arena-player-usage" id="arena-mode-usage"><p class="usage-note">0 / 3 lượt hôm nay</p></div><div class="meter" role="progressbar" aria-label="Tiến độ linh vật" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span style="--value:0%"></span></div><small>Còn 20 kinh nghiệm đến cấp 2</small></section>
+            <section class="arena-discipline" id="arena-discipline" role="status" hidden><div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z M12 7v5l3 2"/></svg></div><div><strong id="arena-discipline-title">Tạm nghỉ đấu với người</strong><p id="arena-discipline-warning"></p><p id="arena-discipline-rest" hidden>Có thể đấu lại sau <b id="arena-rest-countdown">00:00</b>.</p><small>Em vẫn có thể học và luyện với máy.</small></div></section><div class="arena-modes" role="tablist" aria-label="Chế độ đấu trí"><button type="button" role="tab" id="arena-tab-quick" data-arena-mode="quick" aria-controls="arena-panel-quick" aria-selected="true" tabindex="0" class="selected"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg><span>Đấu nhanh</span></button><button type="button" role="tab" id="arena-tab-friends" data-arena-mode="friends" aria-controls="arena-panel-friends" aria-selected="false" tabindex="-1" class=""><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m15-6a4 4 0 0 1 4 4v2M12 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zm4-4a4 4 0 0 1 0 8"/></svg><span>Với bạn</span></button><button type="button" role="tab" id="arena-tab-bot" data-arena-mode="bot" aria-controls="arena-panel-bot" aria-selected="false" tabindex="-1" class=""><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16v12H4z M12 8V4m-2 0h4M8 13h.01m8 0h.01m-8 4h8"/></svg><span>Với máy</span></button></div>
+            <section class="arena-mode-panel" id="arena-panel-quick" role="tabpanel" aria-labelledby="arena-tab-quick" >
+              <h2 class="arena-panel-title">Tìm trận nhanh</h2><button type="button" class="arena-action arena-action-quick" data-human-play data-human-quota="true" data-learning="quick-match" ><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0zm-2 5 6 6"/></svg><span><strong>Tìm đối thủ</strong><small>Ghép với bạn cùng lớp 5 hoặc mở phòng công khai</small></span></button>
+              <div class="section-head arena-rooms-heading"><h3>Phòng đang mở</h3><span class="tag sage">Lớp 5</span></div><section class="card card-pad" id="public-rooms" aria-live="polite">Đang tìm phòng…</section>
+            </section>
+            <section class="arena-mode-panel" id="arena-panel-friends" role="tabpanel" aria-labelledby="arena-tab-friends" hidden>
+              <h2 class="arena-panel-title">Đấu với bạn</h2><button type="button" class="arena-action arena-action-friends" data-human-play data-human-quota="true" data-learning="create-room" ><svg class="mascot-art sprout" style="background:none;height:auto" viewBox="0 0 379 521" aria-hidden="true"><svg width="379" height="521" viewBox="131 44 379 521" overflow="hidden"><image href="mascots.webp" width="1200" height="600"/></svg></svg><span><strong>Tạo phòng đấu</strong><small>Mời bạn bằng mã hoặc mở phòng cho tất cả</small></span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-7-7v14"/></svg></button>
+              <section class="card card-pad arena-join"><h3>Có mã phòng?</h3><form id="learning-join-form"><label class="field"><span>Mã phòng hoặc liên kết</span><input id="learning-room-code" placeholder="Nhập mã hoặc dán liên kết" required maxlength="500" autocomplete="off"></label><button class="btn dark" data-human-play data-human-quota="true" type="submit" >Vào phòng</button></form><small>Dán liên kết bạn gửi cũng được. Nội dung của trận do chủ phòng chọn.</small></section>
+            </section>
+            <section class="arena-mode-panel" id="arena-panel-bot" role="tabpanel" aria-labelledby="arena-tab-bot" hidden>
+              <h2 class="arena-panel-title">Đấu với máy</h2><p class="arena-bot-note">Demo tự biên soạn · Mức độ minh họa · Không tính kinh nghiệm</p><input type="hidden" id="bot-level" value="0">
+              <div class="arena-bots"><button type="button" class="arena-action arena-bot arena-bot-0" data-learning="start-bot" data-bot-level="0" ><svg class="mascot-art sprout" style="background:none;height:auto" viewBox="0 0 379 521" aria-hidden="true"><svg width="379" height="521" viewBox="131 44 379 521" overflow="hidden"><image href="mascots.webp" width="1200" height="600"/></svg></svg><span><strong>Dễ · Tập sự</strong><small>Luyện nhẹ nhàng, làm quen nhịp đấu</small></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg></button><button type="button" class="arena-action arena-bot arena-bot-1" data-learning="start-bot" data-bot-level="1" ><svg class="mascot-art fox" style="background:none;height:auto" viewBox="0 0 443 532" aria-hidden="true"><svg width="443" height="532" viewBox="670 34 443 532" overflow="hidden"><image href="mascots.webp" width="1200" height="600"/></svg></svg><span><strong>Trung bình</strong><small>Cùng thử sức và rèn phản xạ</small></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg></button><button type="button" class="arena-action arena-bot arena-bot-2" data-learning="start-bot" data-bot-level="2" ><svg class="mascot-art sprout" style="background:none;height:auto" viewBox="0 0 379 521" aria-hidden="true"><svg width="379" height="521" viewBox="131 44 379 521" overflow="hidden"><image href="mascots.webp" width="1200" height="600"/></svg></svg><span><strong>Khó · Thử thách</strong><small>Tập trung suy nghĩ, sẵn sàng chinh phục</small></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg></button></div>
+            </section>
+            <details class="card rules arena-rules" open><summary><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6C9 3 5 3 3 4v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-2-1-6-1-9 2zm0 0v14"/></svg><span>Luật đấu trí<small>Nắm luật thật nhanh, sẵn sàng tranh tài!</small></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="arena-rules-body"><ul class="arena-rule-grid">
+                <li><span class="arena-rule-icon" aria-hidden="true">❤️</span><div><strong>100 máu</strong><p>Mỗi linh vật có <b>100 máu</b> khi bắt đầu trận.</p></div></li>
+                <li><span class="arena-rule-icon" aria-hidden="true">⚡</span><div><strong>Đúng và nhanh hơn</strong><p>Trả lời đúng và nhanh hơn đối thủ gây <b>20 sát thương</b>.</p></div></li>
+                <li><span class="arena-rule-icon" aria-hidden="true">🏳️</span><div><strong>Khi nào thua?</strong><p>Linh vật hết máu là thua. <b>Rời trận giữa chừng tính là thua.</b></p></div></li>
+                <li><span class="arena-rule-icon" aria-hidden="true">🤝</span><div><strong>Khi nào hòa?</strong><p>Hết <b>20 câu hỏi</b> mà hai linh vật vẫn còn máu là hòa.</p></div></li>
+              </ul><h3>Kinh nghiệm sau trận</h3><ul class="arena-rule-rewards">
+                <li><span aria-hidden="true">🏆</span><strong>Thắng</strong><b>+2</b><small>kinh nghiệm</small></li>
+                <li><span aria-hidden="true">🌱</span><strong>Thua</strong><b>−1</b><small>kinh nghiệm</small></li>
+                <li><span aria-hidden="true">🤝</span><strong>Hòa</strong><b>0</b><small>kinh nghiệm</small></li>
+              </ul></div>
+            </details></div></div></div></div></main>
+    <footer>
+        <a href="#home" class="footer-brand"><img src="5bmath-logo.svg" alt="5BMath — Gieo Mầm Toán" width="628" height="168"></a>
+        <span>Mỗi ngày hiểu thêm một chút. Mỗi ngày tự tin hơn.</span>
+        <small>Bản demo • Học liệu mẫu tự biên soạn</small>
+    </footer>
+    <aside class="contact-dock" aria-label="Liên hệ 5BMath">
+        <section class="contact-panel" id="contact-panel" aria-labelledby="contact-title" hidden>
+            <div class="contact-head">
+                <h2 id="contact-title">Chat với 5BMath</h2>
+                <button class="contact-close" id="contact-close" type="button" aria-label="Đóng khung liên hệ">×</button>
+            </div>
+            <div class="contact-body" id="web-chat">
+                <p class="contact-note">Trợ lý hỏi đáp tự động · Bản demo</p>
+                <p class="chat-bubble" id="chat-answer" aria-live="polite">Chào bạn! 5BMath có thể giúp bạn tìm bài học, đề thi thử hoặc thông tin tuyển sinh.</p>
+                <div class="chat-topics" aria-label="Câu hỏi gợi ý" role="group">
+                    <button type="button" data-chat-topic="learning" aria-pressed="false">Học những gì?</button>
+                    <button type="button" data-chat-topic="exam" aria-pressed="false">Thi thử ở đâu?</button>
+                    <button type="button" data-chat-topic="enrollment" aria-pressed="false">Tìm hiểu tuyển sinh</button>
+                </div>
+                <a class="text-link" id="chat-link" hidden></a>
+            </div>
+            <div class="contact-body" id="messenger-info" hidden>
+                <p class="chat-bubble">Liên kết Messenger của 5BMath đang được cập nhật. Bạn có thể liên hệ qua nút Zalo bên dưới.</p>
+            </div>
+        </section>
+        <div class="contact-actions">
+            <a class="contact-button contact-zalo" href="https://zalo.me/0984763971" target="_blank" rel="noopener noreferrer" aria-label="Nhắn Zalo 5BMath (mở tab mới)" title="Nhắn Zalo">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4C8.8 4 4 8.6 4 14.8c0 3 1.3 5.7 3.6 7.6l-1 4.7 5-2.5c1.3.4 2.8.6 4.4.6 7.2 0 12-4.3 12-10.4S23.2 4 16 4Z" fill="white"/><text x="16" y="18.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="9.4" font-weight="700" fill="#0068ff">Zalo</text></svg>
+            </a>
+            <button class="contact-button contact-messenger" id="messenger-toggle" type="button" aria-label="Messenger 5BMath" title="Messenger" aria-controls="contact-panel" aria-expanded="false">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4C9 4 4 9 4 15.4c0 3.6 1.6 6.7 4.5 8.9v4.2l4-2.2c1.1.3 2.3.5 3.5.5 7 0 12-4.9 12-11.4S23 4 16 4Z" fill="white"/><path d="m8.2 19.3 6-6.4a1 1 0 0 1 1.4-.1l3.1 2.4 5.1-2.7-6 6.4a1 1 0 0 1-1.4.1l-3.1-2.4Z" fill="#0866ff"/></svg>
+            </button>
+            <button class="contact-button contact-chat" id="chat-toggle" type="button" aria-label="Chat trên web" title="Chat trên web" aria-controls="contact-panel" aria-expanded="false">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 6h16a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H14l-7 4v-4a4 4 0 0 1-3-4V10a4 4 0 0 1 4-4Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 15h.1m5.9 0h.1m5.9 0h.1" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+    </aside>
+    <dialog id="modal"><button id="close-modal" aria-label="Đóng">×</button><div id="modal-body"></div></dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

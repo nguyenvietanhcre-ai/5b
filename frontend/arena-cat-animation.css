@@ -1,0 +1,18 @@
+/* Cat atlas is only fetched when a cat is displayed. Canvas replaces it after decoding. */
+body.learning-mode .mascot-art.cat {
+  display:block; aspect-ratio:1; background-image:url('arena-art/meo-neutral.webp');
+  background-size:contain; background-position:center; background-repeat:no-repeat;
+}
+body.learning-mode .battle-pet.cat { --motion-image:none; }
+body.learning-mode .battle-pet.cat .motion-sprite { display:none !important; }
+body.learning-mode .battle-pet.cat > .mascot-art { visibility:visible; animation:none; }
+body.learning-mode .battle-pet.cat.cat-canvas-ready > .mascot-art { visibility:hidden; }
+body.learning-mode .battle-pet.cat .arena-cat-sprite { position:absolute; inset:0; display:block; width:100%; height:100%; pointer-events:none; }
+body.learning-mode .battle-pet.cat.cat-ultimate-hidden { visibility:hidden; }
+body.learning-mode .arena-cat-ultimate { position:absolute; inset:0; display:block; width:100%; height:100%; z-index:7; pointer-events:none; }
+body.learning-mode .spell-announcement.cat-spell-accessible { width:1px; height:1px; padding:0; border:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+body.learning-mode .illustrated-arena.cat-ultimate-active .energy-beam,
+body.learning-mode .illustrated-arena.cat-ultimate-active .spell-effect { display:none; }
+@media(prefers-reduced-motion:reduce) {
+  body.learning-mode .battle-pet.cat,body.learning-mode .battle-pet.cat * { animation:none !important; transition:none !important; }
+}

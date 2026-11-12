@@ -233,7 +233,7 @@
         });
         observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});sync();
     }
-    document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
+    if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed))document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else{suspended=false;redraw();}});
     window.addEventListener('pagehide',stop);window.addEventListener('resize',()=>{for(const flight of [...flights])finish(flight);redraw();});
     reduced.addEventListener('change',()=>{stop();suspended=false;redraw();});

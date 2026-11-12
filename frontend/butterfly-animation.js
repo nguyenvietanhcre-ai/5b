@@ -98,7 +98,7 @@ window.ButterflyAnimation = (() => {
         for (const node of root.querySelectorAll('.battle-pet.butterfly')) {
             if (!mounted.has(node)) { mounted.add(node); play(node,node.dataset.mood || 'idle'); }
         }
-        if (!observer) {
+        if (!observer && !(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed)) {
             observer = new MutationObserver(records => {
                 for (const record of records) if (record.type === 'attributes' && record.target.matches('.battle-pet.butterfly')) {
                     const node = record.target, action = node.dataset.mood || 'idle';

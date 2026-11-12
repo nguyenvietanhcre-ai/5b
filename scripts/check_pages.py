@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 from xml.etree import ElementTree
 
-from backend.server import PAGES
+from backend.server import PAGES, PRIVATE_PAGES
 
 SITE = "https://5bmath.vn/"
 
@@ -43,12 +43,12 @@ def check(output, target):
     titles = set()
     descriptions = set()
     graph = {}
-    public = {route for route, name in routes.items() if name != "dashboard"}
+    public = {route for route, name in routes.items() if name not in PRIVATE_PAGES}
     mount = "/5b" if target == "github" else ""
     for route, name in routes.items():
         html = (output / route.strip("/") / "index.html").read_text(encoding="utf-8")
         page = PageHTML(html)
-        assert page.route == name and page.grading == "browser", route
+        assert page.route == name and page.grading == ("server" if target in ("python", "cloudflare-live") else "browser"), route
         main = re.search(r'<main id="app">([\s\S]*?)</main>', html)
         assert main and len(re.findall(r"<h1\b", main[1])) == 1, route
         if route not in public:
@@ -70,8 +70,9 @@ def check(output, target):
             if link.netloc == "test.invalid":
                 assert link.path.startswith(mount + "/"), (route, href)
                 destination = link.path.removeprefix(mount)
-                assert destination in public, (route, href)
-                graph[route].add(destination)
+                assert destination in routes, (route, href)
+                if destination in public:
+                    graph[route].add(destination)
 
     found = {"/"}
     pending = ["/"]
@@ -84,7 +85,7 @@ def check(output, target):
     error = PageHTML((output / "404.html").read_text(encoding="utf-8"))
     assert error.meta.get("robots") == "noindex"
     assert mount + "/" in error.links
-    if target == "cloudflare":
+    if target != "github":
         robots = (output / "robots.txt").read_text(encoding="utf-8")
         assert "Sitemap: " + SITE + "sitemap.xml" in robots
         sitemap = ElementTree.parse(output / "sitemap.xml")
@@ -97,6 +98,6 @@ def check(output, target):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("output", type=Path)
-    parser.add_argument("target", choices=["cloudflare", "github"], nargs="?", default="cloudflare")
+    parser.add_argument("target", choices=["cloudflare", "github", "python", "cloudflare-live"], nargs="?", default="cloudflare")
     args = parser.parse_args()
     check(args.output, args.target)

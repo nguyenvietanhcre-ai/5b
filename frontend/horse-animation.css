@@ -1,27 +1,14 @@
-body.learning-mode .horse-appearance-panel { display:flex; gap:18px; align-items:center; }
-body.learning-mode .horse-appearance-panel h2 { font-size:19px; margin:0 0 6px; color:var(--green,#1f6248); }
-body.learning-mode .horse-appearance-panel p { margin:0 0 12px; }
-body.learning-mode .horse-appearance-panel > div { min-width:0; }
-body.learning-mode .horse-appearance-panel .actions { flex-wrap:wrap; gap:8px; }
-body.learning-mode .horse-appearance-panel .btn { min-height:44px; }
-body.learning-mode .horse-appearance-panel [aria-pressed="true"] { outline:2px solid var(--green,#1f6248); outline-offset:3px; }
-body.learning-mode .horse-appearance-status { display:block; margin-top:12px; }
-body.learning-mode .horse-appearance-preview { width:100px; height:100px; flex:none; }
+body.learning-mode .mascot-art.horse { height:auto; background:none; object-fit:contain; }
 body.learning-mode .horse-pet-canvas { position:absolute; inset:0; width:100%; height:100%; display:none; }
 body.learning-mode .horse-ready > .horse-pet-canvas { display:block; }
 body.learning-mode .horse-ready > :not(.horse-pet-canvas) { visibility:hidden !important; display:none !important; }
-body.learning-mode .horse-loading > .mascot-art { visibility:visible !important; display:block !important; animation:none !important; }
-body.learning-mode .horse-loading > .motion-sprite { display:none !important; }
+body.learning-mode .battle-pet.horse:not(.horse-ready) > .mascot-art.horse { visibility:visible !important; display:block !important; animation:none !important; }
+body.learning-mode .battle-pet.horse > .motion-sprite { display:none !important; }
+body.learning-mode .horse-failed::after { content:'Ngựa'; position:absolute; left:0; right:0; bottom:0; color:var(--ink,#203a32); font-size:12px; text-align:center; }
 body.learning-mode .horse-facing { transform:none !important; }
 body.learning-mode .horse-stage-effect { position:absolute; inset:0; width:100%; height:100%; z-index:7; pointer-events:none; }
 body.learning-mode .horse-ultimate .energy-beam,body.learning-mode .horse-ultimate .spell-effect,body.learning-mode .horse-strike .spell-effect { display:none !important; }
 body.learning-mode .horse-ultimate #spell-announcement,body.learning-mode .horse-strike #spell-announcement { visibility:hidden; }
 body.learning-mode .horse-whirl-target .pet-turn { animation:horse-whirl .55s ease-out both; }
 @keyframes horse-whirl { 0% { rotate:0deg; } 100% { rotate:360deg; } }
-@media(max-width:480px) {
- body.learning-mode .horse-appearance-panel { align-items:flex-start; gap:10px; padding:16px; }
- body.learning-mode .horse-appearance-preview { width:64px; height:76px; }
- body.learning-mode .horse-appearance-panel .actions { display:grid; }
- body.learning-mode .horse-appearance-panel .btn { width:100%; font-size:12px; padding-inline:10px; }
-}
 @media(prefers-reduced-motion:reduce) { body.learning-mode .horse-whirl-target .pet-turn { animation:none; } }

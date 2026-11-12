@@ -3,23 +3,25 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { pages, esc } = require('../frontend/app.js');
+const { manifest } = require('../frontend/runtime-assets.js');
 
 const site = 'https://5bmath.vn/';
 const frontend = path.resolve(__dirname, '../frontend');
 const [destination, target = 'cloudflare'] = process.argv.slice(2);
-if (!destination || !['cloudflare', 'github'].includes(target)) {
-    throw new Error('Usage: node scripts/build-pages.cjs <empty-output-dir> [cloudflare|github]');
+if (!destination || !['cloudflare', 'github', 'python', 'cloudflare-live'].includes(target)) {
+    throw new Error('Usage: node scripts/build-pages.cjs <empty-output-dir> [cloudflare|github|python|cloudflare-live]');
 }
 const output = path.resolve(destination);
 fs.mkdirSync(output, { recursive: true });
 if (fs.readdirSync(output).length) throw new Error('The output directory must be empty');
 
+const live = ['python', 'cloudflare-live'].includes(target);
 const template = fs.readFileSync(path.join(frontend, 'index.html'), 'utf8');
 const sitemap = [];
 for (const [id, page] of Object.entries(pages)) {
     const canonical = new URL(page.path, site).href;
     const metadata = [
-        '<title>' + esc(page.title) + ' | 5BMath</title>',
+        '<title>' + esc(page.title) + (id==='home'?'':' | 5BMath') + '</title>',
         '<meta name="description" content="' + esc(page.description) + '">',
         page.noindex
             ? '<meta name="robots" content="noindex">'
@@ -30,29 +32,44 @@ for (const [id, page] of Object.entries(pages)) {
         const siteName = { '@context': 'https://schema.org', '@type': 'WebSite', name: '5BMath', url: site };
         metadata.push('<script type="application/ld+json">' + JSON.stringify(siteName) + '</script>');
     }
-    const html = template
-        .replace('data-grading="server"', 'data-grading="browser" data-page="' + id + '"')
+    const html = id==='entrance' ? fs.readFileSync(path.join(frontend,'admissions.html'),'utf8').replace('data-backend="database"', 'data-backend="' + (live ? 'database' : 'static') + '"').replace('data-grading="server"', 'data-grading="' + (live ? 'server' : 'browser') + '"') : template
+        .replace(/\s*<meta name="description"[^>]*>/, '')
+        .replace(/\s*<link rel="canonical"[^>]*>/, '')
+        .replace('data-grading="server"', 'data-grading="' + (live ? 'server' : 'browser') + '" data-backend="' + (live ? 'database' : 'static') + '" data-page="' + id + '"')
         .replace(/<title>[^<]*<\/title>/, () => metadata.join('\n    '))
-        .replace('<main id="app"></main>', () => '<main id="app">' + page.render() + '</main>');
+        .replace('<body>', id.startsWith('staff-') ? '<body class="staff-mode">' : page.noindex ? '<body class="learning-mode">' : '<body>')
+        .replace('<main id="app"></main>', () => '<main id="app">' +
+            page.render() + '</main>');
     const folder = path.join(output, page.path);
     fs.mkdirSync(folder, { recursive: true });
-    fs.writeFileSync(path.join(folder, 'index.html'), html);
+    fs.writeFileSync(path.join(folder, 'index.html'), html.replace(/[ \t]+$/gm, ''));
     if (!page.noindex) sitemap.push(canonical);
 }
 
-for (const asset of ['app.js', 'styles.css', '5bmath-logo.svg', '5bmath-icon.svg']) {
-    fs.copyFileSync(path.join(frontend, asset), path.join(output, asset));
+if (target !== 'python') {
+const core = ['app.js', 'nickname-policy.js', 'platform-api.js', 'themes.js', 'themes.css',
+    'styles.css', '5bmath-logo.svg', '5bmath-icon.svg', 'demo-rectangle.svg',
+    'mascots.webp', 'admissions.js', 'admissions.css'];
+for (const asset of new Set([...core, ...manifest.files])) {
+    const source = path.resolve(frontend, asset);
+    if (!source.startsWith(frontend + path.sep)) throw new Error('Invalid public asset: ' + asset);
+    fs.copyFileSync(source, path.join(output, asset));
 }
-
+for (const directory of ['arena-art', 'theme-art']) {
+    fs.cpSync(path.join(frontend, directory), path.join(output, directory), {recursive: true});
+}
+}
 const root = target === 'github' ? '/5b/' : '/';
 fs.writeFileSync(path.join(output, '404.html'), `<!doctype html>
-<html lang="vi">
+<html lang="vi" data-theme="garden-adventure">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="noindex">
     <title>Không tìm thấy trang | 5BMath</title>
+    <script src="${root}themes.js"></script>
     <link rel="stylesheet" href="${root}styles.css">
+    <link rel="stylesheet" href="${root}themes.css">
 </head>
 <body>
     <main class="wrap">
@@ -69,7 +86,16 @@ fs.writeFileSync(path.join(output, '404.html'), `<!doctype html>
 </html>
 `);
 
-if (target === 'cloudflare') {
+if (['cloudflare', 'cloudflare-live'].includes(target)) {
+    const worker = fs.readFileSync(path.join(__dirname, 'pages-worker.mjs'), 'utf8')
+        .replace("'__DEMO_REPORT_SQL__'", JSON.stringify(fs.readFileSync(path.join(frontend, '../backend/demo-report.sql'), 'utf8')));
+    fs.writeFileSync(path.join(output, '_worker.js'), worker);
+    fs.writeFileSync(path.join(output, '_routes.json'),
+        JSON.stringify({ version: 1, include: target === 'cloudflare-live'
+            ? ['/api/database-demo', '/api/database-demo/*', '/api/v1/*', '/api/staff/*', '/api/webhooks/sepay', '/api/health', '/api/grade']
+            : ['/api/database-demo', '/api/database-demo/*'], exclude: [] }));
+}
+if (target !== 'github') {
     fs.writeFileSync(path.join(output, 'robots.txt'), 'User-agent: *\nAllow: /\nSitemap: ' + site + 'sitemap.xml\n');
     const urls = sitemap.map(url => '  <url><loc>' + url + '</loc></url>').join('\n');
     fs.writeFileSync(path.join(output, 'sitemap.xml'),

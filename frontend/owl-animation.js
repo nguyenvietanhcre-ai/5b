@@ -179,7 +179,7 @@ const OwlAnimation = (() => {
     function mount(root=document) {
         for(const [node]of mounted)if(!node.isConnected){const job=active.get(node);if(job)cleanJob(job);active.delete(node);mounted.delete(node);}
         for(const node of root.querySelectorAll('.battle-pet.cu-meo'))play(node,node.dataset.mood||'idle');
-        if(!observer) {
+        if (!observer && !(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed)) {
             observer=new MutationObserver(changes=>{
                 for(const change of changes) {
                     if(change.type==='attributes'&&isOwl(change.target)&&moods.get(change.target)!==change.target.dataset.mood)play(change.target,change.target.dataset.mood||'idle');

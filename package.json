@@ -1,0 +1,14 @@
+{
+  "name": "5bmath",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "check:js": "node scripts/check-js.cjs",
+    "test:browser": "node tests/browser-smoke.cjs",
+    "build:pages": "node scripts/build-pages.cjs work/pages-release cloudflare-live"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1",
+    "wrangler": "4.160.1"
+  }
+}

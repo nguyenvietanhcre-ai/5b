@@ -1,0 +1,11 @@
+/* Voi uses a finite Canvas timeline and keeps its allocated square on load. */
+body.learning-mode .mascot-art.voi { background:none; object-fit:contain; }
+body.learning-mode .battle-pet.voi[data-mood] > .mascot-art {
+  visibility:visible; display:block; width:100%; height:100%; animation:none; transform:none; filter:none;
+}
+body.learning-mode .battle-pet.voi .motion-sprite { display:none !important; }
+body.learning-mode .battle-result .battle-pet.voi { filter:drop-shadow(0 7px 5px #203a3240); }
+body.learning-mode .voi-arena-effect { position:absolute; inset:0; width:100%; height:100%; z-index:4; pointer-events:none; }
+body.learning-mode .battle-stage:has(.voi-arena-effect) .spell-announcement { z-index:7; }
+body.learning-mode .fighter[data-spell="water"] .spell-effect { display:none; }
+body.learning-mode .voi-load-error { display:grid; place-items:center; aspect-ratio:1; border-radius:50%; background:var(--cream); color:var(--green); }

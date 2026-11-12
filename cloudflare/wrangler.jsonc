@@ -1,0 +1,23 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "5bmath-api",
+  "account_id": "3b2455eadd2dbfc383376898aceb0603",
+  "workers_dev": true,
+  "main": "runtime/backend_worker.py",
+  "compatibility_date": "2026-11-12",
+  "compatibility_flags": ["python_workers"],
+  "find_additional_modules": true,
+  "rules": [{"type": "Text", "globs": ["**/*.sql", "**/*.json", "**/*.svg"], "fallthrough": false}],
+  "durable_objects": {"bindings": [{"name": "SCHOOLS", "class_name": "SchoolBackend"}]},
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["SchoolBackend"]}],
+  "vars": {"PUBLIC_ORIGIN": "https://5bmath.vn", "TENANT_KEY": "5bmath-main", "TRANSFER_ENABLED": "true"},
+  "observability": {"enabled": true, "traces": {"enabled": true}},
+  "dev": {"ip": "127.0.0.1", "port": 8894, "inspector_port": 9394},
+  "env": {
+    "preview": {
+      "name": "5bmath-api-preview",
+      "durable_objects": {"bindings": [{"name": "SCHOOLS", "class_name": "SchoolBackend"}]},
+      "vars": {"PUBLIC_ORIGIN": "https://review-20261112.5bmath.pages.dev", "TENANT_KEY": "5bmath-review", "TRANSFER_ENABLED": "true"}
+    }
+  }
+}

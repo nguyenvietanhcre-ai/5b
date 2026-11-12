@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi" data-grading="server" data-backend="database" data-page="game" data-theme="garden-adventure">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#1f6248">
+    <base href="../">
+    <title>Trò chơi xếp số thập phân | 5BMath</title>
+    <meta name="description" content="Giúp Sóc qua suối bằng cách xếp các số thập phân từ bé đến lớn qua ba vòng chơi.">
+    <link rel="canonical" href="https://5bmath.vn/tro-choi-xep-so-thap-phan/">
+    <link rel="icon" href="5bmath-icon.svg" type="image/svg+xml">
+    <script src="themes.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="themes.css">
+    <script src="nickname-policy.js" defer></script>
+    <script src="platform-api.js" defer></script>
+    <script src="runtime-assets.js" defer></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="#home" class="brand"><img src="5bmath-logo.svg" alt="5BMath — Gieo Mầm Toán" width="628" height="168"></a>
+            <button id="menu" type="button" aria-label="Mở menu" aria-controls="primary-nav" aria-expanded="false">☰</button>
+            <nav id="primary-nav" aria-label="Điều hướng trang chủ">
+                <a href="#home">Trang chủ</a>
+                <a href="#quy-trinh-hoc">Quy trình học</a>
+                <a href="#chuong-trinh-hoc">Chương trình học</a>
+                <a href="#tai-nguyen">Tài nguyên</a>
+                <a href="#thi-thu">Thi Thử</a>
+                <a href="#tin-tuc">Tin Tức</a>
+                <a href="#tuyen-sinh">Tuyển sinh</a>
+                <a href="#tuyen-dung">Tuyển dụng</a>
+            </nav>
+            <button id="account" class="btn outline small" type="button" disabled aria-busy="true">Đăng nhập</button>
+        </div>
+    </header>
+    <main id="app"><div class="wrap"><div class="page-head"><span class="eyebrow"><span class="dot"></span>CHƠI MỘT CHÚT, HIỂU THÊM NHIỀU</span><h1 class="title">Giúp Sóc bắc cầu</h1><p>Chọn các phiến đá theo thứ tự <b>từ bé đến lớn</b> để giúp Sóc qua suối. Được thử lại, không giới hạn thời gian!</p></div><section class="panel mb"><div class="quiz-top"><span class="tag">SỐ THẬP PHÂN · VÒNG 1</span><b id="game-counter">0 / 4 phiến đá</b></div><div class="game-board"><div class="game-sky"><span>🐿️</span><span class="game-sun" aria-hidden="true">☀</span><span>🌳</span></div><div class="stones"><button class="stone" data-stone="1,08" aria-label="Chọn số 1,08">1,08</button><button class="stone" data-stone="1,8" aria-label="Chọn số 1,8">1,8</button><button class="stone" data-stone="1,18" aria-label="Chọn số 1,18">1,18</button><button class="stone" data-stone="1,008" aria-label="Chọn số 1,008">1,008</button></div><div class="game-status" id="game-status" role="status">Phiến đá bé nhất là số nào nhỉ?</div></div><div class="game-bottom"><span>Mẹo: So sánh lần lượt từng hàng của số thập phân.</span><button class="btn outline small" id="game-reset">Chơi lại ↻</button></div></section></div></main>
+    <footer>
+        <a href="#home" class="footer-brand"><img src="5bmath-logo.svg" alt="5BMath — Gieo Mầm Toán" width="628" height="168"></a>
+        <span>Mỗi ngày hiểu thêm một chút. Mỗi ngày tự tin hơn.</span>
+        <small>Bản demo • Học liệu mẫu tự biên soạn</small>
+    </footer>
+    <aside class="contact-dock" aria-label="Liên hệ 5BMath">
+        <section class="contact-panel" id="contact-panel" aria-labelledby="contact-title" hidden>
+            <div class="contact-head">
+                <h2 id="contact-title">Chat với 5BMath</h2>
+                <button class="contact-close" id="contact-close" type="button" aria-label="Đóng khung liên hệ">×</button>
+            </div>
+            <div class="contact-body" id="web-chat">
+                <p class="contact-note">Trợ lý hỏi đáp tự động · Bản demo</p>
+                <p class="chat-bubble" id="chat-answer" aria-live="polite">Chào bạn! 5BMath có thể giúp bạn tìm bài học, đề thi thử hoặc thông tin tuyển sinh.</p>
+                <div class="chat-topics" aria-label="Câu hỏi gợi ý" role="group">
+                    <button type="button" data-chat-topic="learning" aria-pressed="false">Học những gì?</button>
+                    <button type="button" data-chat-topic="exam" aria-pressed="false">Thi thử ở đâu?</button>
+                    <button type="button" data-chat-topic="enrollment" aria-pressed="false">Tìm hiểu tuyển sinh</button>
+                </div>
+                <a class="text-link" id="chat-link" hidden></a>
+            </div>
+            <div class="contact-body" id="messenger-info" hidden>
+                <p class="chat-bubble">Liên kết Messenger của 5BMath đang được cập nhật. Bạn có thể liên hệ qua nút Zalo bên dưới.</p>
+            </div>
+        </section>
+        <div class="contact-actions">
+            <a class="contact-button contact-zalo" href="https://zalo.me/0984763971" target="_blank" rel="noopener noreferrer" aria-label="Nhắn Zalo 5BMath (mở tab mới)" title="Nhắn Zalo">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4C8.8 4 4 8.6 4 14.8c0 3 1.3 5.7 3.6 7.6l-1 4.7 5-2.5c1.3.4 2.8.6 4.4.6 7.2 0 12-4.3 12-10.4S23.2 4 16 4Z" fill="white"/><text x="16" y="18.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="9.4" font-weight="700" fill="#0068ff">Zalo</text></svg>
+            </a>
+            <button class="contact-button contact-messenger" id="messenger-toggle" type="button" aria-label="Messenger 5BMath" title="Messenger" aria-controls="contact-panel" aria-expanded="false">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4C9 4 4 9 4 15.4c0 3.6 1.6 6.7 4.5 8.9v4.2l4-2.2c1.1.3 2.3.5 3.5.5 7 0 12-4.9 12-11.4S23 4 16 4Z" fill="white"/><path d="m8.2 19.3 6-6.4a1 1 0 0 1 1.4-.1l3.1 2.4 5.1-2.7-6 6.4a1 1 0 0 1-1.4.1l-3.1-2.4Z" fill="#0866ff"/></svg>
+            </button>
+            <button class="contact-button contact-chat" id="chat-toggle" type="button" aria-label="Chat trên web" title="Chat trên web" aria-controls="contact-panel" aria-expanded="false">
+                <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 6h16a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H14l-7 4v-4a4 4 0 0 1-3-4V10a4 4 0 0 1 4-4Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 15h.1m5.9 0h.1m5.9 0h.1" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+    </aside>
+    <dialog id="modal"><button id="close-modal" aria-label="Đóng">×</button><div id="modal-body"></div></dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

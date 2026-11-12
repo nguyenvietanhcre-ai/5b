@@ -255,10 +255,10 @@
         if(options.modes)settings.modes={...settings.modes,...options.modes};
         for(const record of pets.values())record.mode=null;sync();
     }
-    function mount(root=document){enabled=true;if(!observer){observer=new MutationObserver(scheduleSync);observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});}sync(root);}
+    function mount(root=document){enabled=true;if(!observer && !(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed)){observer=new MutationObserver(scheduleSync);observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});}sync(root);}
     function inspect(){return {loaded:[...images].filter(([,r])=>r.ready).map(([kind])=>kind),running:Boolean(raf),enabled,reducedMotion:media.matches,pets:[...pets.values()].map(r=>({mode:r.mode,pose:Number(r.canvas.dataset.pose),time:Number(r.canvas.dataset.time),running:r.running,connected:r.node.isConnected})),flights:flights.size,timers:timers.size};}
     window.ArenaDolphin={ready,play,hit,sync,mount,stop,destroy,configure,renderUltimate,drawSprite:sprite,inspect};
-    document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>mount(),{once:true}):mount();
+    if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed))document.readyState==='loading'?document.addEventListener('DOMContentLoaded',()=>mount(),{once:true}):mount();
     document.addEventListener('visibilitychange',()=>{
         if(document.hidden){stop();return;}
         for(const record of pets.values())play(record.node,record.node.dataset.mood==='ultimate'?'idle':record.node.dataset.mood||'idle');

@@ -65,7 +65,10 @@ button:disabled { cursor: default; }
 #primary-nav { display: flex; flex: 1; justify-content: center; gap: 2px; font-size: 13px; font-weight: 650; white-space: nowrap; }
 #primary-nav a { display: flex; align-items: center; min-height: 44px; padding: 5px clamp(7px, .7vw, 11px); border-radius: 999px; }
 #primary-nav a:hover, #primary-nav a[aria-current] { color: var(--green); background: var(--leaf); }
-#account { display: block; max-width: 160px; min-height: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#account { display: inline-flex; gap: 7px; max-width: 200px; min-height: 44px; overflow: hidden; white-space: nowrap; }
+#account > span:last-child:not(.mascot-avatar) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.mascot-avatar { display: inline-grid; place-items: center; flex: none; width: 34px; height: 34px; padding: 3px; border-radius: 50%; background: var(--garden); }
+.mascot-avatar > img, .mascot-avatar > svg { display: block; width: 100%; height: 100%; object-fit: contain; overflow: hidden; }
 #menu { display: none; border: 1px solid var(--edge); border-radius: var(--radius-control); background: var(--paper); font-size: 22px; }
 .wrap { max-width: 1440px; padding-inline: var(--gutter); margin-inline: auto; }
 .btn {
@@ -218,6 +221,7 @@ button:disabled { cursor: default; }
 .panel h2, .panel h3 { line-height: 1.4; overflow-wrap: anywhere; }
 .notice { margin: 14px 0; padding: 10px 14px; border-radius: var(--radius-control); background: var(--mint); color: var(--ink); font-size: 13px; }
 .notice.mb { margin-bottom: 42px; }
+.sample-math { max-width: 100%; overflow-x: auto; padding-block: 10px; font-size: 1.3rem; }
 .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(235px, 29%); align-items: start; gap: 19px; margin-bottom: 44px; }
 .lesson h2 { font-size: clamp(22px, 2.6vw, 32px); }
 .lesson h3 { font-size: 19px; margin-top: 24px; }
@@ -451,3 +455,22 @@ dialog::backdrop { background: #203a3280; }
     .btn, #toast, .contact-button { transition: none; }
     .contact-button::after { animation: none; }
 }
+
+.home-mascot {
+    width: 100%;
+    aspect-ratio: 1;
+    background: url("mascots.webp") left center / 200% 100% no-repeat;
+}
+.account-birth-year { display: block; margin-block: 12px; }
+.account-birth-year span { display: block; }
+
+.password-control { position: relative; display: block; width: 100%; }
+.password-control > input { width: 100%; max-width: none; margin: 0; padding-right: 52px !important; }
+.password-control > .password-toggle {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 46px; min-height: 44px;
+    display: grid; place-items: center; padding: 0; margin: 0; border: 0;
+    border-radius: 10px; background: transparent; color: var(--green); cursor: pointer;
+}
+.password-toggle:hover { background: #1f62480d; }
+.password-toggle:focus-visible { outline: 3px solid var(--green); outline-offset: -3px; }
+.password-toggle [hidden] { display: none; }

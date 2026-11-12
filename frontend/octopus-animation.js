@@ -186,7 +186,7 @@ const OctopusAnimation = (() => {
         }
     }
     function schedule(){if(!queued){queued=true;queueMicrotask(sync);}}
-    function mount(){if(!observer)start();else sync();}
+    function mount(){enabled=true;if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed) && !observer)start();else sync();}
     function destroy(){
         enabled=false;observer?.disconnect();observer=null;queued=false;
         for(const flight of [...flights])stopFlight(flight);
@@ -194,13 +194,13 @@ const OctopusAnimation = (() => {
         pets.clear();
     }
     function start(){enabled=true;observer=new MutationObserver(schedule);observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-mood']});sync();}
-    document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
+    if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed))document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
     document.addEventListener('visibilitychange',()=>{
         if(document.hidden){for(const flight of [...flights])stopFlight(flight);for(const entry of pets.values()){cancelAnimationFrame(entry.raf);entry.raf=0;}}
         else for(const entry of pets.values())play(entry.node,entry.node.dataset.mood||'idle');
     });
     window.addEventListener('pagehide',destroy);
-    window.addEventListener('pageshow',()=>{if(!observer)start();});
+    window.addEventListener('pageshow',()=>{if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed) && !observer)start();});
     window.addEventListener('resize',()=>{for(const flight of [...flights])stopFlight(flight);for(const entry of pets.values())if(atlas)drawPet(entry,duration[entry.action]||0);});
     reduced.addEventListener('change',()=>{for(const entry of pets.values())play(entry.node,entry.node.dataset.mood||'idle');});
     const inspect=()=>({loaded:Boolean(atlas),pets:[...pets.values()].map(entry=>({action:entry.action,pose:Number(entry.canvas.dataset.pose),running:Boolean(entry.raf)})),flights:flights.size,reducedMotion:reduced.matches});

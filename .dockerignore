@@ -6,5 +6,7 @@
 !backend/**
 !frontend/
 !frontend/**
+!scripts/
+!scripts/**
 **/__pycache__/
 **/*.pyc

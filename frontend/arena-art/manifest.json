@@ -1,0 +1,137 @@
+[
+  {
+    "file": "01-forest-clearing.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 208856,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "02-stream.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 215062,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "03-riverbank.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 199462,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "04-mountains.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 221346,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "05-bamboo.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 156728,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "06-waterfall.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 187224,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "07-lake.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 173068,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "08-autumn.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 191844,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "09-meadow.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 186192,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "10-coast.webp",
+    "width": 896,
+    "height": 896,
+    "bytes": 190788,
+    "type": "background",
+    "columns": 1,
+    "rows": 1
+  },
+  {
+    "file": "fox-motion.webp",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 333444,
+    "type": "mascot-sprite",
+    "columns": 4,
+    "rows": 4
+  },
+  {
+    "file": "lightning-spell.webp",
+    "width": 768,
+    "height": 768,
+    "bytes": 159628,
+    "type": "spell-sprite",
+    "columns": 2,
+    "rows": 2
+  },
+  {
+    "file": "rock-spell.webp",
+    "width": 768,
+    "height": 768,
+    "bytes": 88642,
+    "type": "spell-sprite",
+    "columns": 2,
+    "rows": 2
+  },
+  {
+    "file": "sprout-motion.webp",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 355174,
+    "type": "mascot-sprite",
+    "columns": 4,
+    "rows": 4
+  },
+  {
+    "file": "vine-spell.webp",
+    "width": 768,
+    "height": 768,
+    "bytes": 205218,
+    "type": "spell-sprite",
+    "columns": 2,
+    "rows": 2
+  }
+]

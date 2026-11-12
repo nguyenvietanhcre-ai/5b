@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "minLength": 2,
+  "maxLength": 40,
+  "maxDigits": 6,
+  "fallback": "Bạn học",
+  "blockedWords": [
+    "dit", "deo", "cc",
+    "dcm", "dm", "dkm", "dmm", "cmm", "clm", "vcl", "vkl", "vl",
+    "fuck", "fucking", "shit", "bitch", "asshole", "dick", "pussy", "cunt", "porn", "sex", "xxx"
+  ],
+  "blockedPhrases": [
+    "dit me", "dit ma", "du me", "du ma", "con cac", "cai lon", "an cut", "do ngu", "thang ngu", "con ngu", "cho chet", "mat day", "khon nan", "loz", "lolz", "nigga", "nigger"
+  ],
+  "blockedCompacts": [
+    "ditme", "ditma", "dume", "duma", "concac", "cailon", "ancut", "dongu", "thangngu", "conngu", "chochet", "matday", "khonnan"
+  ],
+  "numberWords": {
+    "khong": "0", "linh": "0", "le": "0", "mot": "1", "hai": "2", "ba": "3", "bon": "4", "tu": "4", "nam": "5", "lam": "5", "sau": "6", "bay": "7", "tam": "8", "chin": "9"
+  },
+  "leet": {"0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b", "9": "g", "@": "a", "$": "s", "!": "i"},
+  "blockedAccentedWords": ["đụ", "đĩ", "địt", "lồn", "cặc", "buồi", "cứt", "đéo"],
+  "allowedWords": ["đèo", "dẻo", "lồng", "đĩa", "đụng", "đụn"],
+  "messages": {
+    "format": "Biệt danh cần 2–40 ký tự, có chữ cái; chỉ dùng chữ, số, dấu cách, gạch ngang hoặc gạch dưới.",
+    "phone": "Biệt danh không được chứa số điện thoại hoặc từ 7 chữ số trở lên. Em hãy chọn tên khác để giữ riêng tư.",
+    "inappropriate": "Biệt danh có từ ngữ chưa phù hợp. Em hãy chọn một tên thân thiện khác."
+  }
+}

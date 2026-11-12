@@ -277,9 +277,9 @@
                 time:Number(e.canvas.dataset.time),running:Boolean(e.raf),connected:e.node.isConnected,
                 facing:e.node.closest('.fighter')?.classList.contains('right')?'left':'right'})),effects:effects.size};
     }
-    window.MamSachAnimation={ready,configure,sync,hit,stop,destroy,sample,renderPet,renderUltimate,renderAttack,drawSprite,inspect,pendingUntil:()=>Date.now()+Math.max(0,pendingUntilAt-performance.now())};
+    window.MamSachAnimation={mountManaged(root=document){enabled=true;sync(root);},ready,configure,sync,hit,stop,destroy,sample,renderPet,renderUltimate,renderAttack,drawSprite,inspect,pendingUntil:()=>Date.now()+Math.max(0,pendingUntilAt-performance.now())};
     function start(){observer=new MutationObserver(scheduleSync);observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-mood']});sync();}
-    document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
+    if(!(typeof RuntimeAssets !== 'undefined' && RuntimeAssets.managed))document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start,{once:true}):start();
     document.addEventListener('visibilitychange',()=>{stop();if(!document.hidden)for(const entry of pets.values())if(atlas)paintPet(entry,durations[entry.mode]||0);});
     window.addEventListener('pagehide',stop);
     window.addEventListener('resize',()=>{stop();for(const entry of pets.values())if(atlas)paintPet(entry,durations[entry.mode]||0);});
