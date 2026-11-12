@@ -62,7 +62,7 @@ cắt dữ liệu âm thầm khi không đáp ứng các giới hạn này.
 `StorageDatabase.run` chạy preflight trước khi mở giao dịch ghi, rồi chạy phần
 đồng bộ trong `transactionSync`. Hash/verify mật khẩu và giới hạn đăng nhập dùng
 cache ContextVar chỉ trong request để không lặp PBKDF hoặc tính hai lượt qua
-replay. Pyodide không có `hashlib.pbkdf2_hmac`; Cloudflare thật giới hạn Web Crypto ở 100.000 vòng, trong khi workerd cục bộ không áp cùng giới hạn. Với SHA256 trên 100.000 vòng, dùng PBKDF2 theo HMAC với context SHA256 gốc của runtime; giữ nguyên 600.000 vòng và định dạng hash cũ. Đường Web Crypto còn dùng cho mức không vượt giới hạn. Bridge từ chối suspend khi đang ghi SQL.
+replay. Pyodide không có `hashlib.pbkdf2_hmac`; Cloudflare thật giới hạn Web Crypto ở 100.000 vòng, trong khi workerd cục bộ không áp cùng giới hạn. SHA256 trên 100.000 vòng dùng PyCryptodome 3.23.0 native WASM đã ghim và kiểm SHA256 tại `vendor/`; giữ nguyên 600.000 vòng, salt và định dạng hash cũ. `build_worker.py` đóng gói thư viện, không tải lúc chạy. Mất thư viện native trên Worker sẽ báo lỗi thay vì âm thầm chạy vòng lặp Python. Đường Web Crypto còn dùng cho mức không vượt giới hạn. Bridge từ chối suspend khi đang ghi SQL. CPython/Docker tiếp tục dùng OpenSSL có sẵn.
 
 Commit độc lập của kết quả Arena được giữ trước khi xét lượt vào phòng tiếp theo.
 Trạng thái phòng được lưu từng hàng cùng giao dịch điểm/duel và khôi phục khi DO

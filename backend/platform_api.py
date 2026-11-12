@@ -310,10 +310,15 @@ def prepare_login(path, body, staff_only=False):
             "SELECT a.id,a.password_hash FROM accounts a JOIN students s ON s.account_id=a.id "
             "WHERE a.login_identifier=? AND a.status='active' AND s.status='active'", (login,)).fetchone()
         staff = db.execute("SELECT id,password_hash FROM staff_users WHERE login=? AND status='active'", (login,)).fetchone()
-    if not staff_only and verify_password(password, account['password_hash'] if account else None) and account and account['password_hash']:
-        return 'student', account['id'], account['password_hash'], login
-    if verify_password(password, staff['password_hash'] if staff else None) and staff:
-        return 'staff', staff['id'], staff['password_hash'], login
+    # One real derivation for a unique active identity, one dummy for unknown names.
+    # Retain both candidates for legacy imports with an identifier in both tables.
+    candidates = [('student', account)] if account else []
+    if staff:
+        candidates.append(('staff', staff))
+    for principal, candidate in candidates or [('unknown', None)]:
+        credential = candidate['password_hash'] if candidate else None
+        if verify_password(password, credential) and candidate and credential:
+            return principal, candidate['id'], credential, login
     raise APIError('Thông tin đăng nhập không đúng.', 401)
 
 
@@ -534,6 +539,23 @@ def vietnam_activity(rows):
             totals[key] = totals.get(key, 0) + (stop - start).total_seconds()
             start = stop
     return {day: int(seconds) for day, seconds in totals.items()}
+
+
+def identity_view(db, session):
+    """Small authenticated public-page snapshot; full learning state stays on demand."""
+    sid = session['student_id']
+    profile = db.execute('SELECT s.full_name,a.login_identifier FROM students s JOIN accounts a ON a.id=s.account_id WHERE s.id=?', (sid,)).fetchone()
+    preferences = db.execute('SELECT theme FROM learning_preferences WHERE student_id=?', (sid,)).fetchone()
+    companion = db.execute('SELECT c.xp,m.name FROM student_companions c JOIN mascots m ON m.id=c.mascot_id WHERE student_id=?', (sid,)).fetchone()
+    completed = {r['client_key']: {'date':r['first_completed_at'],'grade':r['grade_id']} for r in db.execute(
+        "SELECT l.client_key,l.grade_id,p.first_completed_at FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id WHERE p.student_id=? AND l.client_key IN ('public-decimal','public-percent')", (sid,))}
+    theme = preferences['theme'] if preferences else DEFAULT_THEME
+    return {'authenticated':True,'csrf':session['csrf_token'],'name':safe_nickname(profile['full_name']),
+            'account':{'id':session['account_id'],'login':profile['login_identifier']},'partial':True,
+            'state':{'birthYear':session['birth_year'],'completed':completed,
+                     'mascot':mascot_code(companion['name'] if companion else None),
+                     'points':companion['xp'] if companion else 1000,
+                     'theme':theme if theme in LEARNING_THEMES else DEFAULT_THEME}}
 
 
 def state_view(db, session, review=False, read_only=False):
@@ -952,7 +974,8 @@ def dispatch(handler, method, path, body=None):
             credential = password_hash(body.get('password'))
         else:
             login_proof = prepare_login(handler.server.database_path, body)
-    write = method == 'POST' or method == 'GET' and read_needs_maintenance(handler, path)
+    compact = path in ('/api/v1/auth/login','/api/v1/auth/register','/api/v1/session') and parse_qs(urlsplit(handler.path).query).get('view') == ['identity']
+    write = method == 'POST' or method == 'GET' and not compact and read_needs_maintenance(handler, path)
     with connect(handler.server.database_path, write) as db:
         session = read_session(handler,db)
         if path in ('/api/v1/auth/register','/api/v1/auth/login') and method=='POST':
@@ -966,7 +989,7 @@ def dispatch(handler, method, path, body=None):
                     from .staff_api import issue_session as issue_staff_session
                     return {**issue_staff_session(handler, db, account), 'principal': 'staff'}, 200
                 session = issue_session(handler,db,account['id'])
-            return state_view(db,session,review),200
+            return (identity_view(db,session) if compact else state_view(db,session,review)),200
         if path=='/api/v1/session' and method=='GET' and not session:
             return {'authenticated':False},200
         if not session:
@@ -987,7 +1010,7 @@ def dispatch(handler, method, path, body=None):
         if method=='GET' and path in ('/api/v1/session','/api/v1/state'):
             if write:
                 _arena_preflight(db, handler.server.arena, session)
-            return state_view(db,session,review,read_only=not write),200
+            return (identity_view(db,session) if compact else state_view(db,session,review,read_only=not write)),200
         if method=='POST' and path=='/api/v1/auth/logout':
             db.execute('DELETE FROM auth_sessions WHERE token_hash=?',(session['token_hash'],))
             handler.api_headers={'Set-Cookie': session_cookie(COOKIE, '', 0)}

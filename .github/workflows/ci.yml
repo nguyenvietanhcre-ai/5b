@@ -78,6 +78,10 @@ jobs:
           BASE_URL: http://127.0.0.1:8765
           BROWSER_CHANNEL: chromium
         run: npm run test:browser
+      - name: Authentication latency and delayed-session regressions
+        env:
+          BASE_URL: http://127.0.0.1:8765
+        run: node tests/auth-performance.cjs
       - name: Logs
         if: failure()
         run: docker compose logs

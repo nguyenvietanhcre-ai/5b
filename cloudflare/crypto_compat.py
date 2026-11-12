@@ -44,10 +44,19 @@ def webcrypto_pbkdf2(hash_name, password, salt, iterations, dklen=None):
         raise ValueError('invalid derived key length')
     # Production Workers cap native PBKDF2 at100,000; local workerd does not.
     # Keep the existing600,000-round SHA256 format byte-for-byte, using the
-    # standard pad-copy implementation before the SQL write transaction.
+    # pinned PyCryptodome native WASM implementation before SQL writes.
     if hash_name == 'sha256' and iterations > 100_000:
-        from pbkdf2_fallback import pbkdf2_hmac
-        return pbkdf2_hmac(hash_name, password, salt, iterations, length)
+        try:
+            from Crypto.Protocol.KDF import PBKDF2
+            from Crypto.Hash import SHA256
+        except ModuleNotFoundError:
+            # CPython-only oracle tests can run without the Worker WASM package.
+            import sys
+            if sys.platform == 'emscripten':
+                raise
+            from pbkdf2_fallback import pbkdf2_hmac
+            return pbkdf2_hmac(hash_name, password, salt, iterations, length)
+        return PBKDF2(bytes(password), bytes(salt), dkLen=length, count=iterations, hmac_hash_module=SHA256)
     from js import Object, crypto
     from pyodide.ffi import run_sync, to_js
     key = run_sync(crypto.subtle.importKey('raw', to_js(memoryview(password)),

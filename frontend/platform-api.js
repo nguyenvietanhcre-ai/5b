@@ -18,7 +18,7 @@ const PlatformAPI = (() => {
     async function request(path, body, options = {}) {
         const sessionCsrf = snapshot.csrf;
         const revision = sessionRevision;
-        const authMutation = body !== undefined && ['auth/login','auth/register','auth/logout'].includes(path);
+        const authMutation = body !== undefined && ['auth/login','auth/register','auth/logout'].includes(path.split('?')[0]);
         const pending = requestSignal(options.signal);
         try {
             const response = await fetch('/api/v1/' + path, {
@@ -47,8 +47,8 @@ const PlatformAPI = (() => {
             pending.cleanup();
         }
     }
-    async function refresh() {
-        await request('session');
+    async function refresh({compact=false}={}) {
+        await request('session'+(compact?'?view=identity':''));
         const id=new URLSearchParams(location.search).get('id');
         if(snapshot.authenticated && /^\/(lam-de|ket-qua-thi)\/$/.test(location.pathname) && /^\d+$/.test(id || '')) {
             const result=await request('exams/'+id);
@@ -58,5 +58,5 @@ const PlatformAPI = (() => {
     }
     return {enabled,request,get snapshot(){return snapshot;},
         refresh,logout:() => request('auth/logout',{}),
-        async authenticate(kind, values) { return request('auth/' + kind,values); }};
+        async authenticate(kind, values,{compact=false}={}) { return request('auth/' + kind+(compact?'?view=identity':''),values); }};
 })();

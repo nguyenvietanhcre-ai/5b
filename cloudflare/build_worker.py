@@ -2,6 +2,8 @@
 import shutil
 import argparse
 import importlib.metadata
+import hashlib
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,9 +30,27 @@ def vendor_sdk():
             shutil.copy2(distribution.locate_file(item), target)
 
 
+def vendor_crypto():
+    """Verified Pyodide wheel: compiled PBKDF2, no network or unpinned install."""
+    wheel = ROOT / 'cloudflare/vendor/pycryptodome-3.23.0.wasm.whl'
+    expected = '33e595030bf16622b5afc467cac5504ae91f5529c236e99e8a0ac2b4c0b90f14'
+    if hashlib.sha256(wheel.read_bytes()).hexdigest() != expected:
+        raise ValueError('Pinned crypto WASM wheel checksum mismatch')
+    destination = ROOT / 'cloudflare/python_modules'
+    with zipfile.ZipFile(wheel) as archive:
+        for entry in archive.infolist():
+            if entry.filename.startswith('Crypto/') and not entry.is_dir():
+                target = destination / entry.filename
+                if not target.resolve().is_relative_to(destination.resolve()):
+                    raise ValueError('Invalid wheel path')
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(archive.read(entry))
+
+
 def build(include_sdk=False):
     if include_sdk:
         vendor_sdk()
+    vendor_crypto()
     if TARGET.exists():
         if TARGET.resolve() != (ROOT / 'cloudflare' / 'runtime').absolute():
             raise ValueError('Unexpected runtime build target')

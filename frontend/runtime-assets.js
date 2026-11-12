@@ -396,8 +396,8 @@ const RuntimeAssets = (() => {
         cache.set(path,promise);return promise;
     }
     async function group(entry) {
-        await Promise.all(entry.styles.map(path=>asset(path,'style')));
-        for(const path of entry.scripts)await asset(path,'script');
+        // Start independent transfers together; async=false preserves execution order.
+        await Promise.all([...entry.styles.map(path=>asset(path,'style')),...entry.scripts.map(path=>asset(path,'script'))]);
     }
     const ensureLearning=()=>group(manifest.groups.learning);
     const ensureStaff=()=>group(manifest.groups.staff);

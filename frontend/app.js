@@ -3,6 +3,7 @@ const $=s=>document.querySelector(s), KEY='mamtoan-demo-v1';
 const browser = typeof document !== 'undefined';
 const nicknamePolicy = browser ? NicknamePolicy : require('./nickname-policy.js');
 const liveBackend = browser && typeof PlatformAPI !== 'undefined' && PlatformAPI.enabled;
+let initialSession = Promise.resolve();
 let learning = browser ? null : require('./learning.js');
 let staff = browser ? null : require('./staff.js');
 const learningRoutes = browser ? RuntimeAssets.manifest.routes.learning : learning.routes;
@@ -71,7 +72,7 @@ function passwordFields(root) {
 }
 function showModal(html){$('#modal-body').innerHTML=html;passwordFields($('#modal-body'));if(!modal.open)modal.showModal();}
 function updateAccount(){$('#account').innerHTML=data.name?(learning?.avatar()||'<span class="avatar" aria-hidden="true">🌱</span>')+'<span>Góc học tập ↗</span>':'Đăng nhập';}
-async function account(next){try{await ensureLearning();}catch(error){toast(error.message);return;}if(data.name){if(next)next();else location.assign(pageHref('dashboard'));return;}
+async function account(next){if(liveBackend){if(data.name){if(next)next();else location.assign(pageHref('dashboard'));}else realAccount(next);return;}try{await ensureLearning();}catch(error){toast(error.message);return;}if(data.name){if(next)next();else location.assign(pageHref('dashboard'));return;}
 if(liveBackend){realAccount(next);return;}
 showModal('<div class="modal-mark" aria-hidden="true">🌱</div><span class="eyebrow">GÓC HỌC TẬP CỦA EM</span><h2 class="modal-title">Chào em, nhà thám hiểm!</h2><p class="modal-copy">Đặt biệt danh để trải nghiệm lớp học 5BMath.</p><form id="name-form"><label for="student-name">Biệt danh của em</label><input class="name-input" id="student-name" placeholder="Ví dụ: Mầm Xanh" minlength="2" maxlength="40" autocomplete="nickname" aria-describedby="nickname-help" required><p class="modal-copy" id="nickname-help">'+esc(nicknamePolicy.help)+'</p><button class="btn dark" type="submit">Bắt đầu trải nghiệm ↗</button></form><p class="modal-note">TÀI KHOẢN MINH HỌA • Không có mật khẩu. Tên và tiến độ chỉ lưu trong trình duyệt này. Chưa có đăng nhập thật hoặc phân quyền bảo vệ tài liệu.</p>');
 const year = document.createElement('label');
@@ -91,9 +92,12 @@ function realAccount(next, kind='login') {
         const form=event.currentTarget, button=form.querySelector('button[type=submit]');
         const values=Object.fromEntries(new FormData(form));
         if(register){const error=nicknamePolicy.error(values.name);if(error){$('#auth-error').textContent=error;const input=form.elements.name;input.setAttribute('aria-invalid','true');input.focus();return;}values.name=nicknamePolicy.normalize(values.name);values.birthYear=Number(values.birthYear);}
-        button.disabled=true;
+        if(button.disabled)return;
+        button.disabled=true;button.textContent=register?'Đang tạo tài khoản…':'Đang đăng nhập…';
+        form.setAttribute('aria-busy','true');
         try {
-            const snapshot=await PlatformAPI.authenticate(kind,values);
+            await initialSession;
+            const snapshot=await PlatformAPI.authenticate(kind,values,{compact:!next});
             if(snapshot.principal==='staff') {
                 modal.close();
                 location.assign(pageHref(snapshot.user.role==='admin'?'staff-admin':'staff-teacher'));
@@ -104,7 +108,7 @@ function realAccount(next, kind='login') {
             updateAccount();modal.close();
             if(next)next();else location.assign(pageHref('dashboard'));
         } catch(error) { $('#auth-error').textContent=error.message; }
-        finally { if(button.isConnected)button.disabled=false; }
+        finally { if(button.isConnected){button.disabled=false;button.textContent=register?'Tạo tài khoản':'Đăng nhập';form.removeAttribute('aria-busy');} }
     };
 }
 function setMenu(open) {
@@ -421,10 +425,9 @@ async function navigate(focusAnchor = false) {
 }
 
 async function start() {
-    if (liveBackend) {
-        try { applyAccount(await PlatformAPI.refresh()); }
-        catch { data.name = ''; }
-    }
+    const entry=document.documentElement.dataset.page||'home';
+    const privateRoute=entry==='dashboard'||entry.startsWith('learn-')||entry.startsWith('staff-');
+    if(liveBackend)initialSession=PlatformAPI.refresh({compact:!privateRoute}).then(snapshot=>{applyAccount(snapshot);}).catch(error=>{if(error.name!=='AbortError')toast('Chưa thể kiểm tra phiên. Em có thể thử đăng nhập lại.');});
     loadProgress();
     configureLearning();
     modal = $('#modal');
@@ -474,8 +477,13 @@ async function start() {
         else await RuntimeAssets.syncMascots($('#app')).catch(error=>toast(error.message));
     });
     bindContact();
+    // Public controls/rendering never wait for the session network request.
+    if(!privateRoute)await navigate();
+    await initialSession;
     if(data.name)await ensureLearning();
-    await navigate();
+    configureLearning();updateAccount();
+    if(privateRoute)await navigate();
+    else if(['lesson-decimal','lesson-percent'].includes(renderedRoute))await render();
 }
 
 function bindContact() {
