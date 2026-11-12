@@ -42,11 +42,11 @@ const report={scope:'QA only: delayed session, immediate login, compact auth, fu
   await page.locator('[name=login]').fill(login);await page.locator('[name=password]').fill(password);
   const responsePromise=page.waitForResponse(r=>r.url().includes('/auth/login'));
   const started=Date.now();await page.locator('#auth-form').evaluate(f=>{f.requestSubmit();f.requestSubmit();});
-  const response=await responsePromise;const auth=await response.json();authBytes=(await response.body()).byteLength;
+  const response=await responsePromise;const loginApiMs=Date.now()-started;const auth=await response.json();authBytes=(await response.body()).byteLength;
   assert.equal(response.status(),200);assert.equal(auth.partial,true);assert(!auth.lessons);assert(auth.authenticated);
   await page.waitForURL('**/goc-hoc-tap/');await page.waitForFunction(()=>typeof PlatformAPI!=='undefined'&&PlatformAPI.snapshot.authenticated&&!PlatformAPI.snapshot.partial);
   assert.equal(posts,1,'Duplicate form submission must not issue two auth requests');
-  report.login={status:200,loginApiMs:Date.now()-started,compactBytes:authBytes,posts,fullDashboard:true};await context.close();
+  report.login={status:200,loginApiMs,loginToDashboardMs:Date.now()-started,compactBytes:authBytes,posts,fullDashboard:true};await context.close();
   assert.deepEqual(report.errors,[]);report.status='passed';console.log(JSON.stringify(report));
  }finally{await browser.close();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
