@@ -4,6 +4,7 @@ const RuntimeAssets = (() => {
     const manifest = /* RUNTIME_MANIFEST_START */
 {
     "files": [
+        "page-loading.js",
         "runtime-assets.js",
         "learning-content.js",
         "arena-audio.js",

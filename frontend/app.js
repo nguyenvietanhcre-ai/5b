@@ -478,7 +478,7 @@ async function start() {
     });
     bindContact();
     // Public controls/rendering never wait for the session network request.
-    if(!privateRoute)await navigate();
+    if(!privateRoute){await navigate();window.PageLoading?.finish();}
     await initialSession;
     if(data.name)await ensureLearning();
     configureLearning();updateAccount();
@@ -550,5 +550,5 @@ function bindContact() {
     };
 }
 
-if (browser) start().catch(error=>toast(error.message));
+if (browser) start().catch(error=>toast(error.message)).finally(()=>window.PageLoading?.finish());
 else module.exports = { pages, esc };

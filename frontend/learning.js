@@ -1564,9 +1564,20 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         for(const effect of activeHitSpells){effect.timers.forEach(clearTimeout);effect.node?.remove();}
         activeHitSpells.clear();
     }
+    function aimUltimateBeam(stage,source,victim) {
+        const beam=stage?.querySelector('.energy-beam');
+        const actor=source?.querySelector('.battle-pet'),target=victim?.querySelector('.battle-pet');
+        if(!beam||!actor||!target)return;
+        const box=stage.getBoundingClientRect(),scaleX=box.width/stage.offsetWidth,scaleY=box.height/stage.offsetHeight;
+        const point=node=>{const r=node.getBoundingClientRect();return {
+            x:(r.left-box.left+r.width/2)/scaleX-stage.clientLeft,
+            y:(r.top-box.top+r.height*.55)/scaleY-stage.clientTop};};
+        const from=point(actor),to=point(target),dx=to.x-from.x,dy=to.y-from.y;
+        beam.style.cssText=`left:${from.x}px;top:${from.y-beam.offsetHeight/2}px;width:${Math.hypot(dx,dy)}px;transform:rotate(${Math.atan2(dy,dx)}rad);transform-origin:left center`;
+    }
     function playHitSpell(target,attacker,spell,final) {
         const battle=currentBattle,stage=document.querySelector('#battle-stage');
-        if(!battle||!stage)return;
+        if(!battle||!stage||final)return;
         if(hitSpellBattle!==battle.id){shownHitSpells.clear();hitSpellBattle=battle.id;}
         const side=attacker==='#fighter-me'?'me':'opponent';
         const eventId=battle.lastAttack?.attacker===side?battle.lastAttack.id:battle.id+':'+battle.index+':'+side;
@@ -1575,21 +1586,26 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         stage.dataset.randomSpells='true';
         const effect={node:null,timers:[]};activeHitSpells.add(effect);
         const show=()=>{
-            const body=document.querySelector(target+' .pet-body');
+            const body=document.querySelector(target+' .battle-pet');
             if(!stage.isConnected||!body||currentBattle?.id!==battle.id){activeHitSpells.delete(effect);return;}
             const arena=stage.getBoundingClientRect(),pet=body.getBoundingClientRect();
             const width=stage.clientWidth,height=stage.clientHeight,padding=6;
-            const size=Math.max(1,Math.min(pet.width*1.55,pet.height*1.55,width-padding*2,height-padding*2));
-            const left=Math.max(padding,Math.min(width-size-padding,pet.left-arena.left-stage.clientLeft+pet.width/2-size/2));
-            const top=Math.max(padding,Math.min(height-size-padding,pet.top-arena.top-stage.clientTop+pet.height/2-size*.6));
+            const scaleX=arena.width/stage.offsetWidth,scaleY=arena.height/stage.offsetHeight;
+            const x=(pet.left-arena.left+pet.width/2)/scaleX-stage.clientLeft;
+            const y=(pet.top-arena.top+pet.height*.55)/scaleY-stage.clientTop;
+            // The rock and lightning land below the centre of their atlas cell.
+            // Fit around the impact point instead of shifting the whole spell at an edge.
+            const anchorY={rock:.78,vine:.55,lightning:.84}[spell[0]]??.5;
+            const size=Math.max(1,Math.min(pet.width/scaleX*1.55,pet.height/scaleY*1.55,
+                (x-padding)*2,(width-padding-x)*2,(y-padding)/anchorY,(height-padding-y)/(1-anchorY)));
+            const left=x-size/2,top=y-size*anchorY;
             const node=document.createElement('span');effect.node=node;
             node.className='random-hit-spell';node.dataset.spell=spell[0];node.dataset.attackId=eventId;node.setAttribute('aria-hidden','true');
-            node.style.cssText=`left:${left}px;top:${top}px;width:${size}px;height:${size}px;--hit-duration:${final?1000:1500}ms`;
+            node.style.cssText=`left:${left}px;top:${top}px;width:${size}px;height:${size}px;--hit-duration:1500ms`;
             stage.append(node);
-            effect.timers.push(setTimeout(()=>{node.remove();activeHitSpells.delete(effect);},final?1000:1500));
+            effect.timers.push(setTimeout(()=>{node.remove();activeHitSpells.delete(effect);},1500));
         };
-        // Keep the added impact inside the existing three-second finale.
-        if(final)effect.timers.push(setTimeout(show,1750));else show();
+        show();
     }
     function animateHit(target,attacker,final,spell) {
         if(window.ArenaCrabAnimation?.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
@@ -1731,8 +1747,8 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(sourcePet,rabbitUltimate?'ultimate':'attack');
         playBear(sourcePet,bearUltimate?'ultimate':'attack');
         const announcement=document.querySelector('#spell-announcement');
-        if(announcement)announcement.textContent=beeAttack||rabbitUltimate||catAttack||bearUltimate||sparrowAttack?'':'✦ '+spell[1];
-        if(final){if(!beeUltimate&&!rabbitUltimate&&!catUltimate&&!bearUltimate&&!sparrowUltimate)stage?.classList.add(attacker==='#fighter-me'?'ultimate-right':'ultimate-left');ArenaAudio.effect('beam');}else ArenaAudio.effect(spell[0]);
+        if(announcement)announcement.textContent=beeAttack||rabbitUltimate||catAttack||bearUltimate||sparrowAttack?'':final?'✦ Chiêu cuối':'✦ '+spell[1];
+        if(final){if(!beeUltimate&&!rabbitUltimate&&!catUltimate&&!bearUltimate&&!sparrowUltimate){aimUltimateBeam(stage,source,victim);stage?.classList.add(attacker==='#fighter-me'?'ultimate-right':'ultimate-left');}ArenaAudio.effect('beam');}else ArenaAudio.effect(spell[0]);
         setTimeout(()=>{
             victim?.classList.remove('taking-hit');source?.classList.remove('attacking');
             for(const node of [victim,source])if(node?.isConnected){const pet=node.querySelector('.battle-pet');const mood=final&&node===victim?'lose':'idle';pet.dataset.mood=mood;if(pet!==victimPet&&typeof RabbitAnimation!=='undefined')RabbitAnimation.play(pet,mood);const bearMode=final?(node===victim?'defeat':'win'):'idle';playBear(pet,bearMode);if(pet?.classList.contains('gau'))pet.dataset.mood=bearMode==='defeat'?'lose':bearMode;}
@@ -1741,7 +1757,11 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     }
     function dispatchBattleHit(target,attacker,final) {
         const spell=attackSpell(attacker);
-        playHitSpell(target,attacker,spell,final);
+        const stage=document.querySelector('#battle-stage');
+        // Suppress legacy default spells inside mascot reactions as well.
+        if(stage)stage.dataset.randomSpells='true';
+        if(final)clearHitSpells();
+        else playHitSpell(target,attacker,spell,false);
         if(final&&[target,attacker].some(selector=>document.querySelector(selector)?.querySelector('.battle-pet.cu-meo')))owlFinaleUntil=Math.max(owlFinaleUntil,Date.now()+3100);
         window.HorseAnimation?.notifyVictim(target,attacker,final);
         if(typeof RabbitAnimation!=='undefined')RabbitAnimation.notifyVictim(target,attacker,final);

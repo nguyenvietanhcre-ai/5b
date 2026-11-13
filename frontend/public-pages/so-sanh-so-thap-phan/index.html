@@ -10,6 +10,8 @@
     <link rel="canonical" href="https://5bmath.vn/so-sanh-so-thap-phan/">
     <link rel="icon" href="5bmath-icon.svg" type="image/svg+xml">
     <script src="themes.js"></script>
+    <script src="page-loading.js"></script>
+    <link rel="preload" as="image" href="mascots.webp">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="themes.css">
     <script src="nickname-policy.js" defer></script>
@@ -18,6 +20,12 @@
     <script src="app.js" defer></script>
 </head>
 <body>
+    <aside class="page-loader" id="page-loader" role="status" aria-live="polite" aria-atomic="true">
+        <span class="page-loader-mascot" aria-hidden="true"></span>
+        <strong>Mầm Sách đang chuẩn bị Vườn Toán cho em…</strong>
+        <p>Mỗi ngày hiểu thêm một chút, tự tin hơn một chút!</p>
+        <span class="page-loader-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    </aside>
     <header class="site-header">
         <div class="header-inner">
             <a href="#home" class="brand"><img src="5bmath-logo.svg" alt="5BMath — Gieo Mầm Toán" width="628" height="168"></a>

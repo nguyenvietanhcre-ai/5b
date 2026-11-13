@@ -68,10 +68,12 @@ fs.writeFileSync(path.join(output, '404.html'), `<!doctype html>
     <meta name="robots" content="noindex">
     <title>Không tìm thấy trang | 5BMath</title>
     <script src="${root}themes.js"></script>
+    <script src="${root}page-loading.js"></script>
     <link rel="stylesheet" href="${root}styles.css">
     <link rel="stylesheet" href="${root}themes.css">
 </head>
 <body>
+    ${template.match(/<aside class="page-loader"[\s\S]*?<\/aside>/)[0]}
     <main class="wrap">
         <div class="page-head">
             <h1 class="title">Không tìm thấy trang</h1>
