@@ -103,6 +103,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     // Reuse the approved idle artwork. Sprite viewBoxes isolate one mascot
     // without loading an animation renderer into either account header.
     const mascotAvatars = {
+        dog:['Chó','arena-art/dog/idle.webp'],
         sprout:['Mầm Sách','mascots.webp',[131,44,379,521],1200,600],
         fox:['Cáo Nâu','mascots.webp',[670,34,443,532],1200,600],
         horse:['Ngựa','arena-art/horse/v1/idle.webp'],
@@ -146,7 +147,9 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         const routePath = offline ? route === 'dashboard' ? '#dashboard' : '#learn-' + route : routes[route][0];
         return routePath + (search ? '?' + search : '');
     };
-    const animatedArt = (pet, label = '') => pet === 'horse'
+    const animatedArt = (pet, label = '') => pet === 'dog'
+        ? `<img class="mascot-art dog" style="background:none;object-fit:contain" src="arena-art/dog/idle.webp" width="256" height="256" alt="${escape(label)}" loading="lazy">`
+        : pet === 'horse'
         ? `<img class="mascot-art horse" src="arena-art/horse/v1/idle.webp" width="256" height="256" alt="${escape(label)}" loading="lazy">`
         : pet === 'voi'
         ? `<canvas class="mascot-art voi" data-voi width="256" height="256" ${label ? `role="img" aria-label="${escape(label)}"` : 'aria-hidden="true"'}></canvas>`
@@ -430,7 +433,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             return `${intro('Linh vật của em','Chọn bạn đồng hành và xem kinh nghiệm sau mỗi trận.')}
             <section class="card feature-row sage mascot-feature"><div>${badge('Đang đồng hành · Cấp ' + level(),'white')}<h2>${escape(petName())}</h2><p>${content.format(state.points)} / ${content.format(1000 + level() * 20)} điểm kinh nghiệm để lên cấp ${level() + 1}</p>${meter((state.points - 1000) % 20 * 5,'Tiến độ lên cấp tiếp theo')}<small>Còn ${20 - (state.points - 1000) % 20} điểm để lên cấp tiếp theo.</small></div>${art(state.mascot,petName())}</section>
             <div class="grid3 stats">${stat('cup',history.filter(item => item.outcome === 'win').length + ' trận','Thắng · +2 điểm','sand')}${stat('flag',history.filter(item => item.outcome === 'lose').length + ' trận','Thua · −1 điểm','peach')}${stat('users',history.filter(item => item.outcome === 'draw').length + ' trận','Hòa · 0 điểm')}</div>
-            ${heading('Chọn linh vật')}<div class="grid2">${[['horse','Ngựa'],['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['cat','Mèo'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+            ${heading('Chọn linh vật')}<div class="grid2">${[['dog','Chó'],['horse','Ngựa'],['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['cat','Mèo'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
         },
 
         rank() { return liveRank(); },
@@ -1902,6 +1905,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         'choose-rabbit':async () => { if(live)await mutate('mascot',{mascot:'rabbit'});else {state.mascot = 'rabbit';save();}refresh(); },
         'choose-crab':async () => { if(live)await mutate('mascot',{mascot:'crab'});else {state.mascot = 'crab';save();}refresh(); },
         'choose-gau':async () => { if(live)await mutate('mascot',{mascot:'gau'});else {state.mascot = 'gau';save();}refresh(); },
+        'choose-dog':async () => { if(live)await mutate('mascot',{mascot:'dog'});else {state.mascot = 'dog';save();}refresh(); },
         'choose-cat':async () => { if(live)await mutate('mascot',{mascot:'cat'});else {state.mascot = 'cat';save();}refresh(); },
         'choose-horse':async () => { if(live)await mutate('mascot',{mascot:'horse'});else {state.mascot = 'horse';save();}refresh(); },
         'refresh-account':async () => {applySnapshot(await PlatformAPI.refresh());refresh();},

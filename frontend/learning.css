@@ -974,3 +974,6 @@ body.learning-mode .payment-actions .btn { min-height:44px; white-space:normal; 
 .lesson-video .btn{justify-self:start;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 .video-card .video-art p{position:relative;max-width:90%;text-align:center}
 @media(max-width:600px){.lesson-video{padding:1rem}.lesson-video .btn{justify-self:stretch}}
+
+body.learning-mode .battle-pet.dog .motion-sprite { display:none; }
+body.learning-mode .battle-pet.dog > .mascot-art { visibility:visible; }

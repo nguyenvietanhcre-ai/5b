@@ -242,4 +242,23 @@ class PlatformTests(unittest.TestCase):
         with self.assertRaises(APIError):client.call('mascot',{'mascot':['rabbit']})
 
 
+    def test_dog_companion_persists_and_reaches_opponent_and_leaderboard(self):
+        client,_,login,password=self.user()
+        selected=client.call('mascot',{'mascot':'dog'})
+        self.assertEqual(selected['state']['mascot'],'dog')
+        other=Client(self.server)
+        self.assertEqual(other.call('auth/login',{'login':login,'password':password})['state']['mascot'],'dog')
+        self.assertTrue(any(row['mine'] and row['mascot']=='dog' for row in client.call('leaderboard?kind=battle&period=all')['rows']))
+        room=client.call('arena',{'action':'create','scope':'weekly','public':True})
+        friend,_,_,_=self.user()
+        self.assertEqual(next(row for row in friend.call('arena',{'action':'list'})['rooms'] if row['code']==room['code'])['mascot'],'dog')
+        join=friend.call('arena',{'action':'join','code':room['code']})
+        client.call('arena',{'action':'accept',**room})
+        self.server.arena.rooms[room['code']]['readyAt']=0
+        view=friend.call('arena',{'action':'state',**join})
+        self.assertEqual(view['battle']['opponentMascot'],'dog')
+        with self.assertRaises(APIError):client.call('mascot',{'mascot':'unknown'})
+        with self.assertRaises(APIError):client.call('mascot',{'mascot':['dog']})
+
+
 if __name__=='__main__':unittest.main()

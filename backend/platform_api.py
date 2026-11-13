@@ -40,6 +40,7 @@ MASCOT_NAMES['dolphin'] = 'Cá heo'
 MASCOT_NAMES['starfish'] = 'Sao biển'
 MASCOT_NAMES['octopus'] = 'Bạch tuộc'
 MASCOT_NAMES['horse'] = 'Ngựa'
+MASCOT_NAMES['dog'] = 'Chó'
 MASCOT_CODES = {name: code for code, name in MASCOT_NAMES.items()}
 MASCOT_NAMES['crab'] = 'Cua biển'
 MASCOT_CODES['Cua biển'] = 'crab'
