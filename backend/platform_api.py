@@ -44,6 +44,32 @@ MASCOT_NAMES['dog'] = 'Chó'
 MASCOT_CODES = {name: code for code, name in MASCOT_NAMES.items()}
 MASCOT_NAMES['crab'] = 'Cua biển'
 MASCOT_CODES['Cua biển'] = 'crab'
+
+# Storage names stay stable so existing companion IDs and XP need no migration.
+MASCOT_DISPLAY_NAMES = {
+    "Mầm Sách": "Mầm Sách Ham Học",
+    "Chó": "Chó Vui Vẻ",
+    "Mèo": "Mèo Tinh Nghịch",
+    "Thỏ": "Thỏ Nhanh Nhẹn",
+    "Ngựa": "Ngựa Tung Tăng",
+    "Voi": "Voi Tốt Bụng",
+    "Hổ": "Hổ Dũng Cảm",
+    "Sư tử": "Sư Tử Oai Phong",
+    "Gấu": "Gấu Ấm Áp",
+    "Chim sẻ": "Chim Sẻ Líu Lo",
+    "Đại bàng": "Đại Bàng Tinh Anh",
+    "Cú mèo": "Cú Mèo Thông Thái",
+    "Bướm": "Bướm Điệu Đà",
+    "Ong": "Ong Chăm Chỉ",
+    "Cá mập": "Cá Mập Mạnh Mẽ",
+    "Cá heo": "Cá Heo Lém Lỉnh",
+    "Bạch tuộc": "Bạch Tuộc Khéo Léo",
+    "Cua biển": "Cua Biển Vui Tính",
+    "Sao biển": "Sao Biển Lấp Lánh",
+    "Cáo Nâu": "Cáo Nâu Lanh Lợi",
+}
+MASCOT_DISPLAY_NAMES = {code: MASCOT_DISPLAY_NAMES.get(name, name)
+                        for code, name in MASCOT_NAMES.items()}
 _attempts = {}
 _auth_lock = threading.Lock()
 

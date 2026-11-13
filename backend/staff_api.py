@@ -8,7 +8,7 @@ import secrets
 from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, urlsplit
-from .platform_api import (APIError, MASCOT_NAMES, VN, academic, connect, limit_auth, mascot_code, now, packed,
+from .platform_api import (APIError, MASCOT_NAMES, MASCOT_DISPLAY_NAMES, VN, academic, connect, limit_auth, mascot_code, now, packed,
                            ensure_grade, nickname_field, password_hash, stamp,
                            text_field, verify_password, same_origin, session_cookie,
                            prepare_login, verified_login)
@@ -386,7 +386,7 @@ def accounts(db, handler):
                       'FROM accounts a JOIN students s ON s.account_id=a.id ' + clause + ' ORDER BY a.id DESC LIMIT 25 OFFSET ?',
                       (year, stamp(), stamp(), stamp(), *values, (page-1)*25)).fetchall()
     return {'rows': [account_profile(db, row) for row in rows], 'total': total, 'page': page, 'pageSize': 25,
-            'mascots': [{'code': code, 'name': name} for code, name in MASCOT_NAMES.items()]}
+            'mascots': [{'code': code, 'name': name} for code, name in MASCOT_DISPLAY_NAMES.items()]}
 
 
 def account_profile(db, row):

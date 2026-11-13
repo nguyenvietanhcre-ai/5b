@@ -164,7 +164,7 @@ body.learning-mode .shark-ultimate-active .spell-announcement{max-width:94%;whit
         return true;
     }
     function destroy(){generation++;cancelAnimationFrame(frame);frame=0;for(const timer of timers)clearTimeout(timer);timers.clear();for(const job of active.values())dispose(job);active.clear();mounted.clear();}
-    function render(pet,mood='idle'){if(pet!=='ca-map')return '';return `<span class="pet-turn face-ca-map"><span class="battle-pet ca-map" data-mood="${['idle','attack','hit','win','lose','ultimate'].includes(mood)?mood:'idle'}" role="img" aria-label="Cá mập"><span class="mascot-art ca-map" aria-hidden="true"></span></span></span>`;}
+    function render(pet,mood='idle'){if(pet!=='ca-map')return '';return `<span class="pet-turn face-ca-map"><span class="battle-pet ca-map" data-mood="${['idle','attack','hit','win','lose','ultimate'].includes(mood)?mood:'idle'}" role="img" aria-label="Cá Mập Mạnh Mẽ"><span class="mascot-art ca-map" aria-hidden="true"></span></span></span>`;}
     function markDefeated(node){node=shark(node);if(node)node.sharkDefeated=true;}
     document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;for(const [node,job]of active){dispose(job);if(node.isConnected)paint(node,job.action==='ultimate'?'win':job.action,job.duration);}active.clear();}});
     window.addEventListener('resize',()=>{for(const [node,job]of active)if(job.overlay){dispose(job);active.delete(node);node.dataset.mood='win';paint(node,'win',durations.win);}});

@@ -103,26 +103,26 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     // Reuse the approved idle artwork. Sprite viewBoxes isolate one mascot
     // without loading an animation renderer into either account header.
     const mascotAvatars = {
-        dog:['Chó','arena-art/dog/idle.webp'],
-        sprout:['Mầm Sách','mascots.webp',[131,44,379,521],1200,600],
-        fox:['Cáo Nâu','mascots.webp',[670,34,443,532],1200,600],
-        horse:['Ngựa','arena-art/horse/v1/idle.webp'],
-        'cu-meo':['Cú mèo','arena-art/owl/poses.webp',[69,18,210,274],1254,1254],
-        dolphin:['Cá heo','arena-art/ca-heo-v1/actions.webp',[32,48,276,221],1278,1230],
-        octopus:['Bạch tuộc','arena-art/bach-tuoc-idle.webp'],
-        starfish:['Sao biển','arena-art/sao-bien-v1/idle.webp'],
-        bee:['Ong','arena-art/bee/poses.webp',[29,32,260,255],1254,1254],
-        butterfly:['Bướm','arena-art/butterfly-poses.webp',[15,21,284,249],1254,1254],
-        crab:['Cua biển','arena-art/cua-bien-poses.webp',[66,82,202,172],1247,1261],
-        'ca-map':['Cá mập','arena-art/shark/idle.webp'],
-        tiger:['Hổ','arena-art/ho-v1/reactions.webp',[52,959,220,283],1254,1254],
-        sparrow:['Chim sẻ','arena-art/chim-se/idle.webp'],
-        lion:['Sư tử','arena-art/lion-idle.webp'],
-        eagle:['Đại bàng','arena-art/eagle/states.webp',[79,61,172,225],1254,1254],
-        voi:['Voi','arena-art/voi-reactions.webp',[76,21,284,227],1536,1024],
-        rabbit:['Thỏ','arena-art/tho-idle.webp'],
-        cat:['Mèo','arena-art/meo-neutral.webp'],
-        gau:['Gấu','arena-art/gau-idle.webp'],
+        dog:['Chó Vui Vẻ','arena-art/dog/idle.webp'],
+        sprout:['Mầm Sách Ham Học','mascots.webp',[131,44,379,521],1200,600],
+        fox:['Cáo Nâu Lanh Lợi','mascots.webp',[670,34,443,532],1200,600],
+        horse:['Ngựa Tung Tăng','arena-art/horse/v1/idle.webp'],
+        'cu-meo':['Cú Mèo Thông Thái','arena-art/owl/poses.webp',[69,18,210,274],1254,1254],
+        dolphin:['Cá Heo Lém Lỉnh','arena-art/ca-heo-v1/actions.webp',[32,48,276,221],1278,1230],
+        octopus:['Bạch Tuộc Khéo Léo','arena-art/bach-tuoc-idle.webp'],
+        starfish:['Sao Biển Lấp Lánh','arena-art/sao-bien-v1/idle.webp'],
+        bee:['Ong Chăm Chỉ','arena-art/bee/poses.webp',[29,32,260,255],1254,1254],
+        butterfly:['Bướm Điệu Đà','arena-art/butterfly-poses.webp',[15,21,284,249],1254,1254],
+        crab:['Cua Biển Vui Tính','arena-art/cua-bien-poses.webp',[66,82,202,172],1247,1261],
+        'ca-map':['Cá Mập Mạnh Mẽ','arena-art/shark/idle.webp'],
+        tiger:['Hổ Dũng Cảm','arena-art/ho-v1/reactions.webp',[52,959,220,283],1254,1254],
+        sparrow:['Chim Sẻ Líu Lo','arena-art/chim-se/idle.webp'],
+        lion:['Sư Tử Oai Phong','arena-art/lion-idle.webp'],
+        eagle:['Đại Bàng Tinh Anh','arena-art/eagle/states.webp',[79,61,172,225],1254,1254],
+        voi:['Voi Tốt Bụng','arena-art/voi-reactions.webp',[76,21,284,227],1536,1024],
+        rabbit:['Thỏ Nhanh Nhẹn','arena-art/tho-idle.webp'],
+        cat:['Mèo Tinh Nghịch','arena-art/meo-neutral.webp'],
+        gau:['Gấu Ấm Áp','arena-art/gau-idle.webp'],
     };
     function avatar(pet = state.mascot) {
         const code = Object.hasOwn(mascotAvatars,pet) ? pet : 'sprout';
@@ -433,7 +433,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             return `${intro('Linh vật của em','Chọn bạn đồng hành và xem kinh nghiệm sau mỗi trận.')}
             <section class="card feature-row sage mascot-feature"><div>${badge('Đang đồng hành · Cấp ' + level(),'white')}<h2>${escape(petName())}</h2><p>${content.format(state.points)} / ${content.format(1000 + level() * 20)} điểm kinh nghiệm để lên cấp ${level() + 1}</p>${meter((state.points - 1000) % 20 * 5,'Tiến độ lên cấp tiếp theo')}<small>Còn ${20 - (state.points - 1000) % 20} điểm để lên cấp tiếp theo.</small></div>${art(state.mascot,petName())}</section>
             <div class="grid3 stats">${stat('cup',history.filter(item => item.outcome === 'win').length + ' trận','Thắng · +2 điểm','sand')}${stat('flag',history.filter(item => item.outcome === 'lose').length + ' trận','Thua · −1 điểm','peach')}${stat('users',history.filter(item => item.outcome === 'draw').length + ' trận','Hòa · 0 điểm')}</div>
-            ${heading('Chọn linh vật')}<div class="grid2">${[['dog','Chó'],['horse','Ngựa'],['dolphin','Cá heo'],['octopus','Bạch tuộc'],['starfish','Sao biển'],['bee','Ong'],['butterfly','Bướm'],['ca-map','Cá mập'],['tiger','Hổ'],['crab','Cua biển'],['eagle','Đại bàng'],['sparrow','Chim sẻ'],['sprout','Mầm Sách'],['cu-meo','Cú mèo'],['fox','Cáo Nâu'],['voi','Voi'],['rabbit','Thỏ'],['cat','Mèo'],['gau','Gấu'],['lion','Sư tử']].map(([pet,title]) => `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`).join('')}</div>`;
+            ${heading('Chọn linh vật')}<div class="grid2">${['dog','horse','dolphin','octopus','starfish','bee','butterfly','ca-map','tiger','crab','eagle','sparrow','sprout','cu-meo','fox','voi','rabbit','cat','gau','lion'].map(pet => {const title=mascotAvatars[pet][0];return `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}</div></section>`;}).join('')}</div>`;
         },
 
         rank() { return liveRank(); },
