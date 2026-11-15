@@ -133,15 +133,15 @@ async function loginThroughUI(target) {
         await open(page,'/tai-khoan/');
         await page.locator('#appearance-form').waitFor();
         assert.match(await page.locator('meta[name=robots]').getAttribute('content'),/noindex/);
-        await page.getByText('03 · Mầm Sách 3D',{exact:true}).click();
+        await page.getByText('04 · Vườn Khám Phá',{exact:true}).click();
         const preference = page.waitForResponse(r => new URL(r.url()).pathname === '/api/v1/preferences' && r.request().method() === 'POST');
         await page.locator('#appearance-form button[type=submit]').click();
         assert((await preference).ok(),'Theme save request failed');
         await page.waitForFunction(() => document.querySelector('#appearance-status')?.textContent.includes('Đã lưu'));
         await page.reload({waitUntil:'domcontentloaded'});
         await page.locator('#appearance-form').waitFor();
-        assert.equal(await page.locator('html').getAttribute('data-theme'),'clay-sprout');
-        assert.equal((await session(context)).state.theme,'clay-sprout');
+        assert.equal(await page.locator('html').getAttribute('data-theme'),'garden-adventure');
+        assert.equal((await session(context)).state.theme,'garden-adventure');
         const layouts = [];
         for (const [width,height] of viewportPairs) {
             await page.setViewportSize({width,height});
@@ -166,7 +166,7 @@ async function loginThroughUI(target) {
         assert.equal((await session(context)).account.id,owner,'Relogin restored wrong account');
         await open(page,'/tai-khoan/');
         await page.locator('#appearance-form').waitFor();
-        assert.equal(await page.locator('html').getAttribute('data-theme'),'clay-sprout');
+        assert.equal(await page.locator('html').getAttribute('data-theme'),'garden-adventure');
         report.checks.push('UI logout clears anonymous progress; UI login restores the same owner progress and saved appearance.');
         assert.deepEqual(report.errors,[],'Unexpected JavaScript page errors');
         report.status = 'passed';
@@ -181,3 +181,4 @@ async function loginThroughUI(target) {
         await browser.close();
     }
 })().catch(error => {console.error(error.stack);process.exitCode = 1;});
+
