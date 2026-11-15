@@ -10,3 +10,33 @@
 !scripts/**
 **/__pycache__/
 **/*.pyc
+
+!Dockerfile.mixed
+!tests/
+!tests/**
+!tools/
+!tools/**
+!qa-inputs/
+!qa-inputs/**
+!round8-inputs/
+!round8-inputs/**
+!pilot-inputs/
+!pilot-inputs/**
+
+!Dockerfile.restructure
+!restructure-inputs/
+!restructure-inputs/**
+
+# Keep generated public HTML from pinned d623 image; source copy must not overwrite it.
+frontend/public-pages/
+frontend/public-pages/**
+
+# Localhost release generates these from the frozen renderer on the host.
+!Dockerfile.localhost
+!release-public-pages/
+!release-public-pages/**
+
+!requirements-pdf.txt
+!Dockerfile.print-bots
+
+!requirements-pdf-test.txt

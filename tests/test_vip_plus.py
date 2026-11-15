@@ -16,7 +16,9 @@ from test_platform_api import Client
 
 class VipPlusTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1] / 'work')
+        folder=Path(__file__).resolve().parents[1]/'work'
+        folder.mkdir(exist_ok=True)
+        self.tmp = tempfile.TemporaryDirectory(dir=folder)
         self.addCleanup(self.tmp.cleanup)
         self.path = Path(self.tmp.name) / 'test.sqlite3'
         initialize(self.path)

@@ -32,6 +32,7 @@ jobs:
           node tests/test_nickname_policy.cjs
           node tests/test_themes.cjs
           node tests/test_bank_boundary.cjs
+          node tests/test_typed_answers.cjs
           node scripts/export-learning-catalog.cjs
           node scripts/check-prerender.cjs
       - name: Both static release targets
@@ -74,6 +75,8 @@ jobs:
         run: |
           docker compose config --quiet
           docker compose up --build --wait --wait-timeout 120
+      - name: Seed only the disposable CI learning fixture
+        run: docker compose exec -T web python -c "from pathlib import Path; from backend.platform_api import seed_catalog; seed_catalog(Path('/data/5bmath-demo.sqlite3'))"
       - name: Full suite inside the built image
         run: docker compose -f compose.yaml -f compose.test.yaml run --build --rm --no-deps -T web python -m unittest discover -s tests -v
       - name: Real browser flows
