@@ -1,0 +1,2 @@
+CREATE TABLE IF NOT EXISTS practice_export_codes(code TEXT PRIMARY KEY,provider TEXT NOT NULL CHECK(provider IN ('main','pilot')),version_id INTEGER NOT NULL,revision INTEGER NOT NULL,payload_sha256 TEXT NOT NULL,payload_json TEXT NOT NULL,created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS practice_export_rights(student_id INTEGER NOT NULL REFERENCES students(id),code TEXT NOT NULL REFERENCES practice_export_codes(code),exam_id INTEGER NOT NULL REFERENCES exams(id),created_at TEXT NOT NULL,PRIMARY KEY(student_id,code));

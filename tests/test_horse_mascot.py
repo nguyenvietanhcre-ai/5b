@@ -65,7 +65,7 @@ class HorseMascotTests(unittest.TestCase):
         joined = friend.call('arena', {
             'action': 'join', 'code': room['code'], 'scope': 'weekly',
             'mascot': 'horse', 'stats': {'mascot': 'horse', 'xp': 999999}})
-        horse.call('arena', {'action': 'accept', **room})
+        self.assertEqual(horse.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         for client, credentials, expected in (
                 (friend, joined, 'horse'), (horse, room, 'fox')):

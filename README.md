@@ -1,6 +1,12 @@
-# Mầm Toán — Python / GitHub / Docker
+# 5BMath — Python / GitHub / Docker
 
 Website tiếng Việt của 5BMath, có bài đọc công khai và khu vực học sinh lớp 1–5. Học liệu và ngân hàng mẫu được gắn nhãn, chưa thay cho chương trình/đề chính thức đã duyệt.
+
+Bản chuyển đầy đủ chức năng localhost sang Cloudflare, ranh giới dữ liệu học
+tập riêng, PDF/WASM và quy trình kiểm thử được mô tả tại
+[CLOUDFLARE_NATIVE_RELEASE.md](docs/CLOUDFLARE_NATIVE_RELEASE.md).
+Kho học liệu/đáp án và seed tài khoản rỗng được đóng gói riêng theo seal SHA;
+không công khai các tệp đó trong GitHub và không chép DB localhost lên website.
 Tất cả tệp dự án đặt tại F:\ChatGPT Math Project.
 
 ## Trạng thái và nguồn dữ liệu
@@ -80,7 +86,7 @@ Script chỉ tạo/cập nhật luật `5BMath-LAN-8765`, không tắt firewall 
 
 Kiểm thử trong đúng image (chạy tại thư mục gốc dự án trên Windows):
 
-    docker compose -f compose.yaml -f compose.test.yaml run --rm --no-deps -T web python -m unittest discover -s tests -v
+    docker compose -f compose.yaml -f compose.test.yaml run --build --rm --no-deps -T web python -m unittest discover -s tests -v
 
 Ngày 08/11/2026, container healthy, trang chủ/JS/CSS/health trả về HTTP 200, đề mẫu đạt 10/10 và 10 kiểm thử Python đều đạt trong image lẫn trên Windows. Kiểm tra cú pháp JavaScript cũng đạt.
 Nguồn cách dùng Compose: https://docs.docker.com/reference/cli/docker/compose/up/

@@ -11,7 +11,7 @@ import os
 import re
 import secrets
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from .platform_api import APIError, VN, connect, now, stamp
@@ -32,7 +32,7 @@ REASONS = {
     'student_mismatch': 'Thông tin tài khoản và học sinh không khớp',
     'fee_mismatch': 'Học phí đã đổi học sinh, lớp, tháng hoặc số tiền',
     'fee_paid': 'Khoản học phí đã được thanh toán',
-    'invalid_product': 'Thông tin gói VIP không hợp lệ',
+    'invalid_product': 'Thông tin sản phẩm không hợp lệ',
     'internal_account': 'Tài khoản đã có quyền SVip; cần đối soát',
     'purchase_conflict': 'Mã mua VIP đã được ghi nhận khác thông tin đơn',
 }
@@ -72,6 +72,7 @@ def _bank_key(value):
 
 def order_view(order):
     result = dict(order)
+    result.pop('exam_payload_json', None)
     bank, account, owner = (result.get('bank_id') or '', result.get('bank_account') or '',
                             result.get('bank_name') or '')
     result.update(bank=bank, bankAccount=account, bankName=owner, qrUrl='',
@@ -95,6 +96,12 @@ def order_status(db, session, identity):
 
 def create_order(db, session, body):
     from .learning_update import enrolled, membership
+    if body.get('examProduct') is not None:
+        from .exam_commerce import create_order as create_exam_order
+        return create_exam_order(db, session, body)
+    plan = body.get('plan', 'VIP')
+    if plan not in ('VIP', 'VIP+'):
+        raise APIError('Gói đăng ký không hợp lệ.')
     fee_id = body.get('feeId')
     if fee_id is not None and (type(fee_id) is not int or fee_id <= 0):
         raise APIError('Khoản học phí không hợp lệ.')
@@ -111,22 +118,24 @@ def create_order(db, session, body):
     else:
         if membership(db, session) == 'SVip':
             raise APIError('Học sinh nội bộ đã có đầy đủ quyền học.', 403)
-        amount = VIP_UNIT_PRICE
+        if membership(db, session) == 'VIP+' and plan == 'VIP':
+            raise APIError('Em đang dùng VIP+. Chọn gia hạn VIP+ để giữ quyền học nâng cao.', 409)
+        amount = 200000 if plan == 'VIP+' else VIP_UNIT_PRICE
     order = db.execute("SELECT * FROM payment_orders WHERE account_id=? AND coalesce(fee_id,0)=? AND status='pending'",
                        (session['account_id'], fee_id or 0)).fetchone()
-    if order and order['amount'] != amount:
+    if order and (order['amount'] != amount or (not fee and order['subscription_plan'] != plan or order['purchase_type'] == 'exam')):
         # A QR already shown must never silently become a different purchase.
         db.execute("UPDATE payment_orders SET status='cancelled' WHERE id=?", (order['id'],))
         order = None
     bank, account, owner = bank_configuration()
     if order is None:
         identity = db.execute('INSERT INTO payment_orders(account_id,fee_id,reference,amount,created_at,kind,'
-            'vip_months,vip_unit_price,fee_student_id,fee_class_id,fee_month,bank_id,bank_account,bank_name) '
-            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'vip_months,vip_unit_price,fee_student_id,fee_class_id,fee_month,bank_id,bank_account,bank_name,subscription_plan) '
+            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             (session['account_id'], fee_id, 'BM' + secrets.token_hex(10).upper(), amount, stamp(),
-             'tuition' if fee else 'vip', None if fee else 1, None if fee else VIP_UNIT_PRICE,
+             'tuition' if fee else 'vip', None if fee else 1, None if fee else amount,
              fee['student_id'] if fee else None, fee['class_id'] if fee else None, fee['month'] if fee else None,
-             bank or None, account or None, owner or None)).lastrowid
+             bank or None, account or None, owner or None, plan if not fee else 'VIP')).lastrowid
     else:
         identity = order['id']
         # Legacy orders have no invented receiver. Bind only when the owner asks
@@ -134,6 +143,8 @@ def create_order(db, session, body):
         if bank and not order['bank_id'] and not order['bank_account'] and not order['bank_name']:
             db.execute('UPDATE payment_orders SET bank_id=?,bank_account=?,bank_name=? WHERE id=?',
                        (bank, account, owner, identity))
+    if fee:
+        db.execute("UPDATE payment_orders SET purchase_type='tuition' WHERE id=?", (identity,))
     return {'order': order_view(db.execute('SELECT * FROM payment_orders WHERE id=?', (identity,)).fetchone())}
 
 
@@ -146,6 +157,15 @@ def settlement_problem(db, order):
     student = db.execute('SELECT id,status FROM students WHERE account_id=?', (order['account_id'],)).fetchone()
     if not student or student['status'] != 'active':
         return 'student_mismatch'
+    if order['purchase_type'] == 'exam':
+        from .exam_commerce import content_valid
+        try:
+            payload=json.loads(order['exam_payload_json'])
+            if order['fee_id'] is not None or payload.get('price') != order['amount'] or not content_valid(db,payload):
+                return 'invalid_product'
+        except (ValueError,TypeError,KeyError):
+            return 'invalid_product'
+        return None
     if order['kind'] == 'tuition' and order['fee_id'] is not None:
         fee = db.execute('SELECT * FROM class_fees WHERE id=?', (order['fee_id'],)).fetchone()
         if (not fee or fee['student_id'] != student['id'] or fee['student_id'] != order['fee_student_id'] or
@@ -155,6 +175,8 @@ def settlement_problem(db, order):
         if fee['paid_at'] or db.execute("SELECT 1 FROM payment_orders WHERE fee_id=? AND status='paid'", (fee['id'],)).fetchone():
             return 'fee_paid'
     elif order['kind'] == 'vip' and order['fee_id'] is None:
+        if order['subscription_plan'] == 'VIP+' and order['vip_unit_price'] != 200000:
+            return 'invalid_product'
         if (type(order['vip_months']) is not int or not 1 <= order['vip_months'] <= 120 or
                 type(order['vip_unit_price']) is not int or order['vip_unit_price'] <= 0 or
                 order['amount'] != order['vip_unit_price'] * order['vip_months']):
@@ -179,7 +201,9 @@ def settle_order(db, order, source, receipt_id=None):
     if problem:
         raise APIError(REASONS[problem] + '. Kiểm tra lại trước khi xác nhận.', 409)
     confirmed = stamp()
-    if order['kind'] == 'tuition':
+    if order['purchase_type'] == 'exam':
+        db.execute("INSERT INTO notifications(account_id,kind,title,body,sender_name,sender_role,created_at) VALUES (?,'staff_message','Mua bộ đề thành công',?,'5BMath','system',?)", (order['account_id'],order['exam_title']+' · '+order['reference'],confirmed))
+    elif order['kind'] == 'tuition':
         db.execute('UPDATE class_fees SET paid_at=? WHERE id=? AND paid_at IS NULL', (confirmed, order['fee_id']))
         db.execute("INSERT INTO notifications(account_id,kind,title,body,sender_name,sender_role,created_at) "
             "VALUES (?,'staff_message','Thanh toán học phí thành công',?,'5BMath','system',?)",
@@ -188,6 +212,17 @@ def settle_order(db, order, source, receipt_id=None):
         # Keep one key for both legacy staff confirmations and bank webhooks.
         db.execute('INSERT OR IGNORE INTO vip_purchases(account_id,payment_ref,months,confirmed_at) VALUES (?,?,?,?)',
                    (order['account_id'], 'STAFF-ORDER-' + str(order['id']), order['vip_months'], confirmed))
+        if order['subscription_plan'] == 'VIP+':
+            previous = db.execute('SELECT vip_plus_expires_at FROM accounts WHERE id=?', (order['account_id'],)).fetchone()[0]
+            anchor = max(confirmed, previous or confirmed)
+            # Same calendar-month rule as VIP; never convert existing VIP time.
+            from calendar import monthrange
+            start = datetime.fromisoformat(anchor).astimezone(VN)
+            months = start.year * 12 + start.month - 1 + order['vip_months']
+            year, month = divmod(months, 12)
+            month += 1
+            until = start.replace(year=year, month=month, day=min(start.day, monthrange(year, month)[1]))
+            db.execute('UPDATE accounts SET vip_plus_expires_at=?,revision=revision+1 WHERE id=?', (stamp(until), order['account_id']))
     db.execute("UPDATE payment_orders SET status='paid',paid_at=?,confirmed_source=?,receipt_id=? WHERE id=? AND status='pending'",
                (confirmed, source, receipt_id, order['id']))
     return True

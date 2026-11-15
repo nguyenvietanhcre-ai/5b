@@ -62,7 +62,7 @@ class StarfishMascotTests(unittest.TestCase):
         self.assertEqual(next(row for row in listing if row['code'] == room['code'])
                          ['mascot'], 'starfish')
         joined = friend.call('arena', {'action': 'join', 'code': room['code'], 'scope': 'weekly'})
-        owner.call('arena', {'action': 'accept', **room})
+        self.assertEqual(owner.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         mine = owner.call('arena', {'action': 'state', **room})['battle']
         theirs = friend.call('arena', {'action': 'state', **joined})['battle']

@@ -53,6 +53,7 @@ const core = ['app.js', 'nickname-policy.js', 'platform-api.js', 'themes.js', 't
 for (const asset of new Set([...core, ...manifest.files])) {
     const source = path.resolve(frontend, asset);
     if (!source.startsWith(frontend + path.sep)) throw new Error('Invalid public asset: ' + asset);
+    fs.mkdirSync(path.dirname(path.join(output, asset)), {recursive: true});
     fs.copyFileSync(source, path.join(output, asset));
 }
 for (const directory of ['arena-art', 'theme-art']) {
@@ -61,7 +62,7 @@ for (const directory of ['arena-art', 'theme-art']) {
 }
 const root = target === 'github' ? '/5b/' : '/';
 fs.writeFileSync(path.join(output, '404.html'), `<!doctype html>
-<html lang="vi" data-theme="garden-adventure">
+<html lang="vi" data-theme="clay-sprout">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">

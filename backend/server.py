@@ -7,11 +7,11 @@ import re
 import sqlite3
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer as StandardThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, parse_qs
 from .content import grade
 from .database import count_published_exams, demo_samples, initialize
 from .arena import Arena, ArenaError
-from .platform_api import APIError, dispatch, seed_catalog
+from .platform_api import APIError, dispatch, initialize_catalog
 from .staff_api import dispatch as staff_dispatch
 
 class ThreadingHTTPServer(StandardThreadingHTTPServer):
@@ -44,6 +44,7 @@ LEARNING_ROUTES = {
     "tran-dau": "battle", "ket-qua-tran": "battleResult", "linh-vat": "mascot",
     "xep-hang": "rank", "tai-khoan": "profile", "lop-zoom": "classroom",
     "dang-ky-hoc-zoom": "zoomRegistration", "nang-cap": "upgrade", "thanh-toan": "payment",
+    "tra-cuu-cau-hoi": "lookup",
 }
 PAGES.update({"/" + path + "/": "learn-" + name for path, name in LEARNING_ROUTES.items()})
 PRIVATE_PAGES = {"dashboard", *("learn-" + name for name in LEARNING_ROUTES.values())}
@@ -77,6 +78,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         url = urlsplit(self.path)
         route = unquote(url.path)
+        if route.startswith('/api/local-pilot/'):
+            self.local_pilot_request('GET',route)
+            return
         if route.startswith(('/api/v1/', '/api/staff/')):
             self.platform_request('GET', route)
         elif route == "/api/health":
@@ -140,6 +144,9 @@ class Handler(BaseHTTPRequestHandler):
         self.do_GET()
     def do_POST(self):
         endpoint = urlsplit(self.path).path
+        if endpoint.startswith('/api/local-pilot/'):
+            self.local_pilot_request('POST',endpoint)
+            return
         if endpoint == '/api/webhooks/sepay':
             self.sepay_request()
             return
@@ -210,6 +217,38 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.json_response(status, payload)
 
+    def local_pilot_request(self,method,endpoint):
+        self.api_headers={}
+        provider=getattr(self.server,'local_pilot',None)
+        if provider is None:self.json_response(404,{'error':'Thí điểm cục bộ chưa bật.'});return
+        try:
+            body=None
+            if method=='POST':
+                if self.headers.get('Content-Type','').split(';')[0].strip()!='application/json':raise APIError('Use application/json',415)
+                length=int(self.headers.get('Content-Length','0'))
+                limit=1048576+2048 if re.fullmatch(r'/api/local-pilot/exams/\d+/scratch',endpoint) else MAX_BODY
+                if not 0<length<=limit:raise APIError('Invalid request size',413)
+                body=json.loads(self.rfile.read(length).decode())
+                if not isinstance(body,dict):raise APIError('Invalid body')
+                stack=[(body,0)];nodes=0
+                while stack:
+                    item,depth=stack.pop();nodes+=1
+                    if depth>16 or nodes>(100000 if re.fullmatch(r'/api/local-pilot/exams/\d+/scratch',endpoint) else 4096):raise APIError('JSON thí điểm quá sâu hoặc quá nhiều phần tử.')
+                    if isinstance(item,dict):stack.extend((v,depth+1) for v in item.values())
+                    elif isinstance(item,list):stack.extend((v,depth+1) for v in item)
+            result=provider.request(self,method,endpoint.removeprefix('/api/local-pilot/'),body,parse_qs(urlsplit(self.path).query))
+            if '_local_binary' in result:
+                self.api_headers['Content-Security-Policy']="sandbox; default-src 'none'; style-src 'none'"
+                self.respond(200,result['_local_binary'],result['mime']);return
+            self.json_response(200,result)
+        except APIError as error:
+            from .wallet_qa import QuoteChanged
+            payload={'error':str(error)}
+            if isinstance(error,QuoteChanged):payload.update(reconfirm=True,allocation=error.allocation)
+            self.json_response(error.status,payload)
+        except (ValueError,TypeError,KeyError,UnicodeError,RecursionError):self.json_response(400,{'error':'Dữ liệu thí điểm không hợp lệ.'})
+        except sqlite3.Error:self.json_response(503,{'error':'Chưa thể lưu dữ liệu thí điểm; gửi lại cùng yêu cầu.'})
+
     def platform_request(self, method, endpoint):
         self.api_headers = {}
         try:
@@ -222,6 +261,7 @@ class Handler(BaseHTTPRequestHandler):
                 except ValueError:
                     raise APIError('Invalid content length')
                 limit = 262144 if endpoint.startswith('/api/staff/') else MAX_BODY
+                if re.fullmatch(r'/api/v1/exams/\d+/scratch',endpoint):limit=1048576+2048
                 if re.fullmatch(r'/api/v1/classes/\d+/assignments/\d+/submissions', endpoint):
                     limit = 4 * ((10 * 1024 * 1024 + 2) // 3) + 2048
                 if not 0 < length <= limit:
@@ -231,12 +271,15 @@ class Handler(BaseHTTPRequestHandler):
                     raise APIError('Invalid body')
             api = staff_dispatch if endpoint.startswith('/api/staff/') else dispatch
             payload, status = api(self, method, endpoint, body)
+            if isinstance(payload,dict) and 'authenticated' in payload and getattr(self.server,'local_pilot',None):payload['localPilotEnabled']=True
         except APIError as error:
             self.api_headers = {}
             payload = {'error': str(error)}
             discipline = getattr(error, 'arenaDiscipline', None)
             if discipline is not None:
                 payload['arenaDiscipline'] = discipline
+            for key in ('gameClaim','gameConflicts'):
+                if hasattr(error,key):payload[key]=getattr(error,key)
             self.json_response(error.status, payload)
         except (ValueError, UnicodeError, TypeError, RecursionError):
             self.api_headers = {}
@@ -263,7 +306,7 @@ def main():
     parser.add_argument("--database", type=Path, default=os.environ.get("MAM_TOAN_DATABASE", DEFAULT_DATABASE))
     args = parser.parse_args()
     initialize(args.database)
-    seed_catalog(args.database)
+    initialize_catalog(args.database)
     # A cold arena page can request many CSS/JS files at once.
     # Keep local browser bursts queued instead of refusing core scripts.
     ThreadingHTTPServer.request_queue_size = 128
@@ -272,6 +315,19 @@ def main():
     server.review_upgrades = os.environ.get('MAM_TOAN_REVIEW_UPGRADES') == '1'
     server.arena = ARENA
     server.real_accounts = True
+    server.native_python_backend = True
+    server.practice_export_enabled=os.environ.get('MAM_TOAN_PRACTICE_EXPORT')=='1'
+    server.practice_export_ports=frozenset(int(p) for p in os.environ.get('MAM_TOAN_PRACTICE_EXPORT_PORTS','8765').split(','))
+    if any(not 1024<=p<=65535 for p in server.practice_export_ports):raise ValueError('Trusted native export external port required')
+    if os.environ.get('MAM_TOAN_LOCAL_TEST_GAMES')=='1':
+        from .local_test_games import NativeLocalTestGames
+        ports={int(value) for value in os.environ.get('MAM_TOAN_LOCAL_TEST_GAMES_PORTS','8765').split(',')}
+        server.local_test_games=NativeLocalTestGames(ports)
+    if os.environ.get('MAM_TOAN_LOCAL_PILOT')=='1':
+        from .local_pilot import LocalPilot
+        server.local_pilot_ports={int(v) for v in os.environ.get('MAM_TOAN_LOCAL_PILOT_PORTS',str(args.port)).split(',')}
+        if not server.local_pilot_ports or any(not 1024<=v<=65535 for v in server.local_pilot_ports):raise ValueError('Trusted local pilot external port required')
+        server.local_pilot=LocalPilot(args.database,os.environ.get('MAM_TOAN_LOCAL_PILOT_DATABASE','/pilot/local-pilot.sqlite3'),os.environ.get('MAM_TOAN_LOCAL_PILOT_INPUTS',str(FRONTEND.parent/'pilot-inputs')),restructure_inputs=(os.environ.get('MAM_TOAN_RESTRUCTURE_INPUTS',str(FRONTEND.parent/'restructure-inputs')) if os.environ.get('MAM_TOAN_RESTRUCTURE')=='1' else None))
     server.daemon_threads = True
     print(f"Mam Toan (Python): http://{args.host}:{server.server_port}", flush=True)
     try:

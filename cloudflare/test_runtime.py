@@ -76,7 +76,7 @@ class HTTPClient:
             self.last_status, content = response.code, response.read()
             self.last_headers = {key.lower(): value for key, value in response.headers.items()}
         if self.last_status != expected:
-            raise AssertionError('Runtime HTTP status mismatch for ' + path + ': got ' + str(self.last_status) + ', expected ' + str(expected))
+            raise AssertionError('Runtime HTTP status mismatch for ' + path + ': got ' + str(self.last_status) + ', expected ' + str(expected) + ' ' + content.decode('utf-8',errors='replace')[:240])
         if raw:
             return content
         result = json.loads(content)
@@ -156,7 +156,7 @@ def transfer_payload(source, directory):
 
 
 class LocalWorker:
-    def __init__(self, directory, port, operator_token, webhook_secret):
+    def __init__(self, directory, port, operator_token, webhook_secret, native_features=False):
         self.directory, self.port = directory, port
         self.origin = 'http://127.0.0.1:' + str(port)
         self.project = directory / 'worker-project'
@@ -171,6 +171,7 @@ class LocalWorker:
         config.pop('env', None)
         config['name'] = 'fivebmath-isolated-runtime-qa'
         config['vars'] = {'PUBLIC_ORIGIN': self.origin, 'TENANT_KEY': 'runtime-qa', 'TRANSFER_ENABLED': 'true'}
+        config['vars'].update(NATIVE_LEARNING_ENABLED=str(native_features).lower(),DEMO_GAMES_ENABLED=str(native_features).lower())
         config['dev'] = {'ip': '127.0.0.1', 'port': port, 'inspector_port': port + 500}
         (self.project / 'wrangler.jsonc').write_text(json.dumps(config), encoding='utf-8')
         values = {'PUBLIC_ORIGIN': self.origin, 'TENANT_KEY': 'runtime-qa', 'TRANSFER_ENABLED': 'true',
@@ -278,7 +279,7 @@ def run(port):
         auth = {'Authorization': 'Bearer ' + operator_token}
         anonymous = HTTPClient(origin)
         anonymous.call('/__ops/status', expected=404)
-        anonymous.call('/__ops/import', payload, expected=404)
+        anonymous.call('/__ops/import', {}, expected=404)
         anonymous.call('/api/v1/session', expected=503)
         corrupted = copy.deepcopy(payload)
         first_table = next(iter(corrupted['source']['tables']))
@@ -316,7 +317,8 @@ def run(port):
         assert len(exam['questions']) == 3
         assert all('answer' not in question and 'solution' not in question for question in exam['questions'])
         other.call('/api/v1/exams/' + str(exam['id']), expected=404)
-        student.call('/api/v1/exams/' + str(exam['id']) + '/answers', {'position': 1, 'answer': exam['questions'][0]['options'][0]})
+        assert exam['responseMode']=='typed' and all('options' not in q for q in exam['questions'])
+        student.call('/api/v1/exams/' + str(exam['id']) + '/answers', {'position': 1, 'answer': 'Một đáp án tự nhập'})
         result = student.call('/api/v1/exams/' + str(exam['id']) + '/submit', {})['exam']
         assert result['submittedAt'] and 0 <= result['score'] <= 10
         assert result['questions'][0]['solution']
@@ -368,7 +370,11 @@ def run(port):
         room_credentials = {key: room[key] for key in ('code', 'token')}
         joined = other.call('/api/v1/arena', {'action': 'join', 'code': room['code']})
         other_credentials = {key: joined[key] for key in ('code', 'token')}
-        student.call('/api/v1/arena', {'action': 'accept', **room_credentials})
+        paired_state=student.call('/api/v1/arena', {'action':'state',**room_credentials})
+        if paired_state['status']=='challenged':
+            student.call('/api/v1/arena', {'action': 'accept', **room_credentials})
+        else:
+            assert paired_state['status']=='preparing', 'Public pairing must enter preparation directly'
         time.sleep(3.2)
         battle = student.call('/api/v1/arena', {'action': 'state', **room_credentials})['battle']
         question = battle['questions'][battle['index']]
@@ -377,7 +383,7 @@ def run(port):
         with sqlite3.connect(source) as fixture_db:
             correct = str(json.loads(fixture_db.execute('SELECT grading_rule_json FROM question_versions WHERE id=?',
                                                        (question['questionVersionId'],)).fetchone()[0])['answer'])
-        selected = next(option for option in question['options'] if option != correct)
+        selected = 'Đáp án sai để kiểm tra lưu lịch sử'
         answered = student.call('/api/v1/arena', {'action': 'answer', **room_credentials,
                                                 'index': battle['index'], 'answer': selected})['battle']
         assert answered['answer'] == selected and not answered['resolved']

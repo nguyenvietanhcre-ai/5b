@@ -128,7 +128,7 @@ class ArenaPenaltyTests(unittest.TestCase):
 
     def test_xp_floor_and_preparation_cancellation_refund_both(self):
         with connect(self.path, True) as db:
-            db.execute('UPDATE student_companions SET xp=1000 WHERE student_id=?', (self.first.sid,))
+            db.execute('UPDATE student_companions SET xp=0 WHERE student_id=?', (self.first.sid,))
         room, _ = self.pair(playing=False)
         self.assertEqual(self.leave(room)['status'], 'cancelled')
         self.assertEqual(self.first.call('session')['account']['usage']['human']['used'], 0)
@@ -136,7 +136,7 @@ class ArenaPenaltyTests(unittest.TestCase):
         self.assertEqual(self.first.call('session')['arenaDiscipline']['recentAbandons'], 0)
         room, _ = self.pair()
         self.assertEqual(self.leave(room)['result']['points'], 0)
-        self.assertEqual(self.first.call('session')['state']['points'], 1000)
+        self.assertEqual(self.first.call('session')['state']['points'], 0)
 
     def test_network_forgiveness_then_strikes_and_settlement_without_survivor_poll(self):
         self.paid(self.first)

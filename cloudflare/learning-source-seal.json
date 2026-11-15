@@ -1,0 +1,67 @@
+{
+  "containsAccounts": false,
+  "containsSessions": false,
+  "scope": "Source-only learning/demo data; no user database or authentication state; independent teacher approval unchanged",
+  "files": [
+    {
+      "path": "cloudflare/learning-seed.sql",
+      "bytes": 1164169,
+      "sha256": "71000773f683d62348c908ba7eab5a1f45d9b5b1a12278bc12c93aad2b3b49be"
+    },
+    {
+      "path": "cloudflare/learning-names.json",
+      "bytes": 4860,
+      "sha256": "02c7b1546635b276f58bfbdf8426f412cd5d4b2225e2b45b429b707c403e5fbe"
+    },
+    {
+      "path": "pilot-inputs/batch-manifest.json",
+      "bytes": 7042,
+      "sha256": "83aa5539ec936aa6ea2543becab90fbb850277846e54dd2cfb9e4cc7b25c8e18"
+    },
+    {
+      "path": "pilot-inputs/lessons-bundle.json",
+      "bytes": 517536,
+      "sha256": "480b0c405b66dfe04040b05c70ed7fd9367c48be049d17aecd374f07dc2281ad"
+    },
+    {
+      "path": "pilot-inputs/manifest.json",
+      "bytes": 1074,
+      "sha256": "ef55c9111640414dd24e8557ffeaf31c482de1f376dd42321244d0b10cc779fc"
+    },
+    {
+      "path": "pilot-inputs/questions-mcq60.json",
+      "bytes": 254473,
+      "sha256": "c59df867ccd94fb4188cf92a44e9833dd8c6d6d07cc557d10b87b6e7dc8eebe1"
+    },
+    {
+      "path": "pilot-inputs/questions-typed-subset.json",
+      "bytes": 180373,
+      "sha256": "faef70bbc6ea3c9a7ebdc8c50bc5b5ef3c6de9d4361baa3d37d63956baa809f7"
+    },
+    {
+      "path": "pilot-inputs/sources.json",
+      "bytes": 156766,
+      "sha256": "601574f579e73639fe7948c0b390fa633976dbdd30003d20cb559a73b4ebf886"
+    },
+    {
+      "path": "pilot-inputs/typed-manifest.json",
+      "bytes": 4504,
+      "sha256": "cc3d5794c4092b5e9b5385d21f45b13c10e684af39f248a29c2dc004f8e5240c"
+    },
+    {
+      "path": "restructure-inputs/knowledge-bundle.json",
+      "bytes": 194210,
+      "sha256": "938c6a8c08f0aaca336ea1446f3efddb785ee3d24135c37dd5355e7c6a7ab87b"
+    },
+    {
+      "path": "restructure-inputs/knowledge-manifest.json",
+      "bytes": 160,
+      "sha256": "e96380bf71b6dd2bcbed19c1e80e2e9322af9e889826043d969ce71411e513c1"
+    },
+    {
+      "path": "restructure-inputs/mapping60.json",
+      "bytes": 120392,
+      "sha256": "184a8e8aadd66371778d22d740057caad7f73c874dfbb269455315fb406b3899"
+    }
+  ]
+}

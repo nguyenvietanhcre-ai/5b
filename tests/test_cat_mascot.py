@@ -52,7 +52,7 @@ class CatMascotTests(unittest.TestCase):
         listing = friend.call('arena', {'action': 'list'})['rooms']
         self.assertEqual(next(row for row in listing if row['code'] == room['code'])['mascot'], 'cat')
         joined = friend.call('arena', {'action': 'join', 'code': room['code'], 'scope': 'weekly'})
-        cat.call('arena', {'action': 'accept', **room})
+        self.assertEqual(cat.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         battle = friend.call('arena', {'action': 'state', **joined})['battle']
         self.assertEqual(battle['opponentMascot'], 'cat')

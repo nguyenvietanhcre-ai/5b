@@ -195,7 +195,7 @@ class StaffTests(unittest.TestCase):
             asset = db.execute('SELECT id FROM media_assets LIMIT 1').fetchone()[0]
             db.execute('INSERT OR IGNORE INTO question_assets VALUES (?,?)', (q['version_id'], asset))
         self.admin.call('questions', {'id': row['id'], 'revision': row['revision'], 'grade': row['grade_id'], 'topicId': row['topic_id'],
-             'prompt': 'Nội dung đã sửa', 'answer': row['answer'], 'options': row['options'], 'steps': row['steps'],
+             'prompt': 'Nội dung đã sửa', 'answer': row['answer'], 'answerKind':'auto', 'steps': row['steps'],
              'thinking': row['thinking'], 'difficulty': row['difficulty'], 'week': row['curriculum_week'], 'status': 'published'})
         self.assertEqual(student.call('exams/' + exam['id'])['exam']['questions'][0]['text'], exam['questions'][0]['text'])
         with connect(self.path) as db:

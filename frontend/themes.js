@@ -2,7 +2,7 @@
 
 // Run before stylesheets so a saved appearance is present at first paint.
 const ThemeManager = (() => {
-    const defaultTheme = 'garden-adventure';
+    const defaultTheme = 'clay-sprout';
     const options = Object.freeze([
         {id:'morning-garden',number:'01',name:'Vườn Sương Mai',description:'Thoáng nhẹ, màu dịu và khung thanh mảnh.'},
         {id:'crayon-workshop',number:'02',name:'Xưởng Bút Sáp',description:'Giấy ấm, viền sáp và nét nhấn vui tươi.'},
@@ -12,7 +12,7 @@ const ThemeManager = (() => {
     ].map(Object.freeze));
     const valid = value => options.some(option => option.id === value);
     const normalize = value => valid(value) ? value : defaultTheme;
-    const label = value => options.find(option => option.id === value)?.name || 'Vườn Khám Phá';
+    const label = value => options.find(option => option.id === value)?.name || options.find(option => option.id === defaultTheme).name;
     const accountKey = '5bmath-appearance-v1', guestKey = '5bmath-guest-theme-v1';
     let owner = null, savedTheme = defaultTheme, theme = defaultTheme, binding = null;
     const browser = typeof document !== 'undefined';
@@ -46,7 +46,7 @@ const ThemeManager = (() => {
         if(binding) updateSettings();
     }
     function renderSettings() {
-        return `<section class="card card-pad theme-settings" id="appearance" aria-labelledby="appearance-title"><div class="theme-settings-heading"><div><span class="eyebrow">KHU VƯỜN CỦA EM</span><h2 id="appearance-title">Giao diện của em</h2><p id="appearance-help">Chọn phong cách em thích để xem trước, rồi bấm Áp dụng.</p></div><span class="tag sage">5 phong cách</span></div><form id="appearance-form"><fieldset class="theme-fieldset" aria-describedby="appearance-help"><legend>Chọn giao diện</legend><div class="theme-options">${options.map(option => `<label class="theme-option"><input type="radio" name="appearance-theme" value="${option.id}" ${savedTheme === option.id ? 'checked' : ''}><span class="theme-preview" data-preview-theme="${option.id}" aria-hidden="true"><span class="theme-preview-bar"><i></i><i></i><i></i></span><span class="theme-preview-hero"><span class="theme-preview-heading">Học vui mỗi ngày</span><span class="theme-preview-actions"><i></i><b></b></span></span><span class="theme-preview-cards"><i></i><i></i><i></i></span></span><span class="theme-option-copy"><strong>${option.number} · ${option.name}</strong><span>${option.description}</span>${option.id === defaultTheme ? '<small>Mặc định của 5BMath</small>' : ''}</span><span class="theme-option-check" aria-hidden="true"></span></label>`).join('')}</div></fieldset><p class="theme-settings-status" id="appearance-status" role="status" aria-live="polite">Đang dùng ${label(savedTheme)}.</p><div class="actions theme-settings-actions"><button class="btn dark" type="submit" disabled>Áp dụng</button><button class="btn outline" id="appearance-cancel" type="button" disabled>Hủy xem trước</button><button class="btn outline" id="appearance-default" type="button">Mặc định: Vườn Khám Phá</button></div><p class="learning-notice">${owner === null ? 'Lựa chọn được lưu trong trình duyệt này.' : 'Lựa chọn được lưu theo tài khoản để dùng lại trên thiết bị khác.'}</p></form></section>`;
+        return `<section class="card card-pad theme-settings" id="appearance" aria-labelledby="appearance-title"><div class="theme-settings-heading"><div><span class="eyebrow">KHU VƯỜN CỦA EM</span><h2 id="appearance-title">Giao diện của em</h2><p id="appearance-help">Chọn phong cách em thích để xem trước, rồi bấm Áp dụng.</p></div><span class="tag sage">5 phong cách</span></div><form id="appearance-form"><fieldset class="theme-fieldset" aria-describedby="appearance-help"><legend>Chọn giao diện</legend><div class="theme-options">${options.map(option => `<label class="theme-option"><input type="radio" name="appearance-theme" value="${option.id}" ${savedTheme === option.id ? 'checked' : ''}><span class="theme-preview" data-preview-theme="${option.id}" aria-hidden="true"><span class="theme-preview-bar"><i></i><i></i><i></i></span><span class="theme-preview-hero"><span class="theme-preview-heading">Học vui mỗi ngày</span><span class="theme-preview-actions"><i></i><b></b></span></span><span class="theme-preview-cards"><i></i><i></i><i></i></span></span><span class="theme-option-copy"><strong>${option.number} · ${option.name}</strong><span>${option.description}</span>${option.id === defaultTheme ? '<small>Mặc định của 5BMath</small>' : ''}</span><span class="theme-option-check" aria-hidden="true"></span></label>`).join('')}</div></fieldset><p class="theme-settings-status" id="appearance-status" role="status" aria-live="polite">Đang dùng ${label(savedTheme)}.</p><div class="actions theme-settings-actions"><button class="btn dark" type="submit" disabled>Áp dụng</button><button class="btn outline" id="appearance-cancel" type="button" disabled>Hủy xem trước</button><button class="btn outline" id="appearance-default" type="button">Mặc định: ${label(defaultTheme)}</button></div><p class="learning-notice">${owner === null ? 'Lựa chọn được lưu trong trình duyệt này.' : 'Lựa chọn được lưu theo tài khoản để dùng lại trên thiết bị khác.'}</p></form></section>`;
     }
     function updateSettings(message) {
         const context = binding;

@@ -2,7 +2,7 @@
 name = "fivebmath-api-worker"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["reportlab==4.4.9", "pillow==12.2.0"]
 
 [dependency-groups]
 dev = ["workers-runtime-sdk==1.9.6"]

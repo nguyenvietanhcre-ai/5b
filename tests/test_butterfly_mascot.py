@@ -64,7 +64,7 @@ class ButterflyMascotTests(unittest.TestCase):
                       if row['code'] == room['code'])
         self.assertEqual(listed['mascot'], 'butterfly')
         joined = friend.call('arena', {'action': 'join', 'code': room['code']})
-        butterfly.call('arena', {'action': 'accept', **room})
+        self.assertEqual(butterfly.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         battle = friend.call('arena', {'action': 'state', **joined})['battle']
         self.assertEqual(battle['opponentMascot'], 'butterfly')

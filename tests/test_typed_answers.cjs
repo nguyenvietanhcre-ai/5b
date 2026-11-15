@@ -1,0 +1,21 @@
+'use strict';
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const content=require('../frontend/learning-content.js');
+for(const actual of ['0,5','0.50','1/2','2/4',' 1 / 2 ','５/１０'])assert(content.matches(actual,'0.5'),actual);
+for(const actual of ['',null,'1/0','NaN','Infinity','1+1','1 2','0.50000000001','5e1000000'])assert(!content.matches(actual,'0.5'),String(actual));
+assert(content.matches('2;1/2','0,5;2','unordered'));assert(!content.matches('2;1/2','0,5;2','ordered'));
+assert(!content.matches('0.5','0,5','text'));assert(content.matches(' < ','<'));
+// Exercise the actual bot state machine with a deterministic clock and schedule.
+const source=fs.readFileSync('frontend/learning.js','utf8');
+const slice=source.slice(source.indexOf('    function settleBotAttack('),source.indexOf('    function nextBot()'));
+let now=1000;
+const sandbox={Date:{now:()=>now},live:false,botLeaseReady:true,document:{hidden:false},currentBattle:null,content,ArenaAudio:{effect(){}},persistBot(){},updateBattleVisuals(){},nextBot(){},recordBotAttack(b,attacker){b.lastAttack={attacker};},isCorrect:(q,a)=>content.matches(a,q.answer)};
+vm.createContext(sandbox);vm.runInContext(slice,sandbox);
+const fresh=(botAt=90000)=>sandbox.currentBattle={id:'qa',mode:'bot',index:0,questions:[{answer:'1/2',difficulty:0}],botLevel:0,botAt,deadline:100000,readyAt:0,answer:null,resolved:false,correct:0,hp:100,opponentHp:100};
+let b=fresh();sandbox.answerBot('0,5');assert.equal(b.opponentHp,100);assert.equal(b.defenseUntil,4000);
+now=3999;sandbox.tickBot();assert.equal(b.opponentHp,100);now=4000;sandbox.tickBot();assert.equal(b.opponentHp,80);
+now=1000;b=fresh(1500);sandbox.answerBot('1/2');now=1500;sandbox.tickBot();assert.equal(b.opponentHp,90);assert.equal(b.damage,10);
+now=1000;b=fresh(1500);now=1500;sandbox.tickBot();assert.equal(b.hp,100);assert.equal(b.defenseUntil,4500);now=4499;sandbox.answerBot('2/4');assert.equal(b.hp,90);assert.equal(b.correct,1);
+now=1000;b=fresh(1500);now=1500;sandbox.tickBot();now=4500;sandbox.answerBot('1/2');assert.equal(b.hp,80);assert.equal(b.correct,0);
+now=1000;b=fresh(1500);sandbox.answerBot('wrong');sandbox.answerBot('1/2');assert.equal(b.correct,0);now=1500;sandbox.tickBot();assert.equal(b.hp,80);
+console.log('Typed numeric/text/list rules and five actual bot-defense scenarios passed.');

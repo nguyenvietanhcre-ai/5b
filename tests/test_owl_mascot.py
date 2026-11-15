@@ -78,7 +78,7 @@ class OwlMascotTests(unittest.TestCase):
         self.assertEqual(listed['mascot'], 'cu-meo')
         friend.call('mascot', {'mascot': 'cu-meo'})
         joined = friend.call('arena', {'action': 'join', 'code': room['code']})
-        owner.call('arena', {'action': 'accept', **room})
+        self.assertEqual(owner.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         for client, access in ((owner, room), (friend, joined)):
             state = client.call('arena', {'action': 'state', **access})

@@ -2,6 +2,7 @@ import hashlib
 import json
 import secrets
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -109,7 +110,7 @@ class PlatformTests(unittest.TestCase):
             second={r[0] for r in db.execute('SELECT question_version_id FROM exam_items WHERE exam_id=?',(later['id'],))}
             self.assertFalse(first & second)
             db.execute('UPDATE exam_attempts SET started_at=\'2020-01-01T00:00:00Z\',due_at=\'2020-01-01T00:30:00Z\' WHERE exam_id=?',(later['id'],))
-        expired=client.call('exams/'+later['id']+'/answers',{'position':1,'answer':later['questions'][0]['options'][0]})['exam']
+        expired=client.call('exams/'+later['id']+'/answers',{'position':1,'answer':'123'})['exam']
         self.assertEqual(expired['score'],0)
         self.assertEqual(expired['answers'],{})
 
@@ -146,10 +147,10 @@ class PlatformTests(unittest.TestCase):
         listing = inviter.call('arena', {'action': 'list'})['rooms']
         self.assertEqual(next(row for row in listing if row['code']==room['code'])['name'], POLICY['fallback'])
         join = inviter.call('arena', {'action': 'join', 'code': room['code']})
-        self.assertEqual(inviter.call('arena', {'action': 'state', **join})['opponent'], POLICY['fallback'])
+        self.assertEqual(inviter.call('arena', {'action': 'state', **join})['status'], 'preparing')
         with connect(self.path) as db:
             self.assertEqual(db.execute('SELECT full_name FROM students WHERE account_id=?', (second['account']['id'],)).fetchone()[0], '0912345678')
-        invitee.call('arena', {'action': 'accept', **room})
+        self.assertEqual(invitee.call('arena', {'action':'state', **room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         invitee.call('arena', {'action': 'state', **room})
         invitee.call('arena', {'action': 'leave', **room})
@@ -213,14 +214,16 @@ class PlatformTests(unittest.TestCase):
             with self.server.arena.lock:
                 answer=self.server.arena.rooms[room['code']]['questions'][index]['answer']
             result=first.call('arena',{'action':'answer',**room,'index':index,'answer':answer})
+            self.server.arena.rooms[room['code']]['defenseUntil']=time.time()-1
+            first.call('arena',{'action':'state',**room})
             self.server.arena.rooms[room['code']]['nextAt']=0
             result=first.call('arena',{'action':'state',**room})
         self.assertEqual(result['result']['outcome'],'win')
         first.call('arena',{'action':'state',**room})
         second.call('arena',{'action':'state',**join})
-        self.assertEqual(first.call('session')['state']['points'],1002)
-        self.assertEqual(second.call('session')['state']['points'],1000)
-        self.assertEqual(first.call('leaderboard?kind=battle&period=all')['rows'][0]['value'],1002)
+        self.assertEqual(first.call('session')['state']['points'],2)
+        self.assertEqual(second.call('session')['state']['points'],0)
+        self.assertEqual(first.call('leaderboard?kind=battle&period=all')['rows'][0]['value'],2)
 
 
     def test_rabbit_companion_persists_and_reaches_opponent_and_leaderboard(self):
@@ -234,7 +237,7 @@ class PlatformTests(unittest.TestCase):
         friend,_,_,_=self.user()
         self.assertEqual(next(row for row in friend.call('arena',{'action':'list'})['rooms'] if row['code']==room['code'])['mascot'],'rabbit')
         join=friend.call('arena',{'action':'join','code':room['code']})
-        client.call('arena',{'action':'accept',**room})
+        self.assertEqual(client.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt']=0
         view=friend.call('arena',{'action':'state',**join})
         self.assertEqual(view['battle']['opponentMascot'],'rabbit')
@@ -253,7 +256,7 @@ class PlatformTests(unittest.TestCase):
         friend,_,_,_=self.user()
         self.assertEqual(next(row for row in friend.call('arena',{'action':'list'})['rooms'] if row['code']==room['code'])['mascot'],'dog')
         join=friend.call('arena',{'action':'join','code':room['code']})
-        client.call('arena',{'action':'accept',**room})
+        self.assertEqual(client.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt']=0
         view=friend.call('arena',{'action':'state',**join})
         self.assertEqual(view['battle']['opponentMascot'],'dog')

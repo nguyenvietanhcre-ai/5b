@@ -42,6 +42,7 @@ def parse_number(value):
         return None
 
 def grade(kind, answers):
+    from .answers import matches
     if kind not in QUIZZES:
         raise ValueError("Unknown quiz")
     questions = QUIZZES[kind]
@@ -53,7 +54,7 @@ def grade(kind, answers):
     total = sum(q["points"] for q in questions)
     for q, answer in zip(questions, answers):
         if "answer" in q:
-            correct = answer.strip() == q["answer"]
+            correct = matches(answer, q)
         else:
             n = parse_number(answer)
             if "interval" in q:

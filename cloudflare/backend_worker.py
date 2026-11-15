@@ -16,7 +16,7 @@ import transfer
 
 
 def api_path(path):
-    return path.startswith(('/api/v1/', '/api/staff/')) or path in ('/api/health', '/api/grade', '/api/webhooks/sepay')
+    return path.startswith(('/api/v1/', '/api/staff/', '/api/local-pilot/')) or path in ('/api/health', '/api/grade', '/api/webhooks/sepay')
 
 
 async def bounded_body(request, limit):
@@ -52,13 +52,28 @@ class SchoolBackend(DurableObject):
         self.arena = Arena()
         self.database = StorageDatabase(ctx.storage, self.arena)
         self.ready = False
+        self.learning = None
+        self.demo_games = None
+        if getattr(env,'DEMO_GAMES_ENABLED','false')=='true':
+            from native_learning import CloudDemoGames
+            self.demo_games = CloudDemoGames()
 
     def initialize(self):
         if not self.ready:
-            from backend.platform_api import seed_catalog
+            from backend.platform_api import initialize_catalog
             self.database.initialize()
-            self.database.run(lambda: seed_catalog(self.database))
+            self.database.run(lambda: initialize_catalog(self.database))
             self.database.restore_arena()
+            if getattr(self.env,'NATIVE_LEARNING_ENABLED','false')=='true':
+                from native_learning import CloudLearning
+                self.learning = CloudLearning(self.database)
+                self.database.run(self.learning.path.initialize)
+                from backend import platform_api as api
+                from backend.content_retirement import activate,retired
+                def retire_legacy_grade5():
+                    with api.connect(self.database,True) as db:
+                        if not retired(db,5):activate(db)
+                self.database.run(retire_legacy_grade5)
             self.ready = True
 
     async def fetch(self, request):
@@ -78,6 +93,7 @@ class SchoolBackend(DurableObject):
                         raise APIError('Tệp chuyển dữ liệu vượt giới hạn 16 MiB.', 413)
                     payload = transfer.import_data(self.database, json.loads(raw))
                     self.ready = False
+                    self.learning = None
                 else:
                     raise APIError('API không tồn tại.', 404)
                 return Response.json(payload, headers={'Cache-Control': 'no-store'})
@@ -97,6 +113,7 @@ class SchoolBackend(DurableObject):
                 if request.headers.get('Content-Type', '').split(';')[0].strip().lower() != 'application/json':
                     raise APIError('Use application/json', 415)
                 limit = 262144 if path.startswith('/api/staff/') else 16384
+                if re.fullmatch(r'/api/(?:v1|local-pilot)/exams/\d+/scratch',path):limit=1048576+2048
                 if re.fullmatch(r'/api/v1/classes/\d+/assignments/\d+/submissions', path):
                     limit = 4 * ((10 * 1024 * 1024 + 2) // 3) + 2048
                 raw = await bounded_body(request, limit)
@@ -115,7 +132,20 @@ class SchoolBackend(DurableObject):
             handler = SimpleNamespace(server=SimpleNamespace(database_path=self.database, review_upgrades=False, arena=self.arena),
                                       headers=headers, path=urlsplit(request.url).path + ('?' + urlsplit(request.url).query if urlsplit(request.url).query else ''),
                                       api_headers={}, client_address=(headers.get('X-5BMath-Client-IP', 'unknown'), 0))
-            if path == '/api/webhooks/sepay':
+            handler.server.server_port = urlsplit(request.url).port or (443 if request.url.startswith('https:') else 80)
+            handler.server.local_pilot_ports = {handler.server.server_port}
+            handler.server.local_pilot = self.learning
+            handler.server.cloud_learning_provider = self.learning
+            handler.server.cloud_pdf_enabled = self.learning is not None
+            handler.server.local_test_games = self.demo_games
+            handler.server.cloud_demo_games = self.demo_games
+            if path.startswith('/api/local-pilot/'):
+                if self.learning is None:raise APIError('Kho học tập chưa được cấu hình.',503)
+                from urllib.parse import parse_qs
+                from backend.system_settings import require_feature
+                route = path[len('/api/local-pilot/'):]
+                callback = lambda: (self.learning.request(handler,method,route,body,parse_qs(urlsplit(request.url).query)),200)
+            elif path == '/api/webhooks/sepay':
                 from backend.payments import receive_webhook
                 for name in ('X-SePay-Timestamp', 'X-SePay-Signature'):
                     if len(headers.get_all(name, [])) != 1:
@@ -128,7 +158,10 @@ class SchoolBackend(DurableObject):
                 from backend.platform_api import dispatch
                 callback = lambda: dispatch(handler, method, path, body)
             payload, status = self.database.run(callback)
+            if isinstance(payload,dict) and 'authenticated' in payload:payload['localPilotEnabled']=self.learning is not None
             response_headers = {**handler.api_headers, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'}
+            if isinstance(payload,dict) and isinstance(payload.get('_local_binary'),bytes):
+                return Response(payload['_local_binary'],status=status,headers={**response_headers,'Content-Type':payload['mime'],'Content-Security-Policy':"sandbox; default-src 'none'"})
             if isinstance(payload, dict) and isinstance(payload.get('_binary'), bytes):
                 response_headers.update({'Content-Type': payload['contentType'], 'Content-Disposition': payload['disposition'],
                                          'Content-Security-Policy': "sandbox; default-src 'none'"})
@@ -138,10 +171,14 @@ class SchoolBackend(DurableObject):
             payload = {'error': str(error)}
             if getattr(error, 'arenaDiscipline', None):
                 payload['arenaDiscipline'] = error.arenaDiscipline
+            for key in ('gameClaim','gameConflicts'):
+                if hasattr(error,key):payload[key]=getattr(error,key)
             return Response.json(payload, status=error.status, headers={'Cache-Control': 'no-store'})
         except (ValueError, UnicodeError, TypeError, RecursionError):
             return Response.json({'error': 'Dữ liệu gửi lên không hợp lệ.'}, status=400, headers={'Cache-Control': 'no-store'})
-        except sqlite3.Error:
+        except sqlite3.Error as error:
+            from js import console
+            console.error(json.dumps(crypto_compat.safe_error_report(error), ensure_ascii=True))
             return Response.json({'error': 'Chưa thể lưu dữ liệu. Em hãy thử lại.'}, status=503, headers={'Cache-Control': 'no-store'})
         except Exception as error:
             from js import console

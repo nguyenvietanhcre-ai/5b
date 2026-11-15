@@ -104,7 +104,7 @@ class NotificationTests(unittest.TestCase):
 
     def test_staff_audiences_permissions_and_recipient_boundaries(self):
         metadata = self.admin.call('notifications')
-        self.assertEqual([group['value'] for group in metadata['groups']], ['all', 'Free', 'VIP', 'SVip'])
+        self.assertEqual([group['value'] for group in metadata['groups']], ['all', 'Free', 'VIP', 'VIP+', 'SVip'])
         self.assertEqual({row['id'] for row in metadata['classes']}, set(self.classes[:2]))
         own = self.teacher.call('notifications')
         self.assertEqual(own['groups'], [])

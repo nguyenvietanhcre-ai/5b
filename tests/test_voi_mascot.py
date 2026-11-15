@@ -52,7 +52,7 @@ class VoiIntegrationTests(unittest.TestCase):
                         'password':secrets.token_urlsafe(20), 'name':'Bạn cùng chơi', 'birthYear':academic()[0]-10})
             selected = first.call('mascot', {'mascot':'voi'})
             self.assertEqual(selected['state']['mascot'], 'voi')
-            self.assertEqual(selected['state']['points'], 1000)
+            self.assertEqual(selected['state']['points'], 0)
             with self.assertRaises(APIError):
                 first.call('mascot', {'mascot':'unknown-mascot'})
             with self.assertRaises(APIError):
@@ -67,7 +67,7 @@ class VoiIntegrationTests(unittest.TestCase):
             rooms = second.call('arena', {'action':'list'})['rooms']
             self.assertEqual(next(row for row in rooms if row['code']==room['code'])['mascot'], 'voi')
             joined = second.call('arena', {'action':'join', 'code':room['code']})
-            first.call('arena', {'action':'accept', **room})
+            self.assertEqual(first.call('arena',{'action':'state',**room})['status'],'preparing')
             server.arena.rooms[room['code']]['readyAt'] = 0
             opponent_view = second.call('arena', {'action':'state', **joined})
             self.assertEqual(opponent_view['battle']['opponentMascot'], 'voi')

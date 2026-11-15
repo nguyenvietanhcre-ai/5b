@@ -331,6 +331,8 @@ def sample_problem(grade, topic, difficulty, variant, rng=None):
 
 
 def seed_question_bank(db, catalog):
+    from .content_retirement import retired
+    if retired(db,5):raise ValueError("Grade5 bank retired; explicit QA seed cannot restore it")
     """Keep old history, retire leaked seeds once, never republish admin withdrawals."""
     if db.execute('SELECT 1 FROM system_settings WHERE name=?', (MARKER,)).fetchone():
         return
@@ -372,6 +374,8 @@ def seed_question_bank(db, catalog):
 
 def published_version_ids(db, grade, difficulty, max_week=35, topic='', exact_week=None):
     """The shared exam/Arena source, using the latest currently published version."""
+    from .content_retirement import retired
+    if retired(db,grade):return []
     return [row[0] for row in db.execute('SELECT v.id FROM questions q JOIN question_versions v ON v.question_id=q.id '
         "JOIN topics t ON t.id=q.topic_id WHERE q.grade_id=? AND v.status='published' "
         'AND (? IS NULL OR v.difficulty=?) AND v.curriculum_week<=? AND t.client_key IS NOT NULL '
@@ -389,18 +393,25 @@ def arena_questions(db, grade, difficulty, scope='weekly', max_week=35):
     rng = secrets.SystemRandom()
     if len(ids) < 20:
         raise ArenaError('Chưa đủ câu hỏi đã phát hành cho trận đấu. Thầy cô cần bổ sung ngân hàng câu hỏi.', 503)
+    from .answers import requires_choice
     rows = []
-    for identity in rng.sample(ids, 20):
+    rng.shuffle(ids)
+    for identity in ids:
         row = db.execute('SELECT v.*,q.question_code,t.title topic_title FROM question_versions v JOIN questions q ON q.id=v.question_id '
                          'JOIN topics t ON t.id=q.topic_id WHERE v.id=?', (identity,)).fetchone()
         text = ' '.join(block.get('text', '') for block in json.loads(row['prompt_json']) if block.get('type') == 'text')
-        options = [str(value) for value in json.loads(row['options_json'])]
-        answer = str(json.loads(row['grading_rule_json']).get('answer', ''))
-        if not text or answer not in options or len(set(options)) < 2:
+        rule = json.loads(row['grading_rule_json'])
+        answer = str(rule.get('answer', ''))
+        options=json.loads(row['options_json'])
+        mode='choice' if rule.get('responseType')=='choice' or requires_choice(rule) else 'typed'
+        if mode=='choice' and (len(options)!=4 or answer not in options):continue
+        if not text or not answer.strip():
             raise ArenaError('Có câu hỏi chưa đủ dữ liệu cho Đấu trí. Thầy cô cần kiểm tra câu hỏi đã phát hành.', 503)
         rows.append({'id':str(identity), 'questionVersionId':identity, 'text':text, 'answer':answer,
-            'options':rng.sample(options, len(options)), 'difficulty':row['difficulty'] - 1,
+            'gradingRule':rule, 'answerKind':rule.get('answerKind', 'auto'), 'responseMode':mode, **({'options':rng.sample(options,len(options))} if mode=='choice' else {}), 'difficulty':row['difficulty'] - 1,
             'steps':[block.get('text','') for block in json.loads(row['solution_steps_json']) if block.get('type') == 'text'],
             'topicTitle':row['topic_title'],
             **({'sampleLabel':SAMPLE_LABEL} if row['question_code'].startswith('BANK2-') else {})})
+        if len(rows)==20:break
+    if len(rows)!=20:raise ArenaError('Chưa đủ câu hỏi có hình thức trả lời hợp lệ cho Đấu trí.',503)
     return rows

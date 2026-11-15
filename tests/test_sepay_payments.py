@@ -555,7 +555,16 @@ class SePayPaymentTests(unittest.TestCase):
             initialize(legacy_path)
         seed_catalog(legacy_path)
         legacy_server = SimpleNamespace(database_path=legacy_path, review_upgrades=False, arena=Arena())
-        _, state, sid = self.student(server=legacy_server)
+        # Build the pre0016 fixture without rendering a session through the
+        # current API, which now expects columns added by later migrations.
+        from backend.platform_api import register
+        legacy_client = Client(legacy_server)
+        with connect(legacy_path, True) as db:
+            legacy_session = register(legacy_client, db, {
+                'login':'legacy-'+secrets.token_hex(7), 'password':secrets.token_urlsafe(20),
+                'name':'Học sinh thử', 'birthYear':academic()[0]-10})
+            state = {'account':{'id':legacy_session['account_id']}}
+            sid = legacy_session['student_id']
         with connect(legacy_path, True) as db:
             teacher = db.execute("INSERT INTO teachers(full_name) VALUES ('Giáo viên cũ')").lastrowid
             year = db.execute('SELECT academic_year_id FROM student_grades WHERE student_id=?', (sid,)).fetchone()[0]
@@ -574,13 +583,23 @@ class SePayPaymentTests(unittest.TestCase):
                            for table in tables}
             old_rows = {table: [tuple(row) for row in db.execute('SELECT * FROM "' + table + '"')]
                         for table in tables}
+            # XP rebasing is an intentional later migration; monetary/account
+            # history stays intact while the granted 1000 XP is removed once.
+            companion_accounts = {r[0] for r in db.execute('SELECT s.account_id FROM students s JOIN student_companions c ON c.student_id=s.id')}
+            for table, column in [('student_companions','xp'),('bots','xp'),('mascot_levels','min_xp')]:
+                position = old_columns[table].index(column)
+                old_rows[table] = [tuple(max(0,value-1000) if i==position else value for i,value in enumerate(row)) for row in old_rows[table]]
+            revision_position = old_columns['accounts'].index('revision')
+            id_position = old_columns['accounts'].index('id')
+            old_rows['accounts'] = [tuple(value+1 if i==revision_position and row[id_position] in companion_accounts else value for i,value in enumerate(row)) for row in old_rows['accounts']]
         initialize(legacy_path)
         initialize(legacy_path)
         with connect(legacy_path) as db:
             for table in tables:
                 with self.subTest(table=table):
                     selected = ','.join('"' + column + '"' for column in old_columns[table])
-                    self.assertEqual(old_rows[table], [tuple(row) for row in db.execute('SELECT ' + selected + ' FROM "' + table + '"')])
+                    self.assertEqual(old_rows[table], [tuple(row) for row in db.execute('SELECT ' + selected + ' FROM "' + table + '"' + (" WHERE name!='premium'" if table=='system_settings' else ''))])
+                    if table=='system_settings':self.assertEqual(db.execute("SELECT count(*) FROM system_settings WHERE name='premium'").fetchone()[0],1)
             self.assertEqual(db.execute('SELECT count(*) FROM payment_receipts').fetchone()[0], 0)
             paid = db.execute('SELECT * FROM payment_orders WHERE id=?', (old_paid,)).fetchone()
             self.assertEqual((paid['kind'], paid['vip_months'], paid['amount'], paid['status']), ('vip', 1, 100000, 'paid'))

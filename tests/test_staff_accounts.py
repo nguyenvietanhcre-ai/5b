@@ -47,6 +47,23 @@ class StaffAccountTests(unittest.TestCase):
                 'birthYear': academic()[0] - 10, 'password': secrets.token_urlsafe(20),
                 'status': 'active', **changes}
 
+    def test_xp_below_1000_can_be_saved_and_negative_values_are_rejected(self):
+        row, body = self.create(points=0)
+        student, session = self.login(row['login_identifier'], body['password'])
+        self.assertEqual(session['state']['points'], 0)
+        for xp in (0, 1, 19, 20, 999, 0):
+            with self.subTest(xp=xp):
+                row = self.update(row, body, points=xp)
+                self.assertEqual(row['points'], xp)
+                # Admin profile edits revoke old student sessions. Read XP
+                # through a fresh login, matching the real reauthentication flow.
+                student, session = self.login(row['login_identifier'], body['password'])
+                self.assertEqual(session['state']['points'], xp)
+        for invalid in (-1, True, 0.5, '999'):
+            with self.subTest(invalid=invalid):
+                self.assert_error(400, self.admin, f'accounts/{row["id"]}', {'revision':row['revision'], 'points':invalid})
+                self.assertEqual(student.call('session')['state']['points'], 0)
+
     def create(self, **changes):
         body = self.body(**changes)
         result = self.admin.call('accounts', body)
@@ -81,7 +98,7 @@ class StaffAccountTests(unittest.TestCase):
         self.assertEqual(row['grade_level'], 5)
         self.assertEqual(row['revision'], 1)
         self.assertIsNone(row['deleted_at'])
-        self.assertEqual((row['membership'], row['mascot'], row['points']), ('Free', 'sprout', 1000))
+        self.assertEqual((row['membership'], row['mascot'], row['points']), ('Free', 'sprout', 0))
         self.assertIsNone(row['membership_expires_at'])
         self.assertEqual(self.admin.call('session')['user']['role'], 'admin')
         self.assertTrue(self.admin.headers['Cookie'].startswith('5bmath_staff='))
@@ -334,7 +351,8 @@ class StaffAccountTests(unittest.TestCase):
         self.assertEqual(state['account']['membership'], 'Free')
         self.assertEqual(state['account']['usage']['bot']['limit'], 5)
         for _ in range(5):
-            student.call('bot/start', {'requestKey': secrets.token_hex(12)})
+            started=student.call('bot/start', {'requestKey': secrets.token_hex(12)})
+            student.call('game-claim',{'action':'release','claimId':started['gameClaim']['claimId'],'reason':'finish'})
         self.assert_error(429, student, 'bot/start', {'requestKey': secrets.token_hex(12)})
 
         vip_expiry = now() + timedelta(hours=1)
@@ -343,7 +361,8 @@ class StaffAccountTests(unittest.TestCase):
         self.assertEqual((row['membership'], row['membership_expires_at']), ('VIP', stamp(vip_expiry)))
         self.assertEqual(state['account']['membership'], 'VIP')
         self.assertIsNone(state['account']['usage']['bot']['limit'])
-        student.call('bot/start', {'requestKey': secrets.token_hex(12)})
+        started=student.call('bot/start', {'requestKey': secrets.token_hex(12)})
+        student.call('game-claim',{'action':'release','claimId':started['gameClaim']['claimId'],'reason':'finish'})
         with patch('backend.platform_api.now', return_value=vip_expiry + timedelta(seconds=1)):
             expired = student.call('session')
             self.assertEqual(expired['account']['membership'], 'Free')
@@ -423,7 +442,7 @@ class StaffAccountTests(unittest.TestCase):
                    {'membership': 'Gold'}, {'membershipExpiresAt': 'not-a-date'},
                    {'membershipExpiresAt': None}, {'membershipExpiresAt': stamp(now() - timedelta(days=1))},
                    {'membershipExpiresAt': '2026-11-12T25:00:00Z'}, {'mascot': 'unknown'},
-                   {'points': 999}, {'points': 1_000_000_001}, {'points': True}, {'points': 1234.5})
+                   {'points': -1}, {'points': 1_000_000_001}, {'points': True}, {'points': 1234.5})
         with connect(self.path) as db:
             before_audit = db.execute('SELECT count(*) FROM staff_audit_log').fetchone()[0]
         for changes in invalid:
@@ -432,7 +451,7 @@ class StaffAccountTests(unittest.TestCase):
                 preserved = self.admin.call('accounts?q=' + row['login_identifier'])['rows'][0]
                 self.assertEqual((preserved['full_name'], preserved['birth_year'], preserved['revision'],
                                   preserved['membership'], preserved['mascot'], preserved['points']),
-                                 ('Mầm xanh', body['birthYear'], row['revision'], 'Free', 'sprout', 1000))
+                                 ('Mầm xanh', body['birthYear'], row['revision'], 'Free', 'sprout', 0))
         with connect(self.path) as db:
             self.assertEqual(db.execute('SELECT count(*) FROM staff_audit_log').fetchone()[0], before_audit)
             self.assertEqual(db.execute('PRAGMA foreign_key_check').fetchall(), [])

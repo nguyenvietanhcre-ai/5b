@@ -30,3 +30,12 @@ Thumbs.db
 /docs/chat/*.md
 /docs/chat/*.json
 !/docs/chat/README.md
+
+# Account-independent learning data/answer banks are deployed privately.
+/pilot-inputs/
+/restructure-inputs/
+/qa-inputs/
+/round8-inputs/
+/cloudflare/learning-seed.sql
+/cloudflare/.venv-workers/
+/content/lesson-library/

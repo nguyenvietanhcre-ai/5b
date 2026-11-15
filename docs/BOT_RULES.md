@@ -1,0 +1,11 @@
+# BOT practice, 14/11/2026
+
+The user approved the following exception **only for matches with BOT opponents**: an accepted wrong human answer makes the BOT opponent(s) answer correctly immediately, resolves the round immediately, then retains the existing3second transition. No need to wait for the ordinary BOT timer. Empty/malformed input and duplicate/replayed submissions do not trigger a new answer or round.
+
+Ordinary BOT scheduling remains in the final30% of each question duration. The two5slot games use a persisted server schedule42,000<=t<60,000ms for each BOT in a60second question. Their BOT practice has1real authenticated human+4explicit synthetic participants; no synthetic accounts are created. Every BOT answers at most once per round. Reconnect advances from pinned server boundaries. Accepted wrong answers are the sole early-response exception.
+
+BOT practice in CướpCờ/ĐuaThú grants0XP and0leaderboard points, including human wins. Duel BOT remains the existing client grading demo with separate test bank,0XP/leaderboard points and existing usage limits. The Duel wrong-answer exception immediately settles20HP through its existing BOT-only damage function. Normal Duel BOT accuracy/level/timing stays unchanged. If that BOT previously answered incorrectly, an accepted wrong human answer still grants BOT the correct winning outcome as a special round settlement, not a second answer submission; forced-settlement metadata distinguishes it from the ordinary scheduled answer. The client demo is not represented as server-secure.
+
+Human-versus-human Duel retains20questions,3second defense,10HP if defended correctly and20HP otherwise, one submission, existing quota/reward/settlement. Five-real-player group matches retain their original rules and5–4–3–2–1 earned rewards. No shared3/10commercial quota was approved or implemented.
+
+Default appearance changes only new/unset runtime preferences to `clay-sprout` (MầmSách3D). Existing stored selections, including `garden-adventure`, remain valid and are not migrated or overwritten. Historical0017 schema is unchanged; new registrations, staff-created students and creation of previously missing preference rows explicitly write the new default.

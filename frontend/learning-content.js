@@ -105,13 +105,48 @@ const LearningContent = (() => {
         return selected.map(question => ({...question, options:shuffle(question.options)}));
     }
 
-    function battleSeconds(grade, difficulty) {
-        if(grade<=2)return 60;
-        if(grade<=4)return 120;
-        return difficulty===2?240:180;
+    function answerNumber(value) {
+        const text=String(value).normalize('NFKC').trim().replaceAll('−','-');
+        if(text.length>70)return null;
+        const scalar=part=>{
+            const m=part.trim().match(/^([+-]?)(?:(\d+)(?:[.,](\d*))?|[.,](\d+))(?:[eE]([+-]?\d+))?$/);
+            if(!m)return null;
+            const decimals=m[3]??m[4]??'',exponent=Number(m[5]||0)-decimals.length;
+            const digits=((m[2]||'0')+decimals).replace(/^0+/,'');
+            if(Math.abs(digits?digits.length-1+exponent:exponent)>100||Math.abs(exponent)>170)return null;
+            let n=BigInt((m[2]||'0')+decimals)*(m[1]==='-'?-1n:1n),d=1n;
+            if(exponent>=0)n*=10n**BigInt(exponent);else d=10n**BigInt(-exponent);
+            return [n,d];
+        };
+        const parts=text.split('/');if(parts.length>2)return null;
+        const a=scalar(parts[0]),b=parts.length===2?scalar(parts[1]):[1n,1n];
+        if(!a||!b||b[0]===0n)return null;
+        return [a[0]*b[1],a[1]*b[0]];
+    }
+    function matches(actual,expected,kind='auto') {
+        if(actual===undefined||actual===null||!String(actual).trim()||String(actual).length>500)return false;
+        const clean=x=>String(x).normalize('NFKC').trim().replaceAll('−','-');
+        const scalar=(a,b)=>{
+            if(kind!=='text'){
+                const y=answerNumber(b);if(y){const x=answerNumber(a);return Boolean(x&&x[0]*y[1]===y[0]*x[1]);}
+                if(kind==='number')return false;
+            }
+            return clean(a)===clean(b);
+        };
+        if(kind==='ordered'||kind==='unordered'){
+            const left=String(actual).split(';'),right=String(expected).split(';');
+            if(left.length!==right.length||left.length>20)return false;
+            if(kind==='ordered')return left.every((a,i)=>scalar(a,right[i]));
+            return left.every(a=>{const i=right.findIndex(b=>scalar(a,b));if(i<0)return false;right.splice(i,1);return true;});
+        }
+        return scalar(actual,expected);
     }
 
-    return {topics, levels, format, schoolDate, gradeFor, weekFor, lessons, problem, generate, battleSeconds};
+    function battleSeconds(grade, difficulty) {
+        return 60;
+    }
+
+    return {topics, levels, format, schoolDate, gradeFor, weekFor, lessons, problem, generate, battleSeconds, matches};
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = LearningContent;

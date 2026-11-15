@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const {test} = require('node:test');
 
 const source = fs.readFileSync(path.join(__dirname,'../frontend/themes.js'),'utf8');
-const apiSource = fs.readFileSync(path.join(__dirname,'../frontend/platform-api.js'),'utf8');
+const apiSource = fs.readFileSync(process.env.THEME_TEST_API_SOURCE || path.join(__dirname,'../frontend/platform-api.js'),'utf8');
 const ids = ['morning-garden','crayon-workshop','clay-sprout','garden-adventure','garden-notebook'];
 const accountKey = '5bmath-appearance-v1';
 const guestKey = '5bmath-guest-theme-v1';
@@ -75,14 +75,14 @@ function response(payload,ok=true){return {ok,json:async()=>payload};}
 function deferred(){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};}
 function submit(form){return form.emit('submit',{preventDefault(){}});}
 
-test('first paint uses04 default, validates cache, and keeps static/offline guest choice separate',()=>{
+test('first paint uses03 default, validates cache, and keeps static/offline guest choice separate',()=>{
     const empty = harness();
-    assert.equal(empty.manager.theme,'garden-adventure');
-    assert.equal(empty.document.documentElement.dataset.theme,'garden-adventure');
+    assert.equal(empty.manager.theme,'clay-sprout');
+    assert.equal(empty.document.documentElement.dataset.theme,'clay-sprout');
     assert.equal(empty.writes.length,0);
     for(const bad of [null,123,{},'../custom.css','unknown']) {
         const h = harness({seed:{[guestKey]:JSON.stringify(bad),[accountKey]:'{bad json'}});
-        assert.equal(h.manager.theme,'garden-adventure');
+        assert.equal(h.manager.theme,'clay-sprout');
     }
     const cached = harness({database:true,seed:{[accountKey]:JSON.stringify({owner:'17',theme:'clay-sprout'})}});
     assert.equal(cached.manager.owner,'17');
@@ -91,8 +91,23 @@ test('first paint uses04 default, validates cache, and keeps static/offline gues
     assert.equal(offline.manager.owner,null);
     assert.equal(offline.manager.theme,'morning-garden');
     for(const owner of [17,'abc',null,{},'<script>']) {
-        assert.equal(harness({database:true,seed:{[accountKey]:JSON.stringify({owner,theme:'clay-sprout'})}}).manager.theme,'garden-adventure');
+        assert.equal(harness({database:true,seed:{[accountKey]:JSON.stringify({owner,theme:'clay-sprout'})}}).manager.theme,'clay-sprout');
     }
+});
+
+test('new default preserves every explicitly saved guest and account theme',()=>{
+    for(const theme of ids) {
+        assert.equal(harness({seed:{[guestKey]:JSON.stringify(theme)}}).manager.theme,theme);
+        const h = harness({database:true,seed:{[accountKey]:JSON.stringify({owner:'17',theme})}});
+        assert.equal(h.manager.theme,theme);
+        h.manager.sync(snapshot(17,theme));
+        assert.equal(h.manager.savedTheme,theme);
+        assert.equal(h.manager.theme,theme);
+    }
+    const h = harness({database:true});
+    h.manager.sync({authenticated:true,account:{id:18},state:{}});
+    assert.equal(h.manager.theme,'clay-sprout');
+    assert.match(h.manager.renderSettings(),/Mặc định: Mầm Sách 3D/);
 });
 
 test('preview changes DOM without persistence, cancel and route unmount restore saved choice',async()=>{
@@ -101,17 +116,17 @@ test('preview changes DOM without persistence, cancel and route unmount restore 
     const startWrites = h.writes.length;
     await form.emit('change',{target:{name:'appearance-theme',value:'crayon-workshop'}});
     assert.equal(h.manager.theme,'crayon-workshop');
-    assert.equal(h.manager.savedTheme,'garden-adventure');
+    assert.equal(h.manager.savedTheme,'clay-sprout');
     assert.equal(form.controls['[type="submit"]'].disabled,false);
     assert.equal(h.writes.length,startWrites);
     h.manager.preview('../bad.css');
     assert.equal(h.manager.theme,'crayon-workshop');
     await form.controls['#appearance-cancel'].emit('click');
-    assert.equal(h.manager.theme,'garden-adventure');
+    assert.equal(h.manager.theme,'clay-sprout');
     assert.equal(form.controls['[type="submit"]'].disabled,true);
     h.manager.preview('clay-sprout');
     h.manager.unmountSettings();
-    assert.equal(h.manager.theme,'garden-adventure');
+    assert.equal(h.manager.theme,'clay-sprout');
     assert.equal(form.listenerCount('change'),0);
     assert.equal(form.listenerCount('submit'),0);
     assert.equal(h.writes.length,startWrites);
@@ -127,7 +142,7 @@ test('guest Apply persists once and default button previews until Apply',async()
     assert.match(form.controls['#appearance-status'].textContent,/Đã lưu/);
     const writes = h.writes.length;
     await form.controls['#appearance-default'].emit('click');
-    assert.equal(h.manager.theme,'garden-adventure');
+    assert.equal(h.manager.theme,'clay-sprout');
     assert.equal(h.manager.savedTheme,'garden-notebook');
     assert.equal(h.writes.length,writes);
     h.manager.cancelPreview();
@@ -190,12 +205,12 @@ test('blocked localStorage starts safely; failed guest save stays unsaved and ca
     h.manager.preview('garden-notebook');
     await submit(form);
     assert.equal(h.manager.theme,'garden-notebook');
-    assert.equal(h.manager.savedTheme,'garden-adventure');
+    assert.equal(h.manager.savedTheme,'clay-sprout');
     assert.equal(form.controls['[type="submit"]'].disabled,false);
     assert.ok(form.controls['#appearance-status'].classList.values.has('is-error'));
     assert.match(form.controls['#appearance-status'].textContent,/Chưa lưu/);
     h.manager.cancelPreview();
-    assert.equal(h.manager.theme,'garden-adventure');
+    assert.equal(h.manager.theme,'clay-sprout');
 });
 
 test('API authenticated Apply saves snapshot, sends CSRF and unlocks settings',async()=>{

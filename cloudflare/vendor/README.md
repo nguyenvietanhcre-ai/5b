@@ -9,3 +9,9 @@ SHA256: `33e595030bf16622b5afc467cac5504ae91f5529c236e99e8a0ac2b4c0b90f14`.
 `cloudflare/build_worker.py` verifies the checksum and extracts the Crypto package into the ignored `python_modules/` build directory. No network dependency or runtime package download. The wheel retains upstream license metadata. Upstream: https://github.com/Legrandin/pycryptodome, https://github.com/pyodide/pyodide.
 
 Only the Worker uses this package. Local CPython/Docker keeps OpenSSL's `hashlib.pbkdf2_hmac`. Password format, SHA256, 600,000 iterations and existing credentials are unchanged. Worker startup fails if the native package cannot load, rather than silently returning to the slow Python loop. Host-only oracle tests can still exercise the Python fallback without installing the WASM package.
+
+The build excludes unrelated PublicKey/Signature/IO/Math/SelfTest modules.
+KDF, Hash, Cipher, Random and Util remain from the checksum-verified wheel.
+PDF dependencies are separately locked in `../pylock.toml`; pure XML/ReportLab
+SVG conversion avoids a native lxml dependency. Only the application's licensed
+fonts are embedded; unused package example fonts and image extensions are omitted.

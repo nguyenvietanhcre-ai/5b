@@ -1,0 +1,57 @@
+/* Scoped additions to existing learning cards/tokens. */
+.local-pilot { margin:0 0 28px; min-width:0; }
+.local-pilot > .card,.local-pilot > details,.local-pilot > .grid3 { margin-bottom:20px; }
+.local-pilot h1,.local-pilot h2,.local-pilot h3,.local-pilot h4 { overflow-wrap:anywhere; }
+.local-pilot fieldset { border:0; padding:0; min-width:0; }
+.local-pilot legend { font-weight:700; font-size:1.2rem; line-height:1.6; margin-bottom:20px; }
+.local-pilot .answer-choice { display:flex; gap:10px; align-items:flex-start; padding:14px; border:1px solid var(--line,#dce3d7); border-radius:12px; margin:10px 0; cursor:pointer; overflow-wrap:anywhere; }
+.local-pilot .answer-choice input { margin-top:6px; flex-shrink:0; }
+.local-pilot .field input { width:100%; min-height:48px; font-size:1.05rem; }
+.local-pilot .pilot-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; }
+.local-pilot button,.local-pilot a.btn { white-space:normal; overflow-wrap:anywhere; }
+.local-pilot .pilot-history { display:flex; gap:10px; flex-wrap:wrap; }
+.local-pilot .pilot-lessons { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:16px; }
+.local-pilot .pilot-lessons article,.local-pilot .pilot-order { border-top:1px solid var(--line,#dce3d7); padding:16px 0; }
+.local-pilot dialog { max-width:560px; width:calc(100% - 32px); max-height:calc(100dvh - 32px); overflow:auto; padding:24px; border:1px solid #dce3d7; border-radius:20px; color:#203A32; background:#FFF9ED; }
+.local-pilot dialog::backdrop { background:rgba(32,58,50,.45); }
+.local-pilot .pilot-figure { max-width:100%; margin:16px 0; }
+.local-pilot .pilot-diagram-scroll { max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; border:1px solid #dce3d7; border-radius:12px; }
+.local-pilot .pilot-diagram-scroll:focus-visible { outline:2px solid #1F6248; outline-offset:3px; }
+.local-pilot .pilot-diagram { width:100%; min-width:860px; max-width:none; height:auto; display:block; }
+.local-pilot .pilot-figure figcaption { margin-top:10px; line-height:1.6; font-size:.95rem; }
+.local-pilot .pilot-lesson-section { border-left:5px solid #1F6248; }
+.local-pilot .pilot-lesson-section p,.local-pilot .pilot-lesson-section li { line-height:1.8; }
+.local-pilot .pilot-lesson-section aside { background:#FFF9ED; padding:16px; border-left:3px solid #FFBE73; margin:16px 0; }
+@media(max-width:600px) { .local-pilot .pilot-actions .btn { flex:1 1 130px; } .local-pilot dialog .pilot-actions { flex-direction:column; } }
+
+/* R11: native practice/course components, scoped to this provider. */
+body.learning-mode .local-pilot .r11-wallet{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;border:1px solid #d7e1ce;border-radius:16px;background:#f1f5e9;padding:12px 16px}
+body.learning-mode .local-pilot .r11-wallet h2{font-size:15px;letter-spacing:0;margin-right:auto}
+.local-pilot .r11-wallet-stats{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}.local-pilot .r11-wallet .btn{margin:0;min-height:44px}
+.local-pilot .r11-wallet-detail{border:1px solid #d7e1ce;background:var(--app-paper,#fffefa);border-radius:14px;padding:16px;margin-top:10px}.local-pilot .r11-wallet-detail p+p{margin-top:10px}
+body.learning-mode .local-pilot .r11-config{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:14px;align-items:end}
+.local-pilot .r11-config .r11-policy-note{grid-column:1/-1;font-size:13px}
+body.learning-mode .local-pilot .r11-forms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+body.learning-mode .local-pilot .r11-form{display:flex;flex-direction:column;gap:12px;min-width:0}
+.local-pilot .r11-form h2{font-size:22px}.local-pilot .r11-form .field{margin:0;padding:0}.local-pilot .r11-form p{font-size:13px}.local-pilot .r11-form .r11-form-actions{margin-top:auto;display:grid;gap:8px}.local-pilot .r11-form-actions .btn{width:100%;margin:0;min-height:44px}
+.local-pilot .r11-capability{padding:12px;border-radius:11px;background:#f3f5e9;color:#52664f;font-size:13px}
+.local-pilot .r11-history-tools{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:14px 0}.local-pilot .r11-history-tools .r11-history-search{flex:1;min-width:180px}
+.local-pilot .r11-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:16px;border-bottom:1px solid var(--app-line,#e4e8d8)}.local-pilot .r11-history-row:last-child{border:0}.local-pilot .r11-history-row .btn{margin:0}.local-pilot .r11-history-row small{margin-top:6px}.local-pilot .r11-history-row .tag{margin-left:8px}
+body.learning-mode .local-pilot .r11-topics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+body.learning-mode .local-pilot .r11-topic{display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;align-content:start}
+.local-pilot .r11-topic-icon{grid-column:1;grid-row:1;display:grid;place-items:center;width:48px;height:48px;background:#e8f0de;border-radius:13px;font-size:15px;font-weight:750}
+.local-pilot .r11-topic h2{grid-column:2;grid-row:1;min-width:0;font-size:21px;line-height:1.28;word-break:normal;overflow-wrap:break-word;align-self:center}
+.local-pilot .r11-topic>p,.local-pilot .r11-topic>small,.local-pilot .r11-topic>.btn,.local-pilot .r11-topic>.r11-course-list{grid-column:1/-1;min-width:0;word-break:normal;overflow-wrap:break-word}.local-pilot .r11-topic>.btn{width:100%;margin:0;min-height:44px}
+.local-pilot .r11-tabs{display:flex;gap:9px;flex-wrap:wrap}.local-pilot .r11-tabs a,.local-pilot .r11-tabs button{min-height:44px}
+.local-pilot .r11-course-list{display:grid;gap:9px}.local-pilot .r11-course-link{display:block;padding:12px;border:1px solid #bdcbb4;border-radius:12px;min-height:44px}.local-pilot .r11-course-link:hover{background:#edf3e5}
+.local-pilot .r11-knowledge>section,.local-pilot .r11-fixed{margin:18px 0}.local-pilot .r11-knowledge-section{border-left:4px solid var(--green,#1f6248)}.local-pilot .r11-knowledge-section h2{margin-bottom:12px}.local-pilot .r11-knowledge-section p+p{margin-top:10px}
+.local-pilot .r11-fixed{border:1px solid #a8c29c;border-radius:16px;background:#f1f5e9;padding:16px}.local-pilot .r11-fixed h2{font-size:23px;margin:12px 0}.local-pilot .r11-fixed .field{margin:16px 0}.local-pilot .r11-fixed .pilot-actions{margin:15px 0}.local-pilot .r11-fixed-feedback{font-weight:750;color:var(--green,#1f6248)}
+.local-pilot .r11-empty{padding:25px;text-align:center}.local-pilot .r11-empty p{margin:12px 0}.local-pilot .r11-allocation{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}.local-pilot .r11-allocation>div{background:#edf2e4;border-radius:12px;text-align:center;padding:12px 7px;font-size:12px}.local-pilot .r11-allocation strong{display:block;font-size:23px}
+.local-pilot .r11-format-summary{padding:10px 0;font-size:13px}.local-pilot .r11-solution{margin:18px 0}.local-pilot .r11-solution .pilot-lesson-section{background:var(--app-paper,#fffefa)}
+.local-pilot :is(button,input,select,a):focus-visible{outline:3px solid var(--green,#1f6248);outline-offset:3px}.local-pilot [hidden]{display:none!important}
+@media(max-width:1150px){body.learning-mode .local-pilot .r11-forms{grid-template-columns:minmax(0,1fr)}body.learning-mode .local-pilot .r11-topics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){body.learning-mode .local-pilot .r11-topics{grid-template-columns:minmax(0,1fr)}body.learning-mode .local-pilot .r11-config{grid-template-columns:minmax(0,1fr)}body.learning-mode .local-pilot .r11-wallet{display:grid;grid-template-columns:1fr auto;gap:9px;padding:13px}.local-pilot .r11-wallet h2{grid-row:1;grid-column:1;margin:0}.local-pilot .r11-wallet>.btn{grid-row:1;grid-column:2}.local-pilot .r11-wallet-stats{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));font-size:13px}.local-pilot .r11-wallet-stats b{display:block}.local-pilot .r11-allocation{grid-template-columns:repeat(2,minmax(0,1fr))}.local-pilot .r11-history-row{padding:14px 10px;gap:8px}.local-pilot .r11-history-row .tag{margin:5px 0 0}.local-pilot .r11-fixed .pilot-actions .btn{flex:1 1 100%}}
+
+.local-pilot button:disabled{opacity:.55;cursor:not-allowed}.local-pilot button:disabled:hover{transform:none;box-shadow:none}
+.local-pilot .r11-knowledge-section p,.local-pilot .r11-fixed p{white-space:pre-wrap}
+.local-pilot .solution-diagram-figure{width:100%;max-width:100%;min-width:0}.local-pilot .solution-diagram-figure img{min-width:0;max-width:100%;height:auto}.local-pilot .pilot-lesson-section,.local-pilot .r11-knowledge-section{min-width:0}.local-pilot .pilot-lesson-section table,.local-pilot .r11-knowledge-section table{width:100%;max-width:100%;table-layout:fixed}.local-pilot .pilot-lesson-section td,.local-pilot .pilot-lesson-section th,.local-pilot .r11-knowledge-section td,.local-pilot .r11-knowledge-section th{overflow-wrap:anywhere;white-space:normal}

@@ -7,7 +7,7 @@ from .platform_api import APIError, stamp
 INBOX_SIZE = 5
 OUTBOX_SIZE = 25
 GROUPS = [('all', 'Tất cả tài khoản'), ('Free', 'Tài khoản Free'),
-          ('VIP', 'Tài khoản VIP'), ('SVip', 'Tài khoản SVip')]
+          ('VIP', 'Tài khoản VIP'), ('VIP+', 'Tài khoản VIP+'), ('SVip', 'Tài khoản SVip')]
 INBOX_FIELDS = 'id,title,sender_name,sender_role,kind,body,created_at,read_at'
 
 
@@ -57,7 +57,7 @@ def read_notice(db, account_id, identity):
 
 def audience(db, user, body):
     kind = body.get('audience')
-    if kind not in ('all', 'Free', 'VIP', 'SVip', 'class'):
+    if kind not in ('all', 'Free', 'VIP', 'VIP+', 'SVip', 'class'):
         raise APIError('Nhóm nhận thông báo không hợp lệ.')
     if user['role'] != 'admin' and kind != 'class':
         raise APIError('Giáo viên chỉ được gửi thông báo tới lớp đang được phân công.', 403)
@@ -83,8 +83,8 @@ def recipients(db, kind, class_id):
                       'AND e.class_id=? AND e.left_at IS NULL)) AND '
                       "(? IN ('all','class') OR ?=CASE WHEN EXISTS(SELECT 1 FROM access_entitlements x "
                       'WHERE x.account_id=a.id AND x.starts_at<=? AND (x.ends_at IS NULL OR x.ends_at>?)) '
-                      "THEN 'SVip' WHEN a.vip_expires_at>? THEN 'VIP' ELSE 'Free' END) ORDER BY a.id",
-                      (kind, class_id, kind, kind, current, current, current)).fetchall()
+                      "THEN 'SVip' WHEN a.vip_plus_expires_at>? THEN 'VIP+' WHEN a.vip_expires_at>? THEN 'VIP' ELSE 'Free' END) ORDER BY a.id",
+                      (kind, class_id, kind, kind, current, current, current, current)).fetchall()
     return [row['id'] for row in rows]
 
 

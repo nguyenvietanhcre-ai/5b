@@ -16,6 +16,8 @@
  * https://docs.github.com/en/rest/actions/workflow-jobs
  */
 const path = require('node:path');
+const fs = require('node:fs');
+const {createHash} = require('node:crypto');
 const {spawnSync} = require('node:child_process');
 const root = path.resolve(__dirname,'..');
 const repository = 'nguyenvietanhcre-ai/5b';
@@ -48,6 +50,17 @@ function verifyLocal(sha) {
     ].includes(origin))fail('Origin is not the approved repository.');
     if(git(['status','--porcelain=v1','-z','--untracked-files=all','--',...runtimePaths])) {
         fail('Runtime checkout contains staged, unstaged or untracked changes.');
+    }
+    const config=JSON.parse(fs.readFileSync(path.join(root,'cloudflare/wrangler.jsonc'),'utf8'));
+    if(config.vars?.NATIVE_LEARNING_ENABLED==='true') {
+        const seal=JSON.parse(fs.readFileSync(path.join(root,'cloudflare/learning-source-seal.json'),'utf8'));
+        if(seal.containsAccounts!==false || seal.containsSessions!==false)fail('Account-free native source seal required.');
+        for(const file of seal.files) {
+            const target=path.resolve(root,file.path);
+            if(!target.startsWith(root+path.sep))fail('Invalid native source path.');
+            let bytes;try{bytes=fs.readFileSync(target);}catch{fail('Private native release input is missing.');}
+            if(bytes.length!==file.bytes || createHash('sha256').update(bytes).digest('hex')!==file.sha256)fail('Native release source differs from its committed seal.');
+        }
     }
 }
 function verifyRemote(sha) {

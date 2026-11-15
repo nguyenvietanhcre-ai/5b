@@ -1,7 +1,8 @@
 'use strict';
 // Original, quiet pentatonic loop and synthesized interface sounds. No downloads.
 const ArenaAudio = (() => {
-    let context, loop, active=false, step=0, muted=false;
+    let context, loop, active=false, step=0, muted=false,revision=0,contextCount=0;
+    const voices=new Set();
     try { muted=localStorage.getItem('5bmath-arena-muted')==='1'; } catch {}
     function tone(frequency,duration=.13,volume=.04,type='sine',offset=0) {
         if(!context || context.state!=='running' || muted || !active || document.hidden)return;
@@ -9,6 +10,7 @@ const ArenaAudio = (() => {
         oscillator.type=type;oscillator.frequency.setValueAtTime(frequency,at);
         gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(volume,at+.015);
         gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
+        voices.add(oscillator);oscillator.onended=()=>voices.delete(oscillator);
         oscillator.connect(gain);gain.connect(context.destination);oscillator.start(at);oscillator.stop(at+duration+.01);
     }
     function music() {
@@ -19,12 +21,19 @@ const ArenaAudio = (() => {
     }
     async function unlock() {
         if(!active || document.hidden || muted)return;
-        if(!context)context=new (window.AudioContext||window.webkitAudioContext)();
+        const expected=revision;
+        const Audio=window.AudioContext||window.webkitAudioContext;
+        if(!Audio)return;
+        if(!context){context=new Audio();contextCount++;}
         try {await context.resume();} catch {}
+        if(expected!==revision||!active||document.hidden||muted){if(!active||document.hidden||muted)stop();return;}
+        if(context.state!=='running')return;
         if(!loop){music();loop=setInterval(music,360);}
     }
-    function stop() {clearInterval(loop);loop=null;if(context?.state==='running')context.suspend().catch(()=>{});}
-    function setActive(value) {active=value;if(value)unlock();else stop();}
+    function stop() {revision++;clearInterval(loop);loop=null;for(const voice of voices){try{voice.stop();voice.disconnect();}catch{}}voices.clear();if(context?.state==='running')context.suspend().catch(()=>{});}
+    function controls(){document.querySelectorAll('[data-game-audio-toggle]').forEach(button=>{button.textContent=muted?'🔇 Nhạc: Tắt':'🎵 Nhạc: Bật';button.setAttribute('aria-pressed',String(!muted));});}
+    function setActive(value) {active=Boolean(value);controls();if(active)unlock();else stop();}
+    function toggle(){muted=!muted;try{localStorage.setItem('5bmath-arena-muted',muted?'1':'0');}catch{}if(muted)stop();else unlock();controls();return muted;}
     function effect(kind='tap') {
         if(kind==='hit'){tone(130,.2,.08,'triangle');tone(65,.3,.06,'sine',.06);}
         else if(kind==='rock'){tone(95,.28,.07,'triangle',.15);tone(60,.35,.04,'sine',.4);}
@@ -41,7 +50,8 @@ const ArenaAudio = (() => {
     }
     document.addEventListener('pointerdown',()=>{unlock();if(active)effect();});
     document.addEventListener('keydown',()=>unlock());
+    document.addEventListener('click',event=>{if(event.target.closest('[data-game-audio-toggle]'))toggle();});
     document.addEventListener('visibilitychange',()=>document.hidden?stop():unlock());
     window.addEventListener('pagehide',stop);
-    return {setActive,effect,get muted(){return muted;},toggle(){muted=!muted;try{localStorage.setItem('5bmath-arena-muted',muted?'1':'0');}catch{}if(muted)stop();else unlock();return muted;}};
+    return {setActive,effect,get muted(){return muted;},toggle,inspect:()=>({active,muted,contextState:context?.state||'uninitialized',contextCount,loopRunning:Boolean(loop),voiceCount:voices.size})};
 })();

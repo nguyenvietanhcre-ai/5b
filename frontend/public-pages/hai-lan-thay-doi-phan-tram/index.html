@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi" data-grading="server" data-backend="database" data-page="lesson-percent" data-theme="garden-adventure">
+<html lang="vi" data-grading="server" data-backend="database" data-page="lesson-percent" data-theme="clay-sprout">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -13,10 +13,12 @@
     <script src="page-loading.js"></script>
     <link rel="preload" as="image" href="mascots.webp">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="solution-view.css">
     <link rel="stylesheet" href="themes.css">
     <script src="nickname-policy.js" defer></script>
     <script src="platform-api.js" defer></script>
     <script src="runtime-assets.js" defer></script>
+    <script src="solution-view.js" defer></script>
     <script src="app.js" defer></script>
 </head>
 <body>
@@ -43,7 +45,7 @@
             <button id="account" class="btn outline small" type="button" disabled aria-busy="true">Đăng nhập</button>
         </div>
     </header>
-    <main id="app"><div class="wrap"><div class="page-head"><div class="crumb"><a href="bai-hoc-toan-lop-5/">Bài học</a> / Chuyên đề nâng cao</div><span class="tag warm">NÂNG CAO</span><h1 class="title">Hai lần thay đổi phần trăm</h1><p>Đừng để hai con số giống nhau đánh lừa em!</p></div><div class="split"><article class="panel lesson"><span class="eyebrow">CÂU HỎI KHỞI ĐỘNG</span><h2>Tăng 20% rồi giảm 20%,<br>giá có quay về như cũ?</h2><p>Một chiếc ba lô giá <b>200.000 đồng</b>. Cửa hàng tăng giá 20%, sau đó giảm 20% trên giá đã tăng.</p><div class="visual visual-prices"><b>200.000đ</b><span>→ +20% →</span><b>240.000đ</b><span>→ −20% →</span><b>192.000đ</b></div><h3>Cùng giải từng bước</h3><ol><li>Giá sau tăng: 200.000 × 120 : 100 = <b>240.000 đồng</b>.</li><li>Số tiền giảm: 240.000 × 20 : 100 = <b>48.000 đồng</b>.</li><li>Giá cuối: 240.000 − 48.000 = <b>192.000 đồng</b>.</li></ol><div class="example"><b>Điều quan trọng nhất</b><p>Hai lần “20%” được tính trên hai giá trị khác nhau. Giá cuối thấp hơn ban đầu 8.000 đồng, tương ứng 4% giá ban đầu.</p></div><h3>Đến lượt em suy nghĩ</h3><p>Một món đồ giá 100.000 đồng, giảm 20%. Muốn trở về giá cũ, cần tăng bao nhiêu phần trăm trên giá đã giảm?</p><details class="hint"><summary>Xem gợi ý và lời giải</summary><p>Giá sau giảm: 80.000 đồng. Cần tăng: 20.000 đồng. Tỉ lệ tăng: 20.000 : 80.000 × 100 = <b>25%</b>.</p></details><h3>Luyện tập ngay</h3><p>Thử đề tổng hợp có câu vận dụng phần trăm.</p><a class="btn dark" href="de-thi-thu-toan-vao-lop-6/">Thử sức với đề mẫu →</a></article><aside class="panel aside"><span class="aside-title">HÀNH TRÌNH BÀI HỌC</span><h3>30 phút khám phá</h3><div class="progress"><span style="width:30%"></span></div><ul class="check-list"><li><b>01</b> · Khởi động bằng tình huống</li><li><b>02</b> · Hiểu cách giải</li><li><b>03</b> · Luyện tập và vận dụng</li></ul><button class="btn outline" data-video="percent">▷ Kịch bản video mẫu</button><button class="btn dark" data-complete="percent" disabled aria-busy="true">Đánh dấu đã học</button><p class="modal-note">Video chưa được quay. Em có thể đọc bài học đầy đủ trên trang.</p></aside></div></div></main>
+    <main id="app"><div class="wrap"><div class="page-head"><div class="crumb"><a href="bai-hoc-toan-lop-5/">Bài học</a> / Chuyên đề nâng cao</div><span class="tag warm">NÂNG CAO</span><h1 class="title">Hai lần thay đổi phần trăm</h1><p>Đừng để hai con số giống nhau đánh lừa em!</p></div><div class="split"><article class="panel lesson"><span class="eyebrow">CÂU HỎI KHỞI ĐỘNG</span><h2>Tăng 20% rồi giảm 20%,<br>giá có quay về như cũ?</h2><p>Một chiếc ba lô giá <b>200.000 đồng</b>. Cửa hàng tăng giá 20%, sau đó giảm 20% trên giá đã tăng.</p><div class="visual visual-prices"><b>200.000đ</b><span>→ +20% →</span><b>240.000đ</b><span>→ −20% →</span><b>192.000đ</b></div><h3>Cùng giải từng bước</h3><ol><li>Giá sau tăng: 200.000 × 120 : 100 = <b>240.000 đồng</b>.</li><li>Số tiền giảm: 240.000 × 20 : 100 = <b>48.000 đồng</b>.</li><li>Giá cuối: 240.000 − 48.000 = <b>192.000 đồng</b>.</li></ol><div class="example"><b>Điều quan trọng nhất</b><p>Hai lần “20%” được tính trên hai giá trị khác nhau. Giá cuối thấp hơn ban đầu 8.000 đồng, tương ứng 4% giá ban đầu.</p></div><h3>Đến lượt em suy nghĩ</h3><p>Một món đồ giá 100.000 đồng, giảm 20%. Muốn trở về giá cũ, cần tăng bao nhiêu phần trăm trên giá đã giảm?</p><details class="hint"><summary>Xem gợi ý và lời giải</summary><p>Giá sau giảm: 80.000 đồng. Cần tăng: 20.000 đồng. Tỉ lệ tăng: 20.000 : 80.000 × 100 = <b class="solution-answer-inline">25%</b>.</p></details><h3>Luyện tập ngay</h3><p>Thử đề tổng hợp có câu vận dụng phần trăm.</p><a class="btn dark" href="de-thi-thu-toan-vao-lop-6/">Thử sức với đề mẫu →</a></article><aside class="panel aside"><span class="aside-title">HÀNH TRÌNH BÀI HỌC</span><h3>30 phút khám phá</h3><div class="progress"><span style="width:30%"></span></div><ul class="check-list"><li><b>01</b> · Khởi động bằng tình huống</li><li><b>02</b> · Hiểu cách giải</li><li><b>03</b> · Luyện tập và vận dụng</li></ul><button class="btn outline" data-video="percent">▷ Kịch bản video mẫu</button><button class="btn dark" data-complete="percent" disabled aria-busy="true">Đánh dấu đã học</button><p class="modal-note">Video chưa được quay. Em có thể đọc bài học đầy đủ trên trang.</p></aside></div></div></main>
     <footer>
         <a href="#home" class="footer-brand"><img src="5bmath-logo.svg" alt="5BMath — Gieo Mầm Toán" width="628" height="168"></a>
         <span>Mỗi ngày hiểu thêm một chút. Mỗi ngày tự tin hơn.</span>

@@ -8,6 +8,7 @@ const RuntimeAssets = (() => {
         "runtime-assets.js",
         "learning-content.js",
         "arena-audio.js",
+        "game-session.js",
         "learning.js",
         "learning.css",
         "staff.js",
@@ -49,25 +50,62 @@ const RuntimeAssets = (() => {
         "arena-crab-animation.css",
         "shark-animation.js",
         "octopus-animation.js",
-        "octopus-animation.css"
+        "octopus-animation.css",
+        "arena-art/badge-mascots/data.js",
+        "arena-art/badge-mascots/runtime.js",
+        "local-pilot.js",
+        "local-pilot.css",
+        "group-games.js",
+        "group-games.css",
+        "games-art.js",
+        "games-art.css",
+        "practice-export.js",
+        "practice-export.css",
+        "solution-view.js",
+        "solution-view.css",
+        "game-rules.js",
+        "race-scenes.js",
+        "race-scenes/dyke-768.webp",
+        "race-scenes/dyke-1280.webp",
+        "race-scenes/mangrove-768.webp",
+        "race-scenes/mangrove-1280.webp",
+        "race-scenes/coast-768.webp",
+        "race-scenes/coast-1280.webp",
+        "staff-catalogue.js",
+        "staff-catalogue.css"
     ],
     "groups": {
         "learning": {
             "scripts": [
+                "arena-art/badge-mascots/data.js",
+                "arena-art/badge-mascots/runtime.js",
                 "learning-content.js",
                 "arena-audio.js",
-                "learning.js"
+                "game-session.js",
+                "local-pilot.js",
+                "race-scenes.js",
+                "games-art.js",
+                "game-rules.js",
+                "group-games.js",
+                "learning.js",
+                "practice-export.js"
             ],
             "styles": [
-                "learning.css"
+                "learning.css",
+                "local-pilot.css",
+                "games-art.css",
+                "group-games.css",
+                "practice-export.css"
             ]
         },
         "staff": {
             "scripts": [
+                "staff-catalogue.js",
                 "staff.js"
             ],
             "styles": [
-                "staff.css"
+                "staff.css",
+                "staff-catalogue.css"
             ]
         }
     },
@@ -355,6 +393,10 @@ const RuntimeAssets = (() => {
             "payment": [
                 "thanh-toan/",
                 "Thanh toán"
+            ],
+            "lookup": [
+                "tra-cuu-cau-hoi/",
+                "Tra cứu câu hỏi"
             ]
         },
         "staff": {
@@ -369,7 +411,7 @@ const RuntimeAssets = (() => {
         }
     }
 }
-    /* RUNTIME_MANIFEST_END */;
+/* RUNTIME_MANIFEST_END */;
     if (typeof document === 'undefined') return {manifest};
     const base = new URL('.',document.currentScript.src);
     const scripts = new Map(), styles = new Map(), active = new Map();

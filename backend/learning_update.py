@@ -13,6 +13,9 @@ def membership(db, session):
     if db.execute('SELECT 1 FROM access_entitlements WHERE account_id=? AND starts_at<=? AND (ends_at IS NULL OR ends_at>?)',
                   (aid, stamp(), stamp())).fetchone():
         return 'SVip'
+    plus = db.execute('SELECT vip_plus_expires_at FROM accounts WHERE id=?', (aid,)).fetchone()[0]
+    if plus and plus > stamp():
+        return 'VIP+'
     expiry = db.execute('SELECT vip_expires_at FROM accounts WHERE id=?', (aid,)).fetchone()[0]
     return 'VIP' if expiry and expiry > stamp() else 'Free'
 

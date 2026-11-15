@@ -8,7 +8,7 @@ import secrets
 from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, urlsplit
-from .platform_api import (APIError, MASCOT_NAMES, MASCOT_DISPLAY_NAMES, VN, academic, connect, limit_auth, mascot_code, now, packed,
+from .platform_api import (APIError, DEFAULT_THEME, MASCOT_NAMES, MASCOT_DISPLAY_NAMES, VN, academic, connect, limit_auth, mascot_code, now, packed,
                            ensure_grade, nickname_field, password_hash, stamp,
                            text_field, verify_password, same_origin, session_cookie,
                            prepare_login, verified_login)
@@ -396,6 +396,8 @@ def account_profile(db, row):
     if grants:
         membership = 'SVip'
         expiry = None if any(grant['ends_at'] is None for grant in grants) else max(grant['ends_at'] for grant in grants)
+    elif (db.execute('SELECT vip_plus_expires_at FROM accounts WHERE id=?',(row['id'],)).fetchone()[0] or '') > current:
+        membership, expiry = 'VIP+', db.execute('SELECT vip_plus_expires_at FROM accounts WHERE id=?',(row['id'],)).fetchone()[0]
     elif row['vip_expires_at'] and row['vip_expires_at'] > current:
         membership, expiry = 'VIP', row['vip_expires_at']
     else:
@@ -405,7 +407,7 @@ def account_profile(db, row):
     return {**dict(row), 'full_name': safe_nickname(row['full_name']),
             'grade_level': max(1, min(5, academic()[0]-row['birth_year']-5)),
             'membership': membership, 'membership_expires_at': expiry,
-            'mascot': mascot_code(companion['name'] if companion else None), 'points': companion['xp'] if companion else 1000}
+            'mascot': mascot_code(companion['name'] if companion else None), 'points': companion['xp'] if companion else 0}
 
 
 def account_result(db, identity):
@@ -417,7 +419,7 @@ def account_result(db, identity):
 
 def plan_expiry(body):
     plan = body.get('membership')
-    if plan not in ('Free', 'VIP', 'SVip'):
+    if plan not in ('Free', 'VIP', 'VIP+', 'SVip'):
         raise APIError('Gói tài khoản không hợp lệ.')
     value = body.get('membershipExpiresAt')
     if plan == 'Free':
@@ -425,7 +427,7 @@ def plan_expiry(body):
             raise APIError('Gói Free không có ngày hết hạn.')
         return plan, None
     if value in (None, ''):
-        if plan == 'VIP':
+        if plan in ('VIP', 'VIP+'):
             raise APIError('Gói VIP cần ngày hết hạn trong tương lai.')
         return plan, None
     try:
@@ -451,7 +453,8 @@ def end_account_entitlements(db, identity):
 
 def apply_account_plan(db, identity, plan, expiry):
     end_account_entitlements(db, identity)
-    db.execute('UPDATE accounts SET vip_expires_at=? WHERE id=?', (expiry if plan == 'VIP' else None, identity))
+    db.execute('UPDATE accounts SET vip_expires_at=? WHERE id=?', (expiry if plan in ('VIP', 'VIP+') else None, identity))
+    db.execute('UPDATE accounts SET vip_plus_expires_at=? WHERE id=?', (expiry if plan == 'VIP+' else None, identity))
     if plan == 'SVip':
         db.execute("INSERT INTO access_entitlements(account_id,kind,starts_at,ends_at) VALUES (?,'internal',?,?)",
                    (identity, stamp(now()-timedelta(seconds=1)), expiry))
@@ -493,9 +496,9 @@ def save_account(db, user, identity, body, prepared_credential=None):
     mascot = body.get('mascot', before['mascot'] if before else 'sprout')
     if not isinstance(mascot, str) or mascot not in MASCOT_NAMES:
         raise APIError('Linh vật không hợp lệ.')
-    points = body.get('points', before['points'] if before else 1000)
-    if type(points) is not int or not 1000 <= points <= 1_000_000_000:
-        raise APIError('Kinh nghiệm linh vật cần là số nguyên từ 1.000 đến 1.000.000.000.')
+    points = body.get('points', before['points'] if before else 0)
+    if type(points) is not int or not 0 <= points <= 1_000_000_000:
+        raise APIError('Kinh nghiệm linh vật cần là số nguyên từ 0 đến 1.000.000.000.')
     status = body.get('status', old['status'] if old else 'active')
     if status not in ('active', 'suspended'):
         raise APIError('Trạng thái tài khoản không hợp lệ.')
@@ -537,7 +540,7 @@ def save_account(db, user, identity, body, prepared_credential=None):
             ensure_grade(db, sid, birth)
             db.execute("INSERT OR IGNORE INTO mascots(name) VALUES ('Mầm Sách')")
             db.execute("INSERT INTO student_companions(student_id,mascot_id) SELECT ?,id FROM mascots WHERE name='Mầm Sách'", (sid,))
-            db.execute('INSERT INTO learning_preferences(student_id) VALUES (?)', (sid,))
+            db.execute('INSERT INTO learning_preferences(student_id,theme) VALUES (?,?)', (sid,DEFAULT_THEME))
     if not old or mascot != before['mascot'] or points != before['points']:
         sid = before['student_id'] if before else sid
         db.execute('INSERT OR IGNORE INTO mascots(name) VALUES (?)', (MASCOT_NAMES[mascot],))
@@ -710,6 +713,11 @@ def content_list(db, handler):
             row['id'] = row['question_id']
             row['prompt'] = intro_text(row['prompt_json'])
             row['answer'] = str(json.loads(row['grading_rule_json']).get('answer', ''))
+            row['responseType'] = json.loads(row['grading_rule_json']).get('responseType','typed')
+            row['answerShape'] = json.loads(row['grading_rule_json']).get('answerShape','single')
+            row['answerTargets'] = json.loads(row['grading_rule_json']).get('answerTargets',[])
+            row['choiceRationales'] = json.loads(row['grading_rule_json']).get('choiceRationales',[])
+            row['answerKind'] = json.loads(row['grading_rule_json']).get('answerKind', 'auto')
             row['options'] = json.loads(row['options_json'])
             row['steps'] = '\n'.join(item.get('text', '') for item in json.loads(row['solution_steps_json']) if item.get('type') == 'text')
             row['thinking'] = intro_text(row['hints_json'])
@@ -792,11 +800,26 @@ def save_question(db, user, body):
         raise APIError('Chuyên đề cần cùng khối với câu hỏi.')
     prompt = text_field(body, 'prompt', 10000)
     answer = text_field(body, 'answer', 500)
-    options = body.get('options')
-    if not isinstance(options, list) or not 2 <= len(options) <= 4 or any(not isinstance(option, str) or not option.strip() or len(option) > 500 for option in options):
-        raise APIError('Nhập từ hai đến bốn lựa chọn, mỗi lựa chọn trên một dòng.')
-    if len(set(options)) != len(options) or answer not in options:
-        raise APIError('Các lựa chọn cần khác nhau và có đáp án đúng.')
+    from .answers import validate_rule, requires_choice, validate_choices
+    shape=body.get('answerShape','single')
+    if shape not in ('single','parts','objects','solutions'):raise APIError('Cấu trúc đáp án không hợp lệ.')
+    requested=body.get('responseType','auto')
+    if requested not in ('auto','typed','choice'):raise APIError('Hình thức câu hỏi không hợp lệ.')
+    metadata={**body,'prompt':prompt}
+    choice=requires_choice(metadata) or requested=='choice' or bool(body.get('options'))
+    targets=body.get('answerTargets',[])
+    try:
+        if choice:
+            if requires_choice(metadata) and (not isinstance(targets,list) or len(targets)<2):
+                raise ValueError('Câu nhiều ý/đối tượng/kết quả cần ghi ít nhất 2 nhãn cần trả lời.')
+            options=validate_choices(answer,body.get('options'),body.get('choiceRationales'),targets)
+            answer_rule={'answer':answer,'answerKind':'text','responseType':'choice','answerShape':shape,
+                'answerTargets':targets,'choiceRationales':body['choiceRationales']}
+        else:
+            answer_rule={**validate_rule(answer,body.get('answerKind','auto')),'responseType':'typed','answerShape':'single','answerTargets':[]}
+            options=[]
+    except ValueError as error:
+        raise APIError(str(error)) from error
     steps, thinking = text_field(body, 'steps', 20000), text_field(body, 'thinking', 10000, 0)
     difficulty, week = number(body, 'difficulty', 1, 4), number(body, 'week', 1, 53)
     status = body.get('status')
@@ -827,7 +850,7 @@ def save_question(db, user, body):
                 solution.append({'type': 'text', 'text': lines.pop(0)})
     solution += [{'type': 'text', 'text': line} for line in lines]
     rule = json.loads(previous['grading_rule_json']) if previous else {}
-    rule['answer'] = answer
+    rule.update(answer_rule)
     hints = replace_intro(previous['hints_json'], thinking) if previous else [{'type': 'text', 'text': thinking}]
     version_id = db.execute('INSERT INTO question_versions(question_id,revision,difficulty,curriculum_week,prompt_json,grading_rule_json,solution_steps_json,hints_json,status,options_json) VALUES (?,?,?,?,?,?,?,?,?,?)',
                (identity, previous['revision']+1 if previous else 1, difficulty, week, packed(blocks),
@@ -1035,6 +1058,12 @@ def dispatch(handler, method, path, body=None):
             fn = save_assignment if match[2] == 'assignments' else save_records
             return fn(db, user, int(match[1]), body), 200
         require_admin(user)
+        if path.startswith('/api/staff/catalogue/') or path == '/api/staff/management':
+            from .admin_catalogue import dispatch as catalogue_dispatch
+            return catalogue_dispatch(handler,db,user,method,path,body)
+        if path.startswith('/api/staff/native-lessons'):
+            from .admin_native import dispatch as native_dispatch
+            return native_dispatch(handler,user,method,path,body,parse_qs(urlsplit(handler.path).query))
         if path == '/api/staff/admissions' and method == 'GET':
             from .admissions import list_registrations
             query, _, page = page_query(handler)

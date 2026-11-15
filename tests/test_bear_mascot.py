@@ -72,7 +72,7 @@ class BearMascotTests(unittest.TestCase):
         client, login, password = self.user()
         selected = client.call('mascot', {'mascot': 'gau'})
         self.assertEqual(selected['state']['mascot'], 'gau')
-        self.assertEqual(selected['state']['points'], 1000)
+        self.assertEqual(selected['state']['points'], 0)
         restored = BearClient(self.server)
         self.assertEqual(restored.call('auth/login', {'login': login, 'password': password})
                          ['state']['mascot'], 'gau')
@@ -89,7 +89,7 @@ class BearMascotTests(unittest.TestCase):
         listing = friend.call('arena', {'action': 'list'})['rooms']
         self.assertEqual(next(row for row in listing if row['code'] == room['code'])['mascot'], 'gau')
         joined = friend.call('arena', {'action': 'join', 'code': room['code']})
-        client.call('arena', {'action': 'accept', **room})
+        self.assertEqual(client.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         battle = friend.call('arena', {'action': 'state', **joined})['battle']
         self.assertEqual(battle['opponentMascot'], 'gau')

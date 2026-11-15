@@ -6,7 +6,7 @@ const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosnif
 export default {
     async fetch(request, env) {
         const pathname = new URL(request.url).pathname;
-        if (pathname.startsWith('/api/v1/') || pathname.startsWith('/api/staff/') ||
+        if (pathname.startsWith('/api/v1/') || pathname.startsWith('/api/staff/') || pathname.startsWith('/api/local-pilot/') ||
             pathname === '/api/webhooks/sepay' || pathname === '/api/health' || pathname === '/api/grade') {
             if (!env.BACKEND) return Response.json({error:'Backend chưa được kết nối.'}, {status:503,headers});
             try { return await env.BACKEND.fetch(request); }

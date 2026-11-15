@@ -52,7 +52,7 @@ class SparrowTests(unittest.TestCase):
             self.assertEqual(next(r for r in call(friend, 'arena', {'action':'list'})['rooms']
                 if r['code']==room['code'])['mascot'], 'sparrow')
             joined = call(friend, 'arena', {'action':'join','code':room['code']})
-            call(resumed, 'arena', {'action':'accept', **room})
+            self.assertEqual(call(resumed, 'arena', {'action':'state', **room})['status'],'preparing')
             server.arena.rooms[room['code']]['readyAt'] = 0
             self.assertEqual(call(friend, 'arena', {'action':'state', **joined})['battle']['opponentMascot'], 'sparrow')
 

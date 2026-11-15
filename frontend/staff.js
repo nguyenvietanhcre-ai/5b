@@ -23,7 +23,7 @@ const StaffApp = (() => {
     const table = (heads,rows) => `<div class="staff-table-wrap"><table class="staff-table"><thead><tr>${heads.map(head=>'<th scope="col">'+head+'</th>').join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
     const gradeOptions = Array.from({length:5},(_,index)=>[index+1,'Khối '+(index+1)]);
     const adminTabs = [
-        ['overview','Tổng quan','▦'],['classes','Lớp Zoom','◷'],['content','Học liệu','▤'],
+        ['overview','Tổng quan','▦'],['management','Trung tâm điều hành','⌂'],['videoSeries','Series & video','▷'],['examProducts','Đề bán riêng','₫'],['vipContent','Nội dung VIP+','✦'],['nativeLessons','Bài giảng lớp 5','▤'],['operations','Vận hành','⚙'],['classes','Lớp Zoom','◷'],['content','Học liệu','▤'],
         ['accounts','Học sinh','♙'],['users','Nhân sự & quyền','♧'],
         ['admissions','Đăng ký đầu vào','✎'],['notifications','Gửi thông báo','✉'],['payments','Đối soát','₫'],['settings','Cấu hình','⚙'],['audit','Nhật ký','≡'],
     ];
@@ -72,6 +72,7 @@ const StaffApp = (() => {
         return result;
     }
 
+    const catalogueUI=typeof StaffCatalogue!=='undefined'?StaffCatalogue.create({request,header,panel,empty,table,input,text,select,stats,money,date,openForm,pagination,message,grades:gradeOptions,payload:()=>payload,filter:()=>filter,setFilter:value=>{filter=value;},tab:()=>tab,reload:loadTab,owner:()=>user?.id+':'+csrf}):null;
     function header(title,copy,actions='') {
         return `<div class="staff-page-head"><div><h1>${title}</h1><p>${copy}</p></div><div class="staff-actions">${actions}</div></div>`;
     }
@@ -88,7 +89,7 @@ const StaffApp = (() => {
         }
         const nav = mode==='admin' ? adminTabs.map(([key,label,symbol]) => `<button type="button" data-tab="${key}" ${tab===key?'aria-current="page"':''}><span aria-hidden="true">${symbol}</span>${label}</button>`).join('') :
             `<button type="button" data-tab="overview" ${tab!=='notifications'?'aria-current="page"':''}><span aria-hidden="true">▦</span>Lớp của tôi</button><button type="button" data-tab="notifications" ${tab==='notifications'?'aria-current="page"':''}><span aria-hidden="true">✉</span>Gửi thông báo</button><a href="./"><span aria-hidden="true">⌂</span>Trang chủ 5BMath</a>`;
-        return `<div class="staff-shell"><aside class="staff-sidebar"><a class="staff-brand" href="./"><img src="5bmath-logo.svg" alt="5BMath Gieo Mầm Toán" width="628" height="168"></a><span class="staff-role">${mode==='admin'?'Quản trị hệ thống':'Không gian giáo viên'}</span><nav aria-label="Điều hướng nhân sự">${nav}</nav><div class="staff-side-footer">${user.role==='admin'?'<a href="'+(mode==='admin'?'giao-vien/':'quan-tri/')+'">'+(mode==='admin'?'Mở trang giáo viên':'Mở trang quản trị')+' ↗</a>':''}<span>5BMath · Gieo Mầm Toán</span></div></aside>
+        return `<div class="staff-shell"><aside class="staff-sidebar"><a class="staff-brand" href="./"><img src="5bmath-logo.svg" alt="5BMath Gieo Mầm Toán" width="628" height="168"></a><span class="staff-role">${mode==='admin'?'Quản trị hệ thống':'Không gian giáo viên'}</span>${mode==='admin'?'<label class="admin-nav-search"><span>Tìm mục quản lý</span><input type="search" data-admin-nav-search aria-label="Tìm mục quản lý"></label>':''}<nav aria-label="Điều hướng nhân sự">${nav}</nav><div class="staff-side-footer">${user.role==='admin'?'<a href="'+(mode==='admin'?'giao-vien/':'quan-tri/')+'">'+(mode==='admin'?'Mở trang giáo viên':'Mở trang quản trị')+' ↗</a>':''}<span>5BMath · Gieo Mầm Toán</span></div></aside>
         <div class="staff-main"><header class="staff-topbar"><a class="staff-mobile-brand" href="./"><img src="5bmath-logo.svg" alt="5BMath" width="628" height="168"></a><span class="staff-date">${new Intl.DateTimeFormat('vi-VN',{dateStyle:'full',timeZone:'Asia/Ho_Chi_Minh'}).format(new Date())}</span><div class="staff-identity"><span class="staff-avatar">${esc(user.full_name.trim().split(/\s+/).slice(-2).map(part=>part[0]).join(''))}</span><div><b>${esc(user.full_name)}</b><small>${statusLabel(user.role)}</small></div>${button('Đổi mật khẩu','password')}${button('Thoát','logout')}</div></header>
         <div class="staff-content">${body}</div></div></div>`;
     }
@@ -105,7 +106,7 @@ const StaffApp = (() => {
                 classCards(classList);
         }
         const count=payload.counts || {};
-        return header('Quản trị hệ thống','Theo dõi dữ liệu hiện có và điều phối công việc của 5BMath.',button('Tải lại','reload'))+
+        return header('Quản trị hệ thống','Theo dõi dữ liệu hiện có và điều phối công việc của 5BMath.',button('Tải lại','reload')+'<button class="btn dark" type="button" data-tab="management">Tất cả chức năng</button>')+
             stats([['Học sinh',count.students||0],['Lớp Zoom',count.classes||0],['Bài học',count.lessons||0],['Bài toán',count.questions||0]])+
             `<div class="staff-grid-two">${panel('Công việc quản trị',`<div class="staff-task-list"><button type="button" data-tab="payments"><span><b>Đối soát thanh toán</b><small>Đơn chờ xác nhận tiền đã nhận</small></span><strong>${count.pendingPayments||0} →</strong></button><button type="button" data-tab="classes"><span><b>Quản lý lớp Zoom</b><small>Phân công giáo viên và ghi danh học sinh</small></span>→</button><button type="button" data-tab="content"><span><b>Cập nhật học liệu</b><small>Bài giảng, chuyên đề và câu hỏi theo phiên bản</small></span>→</button></div>`)}${panel('Điều hành hệ thống',`<p>Điều chỉnh trạng thái chức năng và hạn mức tài khoản Free.</p><div class="staff-actions">${button('Mở cấu hình','settings','', 'dark')}${button('Xem nhật ký','audit')}</div><div class="staff-small-mascot" aria-hidden="true"></div>`)}</div>`;
     }
@@ -213,7 +214,7 @@ const StaffApp = (() => {
                 const id='data-id="'+row.id+'"';
                 const actions=row.deleted_at?button('Khôi phục','restore-account',id):button('Chỉnh sửa','edit-account',id)+button(row.status==='active'?'Tạm khóa':'Mở lại','account-status',id)+button('Xóa','delete-account',id,'outline staff-danger');
                 const mascot=(payload.mascots||[]).find(item=>item.code===row.mascot)?.name;
-                return `<tr><td><b>${esc(row.full_name)}</b><small>${esc(row.login_identifier)}${row.is_demo?' · Dữ liệu thử':''}</small>${mascot?'<small>'+esc(mascot)+' · '+new Intl.NumberFormat('vi-VN').format(row.points??1000)+' kinh nghiệm</small>':''}</td><td data-label="Khối">Khối ${row.grade_level}<small>Sinh năm ${esc(row.birth_year)}</small></td><td data-label="Quyền học">${badge(row.membership)}${row.class_name?'<small>'+esc(row.class_name)+'</small>':''}${row.membership!=='Free'?'<small>'+(row.membership_expires_at?'Đến '+date(row.membership_expires_at):'Không giới hạn thời hạn')+'</small>':''}</td><td data-label="Trạng thái">${badge(row.deleted_at?'deleted':row.status)}${row.deleted_at?'<small>'+date(row.deleted_at)+'</small>':''}</td><td data-label="Thao tác"><div class="staff-actions">${actions}</div></td></tr>`;
+                return `<tr><td><b>${esc(row.full_name)}</b><small>${esc(row.login_identifier)}${row.is_demo?' · Dữ liệu thử':''}</small>${mascot?'<small>'+esc(mascot)+' · '+new Intl.NumberFormat('vi-VN').format(row.points??0)+' kinh nghiệm</small>':''}</td><td data-label="Khối">Khối ${row.grade_level}<small>Sinh năm ${esc(row.birth_year)}</small></td><td data-label="Quyền học">${badge(row.membership)}${row.class_name?'<small>'+esc(row.class_name)+'</small>':''}${row.membership!=='Free'?'<small>'+(row.membership_expires_at?'Đến '+date(row.membership_expires_at):'Không giới hạn thời hạn')+'</small>':''}</td><td data-label="Trạng thái">${badge(row.deleted_at?'deleted':row.status)}${row.deleted_at?'<small>'+date(row.deleted_at)+'</small>':''}</td><td data-label="Thao tác"><div class="staff-actions">${actions}</div></td></tr>`;
             }))}</div>`:empty('Không tìm thấy tài khoản','Thử đổi từ khóa hoặc bộ lọc trạng thái.'))+pagination()+
             '<p class="staff-note">Tạm khóa giữ tài khoản trong danh sách. Xóa chuyển tài khoản sang mục Đã xóa và ngừng truy cập; lịch sử học tập, điểm và thanh toán vẫn được giữ.</p>');
     }
@@ -366,7 +367,7 @@ const StaffApp = (() => {
     function paymentsView() {
         const search=`<form class="staff-toolbar" id="staff-filter-form">${input('Mã đơn / học sinh','q',filter.q,'search','placeholder="Mã đơn, tên đăng nhập hoặc biệt danh…" maxlength="100"')}${input('Người giới thiệu','referrer',filter.referrer||'','search','placeholder="Tên đăng nhập hoặc biệt danh người giới thiệu…" maxlength="100"')}${submit('Tìm kiếm')}</form>`;
         return header('Đối soát thanh toán','Theo dõi thanh toán tự động và kiểm tra các khoản tiền cần đối soát.')+
-            panel('Đơn thanh toán',search+'<p class="staff-note staff-payment-note">Loại tài khoản người giới thiệu là gói đang hiệu lực. Trạng thái thưởng được lấy từ hồ sơ giới thiệu.</p>'+(payload.rows?.length?table(['Mã đơn / học sinh','Người giới thiệu','Nội dung','Số tiền','Trạng thái','Thao tác'],payload.rows.map(row=>`<tr><td data-label="Mã đơn / học sinh"><b>${esc(row.reference)}</b><small><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</small><small>${date(row.created_at)}</small></td><td data-label="Người giới thiệu">${paymentReferrerMarkup(row.referrer)}</td><td data-label="Nội dung">${row.fee_id?esc(row.class_name)+' · '+esc(row.month):'VIP một tháng'}</td><td data-label="Số tiền"><b>${money(row.amount)}</b></td><td data-label="Trạng thái">${row.fee_id&&row.status==='paid'?'<span class="staff-badge">Đã hoàn thành</span>':badge(row.status)}${row.paid_at?'<small>'+date(row.paid_at)+'</small>':''}</td><td data-label="Thao tác">${row.status==='pending'?button('Đối soát','confirm-payment','data-id="'+row.id+'"'):'Đã xử lý'}</td></tr>`)):empty('Không có đơn thanh toán phù hợp','Thử đổi mã đơn, tên học sinh hoặc người giới thiệu.'))+pagination(),'staff-payment-list')+panel('Giao dịch ngân hàng','<div id="staff-bank-receipts">'+receiptsMarkup()+'</div>','staff-receipt-list');
+            panel('Đơn thanh toán',search+'<p class="staff-note staff-payment-note">Loại tài khoản người giới thiệu là gói đang hiệu lực. Trạng thái thưởng được lấy từ hồ sơ giới thiệu.</p>'+(payload.rows?.length?table(['Mã đơn / học sinh','Người giới thiệu','Nội dung','Số tiền','Trạng thái','Thao tác'],payload.rows.map(row=>`<tr><td data-label="Mã đơn / học sinh"><b>${esc(row.reference)}</b><small><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</small><small>${date(row.created_at)}</small></td><td data-label="Người giới thiệu">${paymentReferrerMarkup(row.referrer)}</td><td data-label="Nội dung">${row.fee_id?esc(row.class_name)+' · '+esc(row.month):row.purchase_type==='exam'?esc(row.exam_title):esc(row.subscription_plan||'VIP')+' · 1 tháng'}</td><td data-label="Số tiền"><b>${money(row.amount)}</b></td><td data-label="Trạng thái">${row.fee_id&&row.status==='paid'?'<span class="staff-badge">Đã hoàn thành</span>':badge(row.status)}${row.paid_at?'<small>'+date(row.paid_at)+'</small>':''}</td><td data-label="Thao tác">${row.status==='pending'?button('Đối soát','confirm-payment','data-id="'+row.id+'"'):'Đã xử lý'}</td></tr>`)):empty('Không có đơn thanh toán phù hợp','Thử đổi mã đơn, tên học sinh hoặc người giới thiệu.'))+pagination(),'staff-payment-list')+panel('Giao dịch ngân hàng','<div id="staff-bank-receipts">'+receiptsMarkup()+'</div>','staff-receipt-list');
     }
     function receiptReason(row){
         const reasons={paid:'Đã xác nhận thanh toán',settled:'Đã xác nhận thanh toán',processed:'Đã xác nhận thanh toán',amount_mismatch:'Số tiền chưa khớp đơn',unknown_reference:'Chưa tìm thấy đơn theo mã',missing_reference:'Chưa nhận diện được mã thanh toán',ambiguous_reference:'Nội dung có nhiều mã thanh toán',order_cancelled:'Đơn đã hủy',cancelled_order:'Đơn đã hủy',order_paid:'Đơn đã được thanh toán trước đó',already_paid:'Đơn đã được thanh toán trước đó',duplicate_payment:'Có khoản chuyển khác cho đơn đã hoàn tất',wrong_account:'Tài khoản nhận chưa khớp',account_mismatch:'Tài khoản nhận chưa khớp',bank_mismatch:'Ngân hàng nhận chưa khớp',outgoing:'Giao dịch tiền ra',not_incoming:'Giao dịch tiền ra',fee_changed:'Học phí đã thay đổi',fee_paid:'Học phí đã được thanh toán',account_inactive:'Tài khoản học sinh không hoạt động',invalid_owner:'Chủ tài khoản và học phí chưa khớp',legacy_unconfigured:'Đơn cũ chưa đủ thông tin ngân hàng để tự xác nhận'};
@@ -417,14 +418,14 @@ const StaffApp = (() => {
 
     function settingsView() {
         const cfg=payload.settings || {};
-        const flags=[['registration_open','Đăng ký tài khoản mới'],['learning_open','Học online'],['practice_open','Tạo đề luyện tập'],['arena_open','Tạo và ghép trận đấu trí'],['leaderboard_open','Bảng xếp hạng']];
+        const flags=[['registration_open','Đăng ký tài khoản mới'],['learning_open','Học online'],['practice_open','Tạo đề luyện tập'],['arena_open','Tạo và ghép trận · cả ba trò chơi'],['leaderboard_open','Bảng xếp hạng']];
         return header('Cấu hình hệ thống','Thay đổi có hiệu lực cho các yêu cầu tiếp theo và được ghi vào nhật ký.')+
             `<form id="staff-settings-form"><div class="staff-grid-two">${panel('Trạng thái chức năng',`<div class="staff-switches">${flags.map(([key,title])=>`<label><span>${title}</span><input type="checkbox" name="${key}" ${cfg[key]?'checked':''}><i aria-hidden="true"></i></label>`).join('')}</div>`)}
-            ${panel('Hạn mức Free mỗi ngày',`<div class="staff-form-grid">${[['content','Luyện theo nội dung'],['combined','Đề tổng hợp'],['human','Đấu với người'],['bot','Đấu với bot']].map(([key,label])=>input(label,key,cfg.free_limits?.[key]??0,'number','required min="0" max="100"')).join('')}</div><p class="staff-note">Tính theo ngày Việt Nam. VIP và SVip giữ quyền không giới hạn. Đề và trận đang làm vẫn có thể hoàn thành.</p>`)}</div><div class="staff-form-footer">${submit('Lưu cấu hình')}</div></form>`;
+            ${panel('Hạn mức Free mỗi ngày',`<div class="staff-form-grid">${[['content','Luyện theo nội dung'],['combined','Đề tổng hợp'],['human','Đấu với người'],['bot','Đấu với bot']].map(([key,label])=>input(label,key,cfg.free_limits?.[key]??0,'number','required min="0" max="100"')).join('')}</div><p class="staff-note">Tính theo ngày Việt Nam. Quyền VIP/VIP+/SVip và ví câu hỏi lớp 5 có cơ chế riêng. Đề và trận đang làm vẫn có thể hoàn thành.</p>`)}</div><div class="staff-form-footer">${submit('Lưu cấu hình')}</div></form>`;
     }
 
     function auditView() {
-        const entities={admission:'Đăng ký đầu vào',class:'Lớp học',enrollment:'Ghi danh',session:'Buổi học',assignment:'Bài tập',class_records:'Điểm danh / nhận xét / điểm',class_fee:'Học phí',class_tuition:'Tính học phí',notification_broadcast:'Thông báo',account:'Học sinh',staff:'Nhân sự',topic:'Chuyên đề',lesson:'Bài học',question:'Câu hỏi',payment:'Thanh toán',referral_reward:'Thưởng giới thiệu',settings:'Cấu hình'};
+        const entities={admission:'Đăng ký đầu vào',class:'Lớp học',enrollment:'Ghi danh',session:'Buổi học',assignment:'Bài tập',class_records:'Điểm danh / nhận xét / điểm',class_fee:'Học phí',class_tuition:'Tính học phí',notification_broadcast:'Thông báo',account:'Học sinh',staff:'Nhân sự',topic:'Chuyên đề',lesson:'Bài học',question:'Câu hỏi',payment:'Thanh toán',referral_reward:'Thưởng giới thiệu',settings:'Cấu hình',catalogue_series:'Series video',catalogue_videos:'Video',catalogue_products:'Đề bán riêng',catalogue_sets:'Nội dung VIP+'};
         return header('Nhật ký thay đổi','Theo dõi ai đã cập nhật dữ liệu và thời điểm thực hiện.')+
             panel('Hoạt động quản trị',(payload.rows?.length?table(['Thời điểm','Người thực hiện','Đối tượng','Nội dung'],payload.rows.map(row=>`<tr><td>${date(row.created_at)}</td><td>${esc(row.full_name)}</td><td>${esc(entities[row.entity]||row.entity)} #${esc(row.entity_id)}</td><td>${esc(row.summary)}</td></tr>`)):empty('Chưa có thay đổi'))+pagination());
     }
@@ -436,6 +437,7 @@ const StaffApp = (() => {
         if(detail) return classView();
         if(tab==='notifications') return notificationsView();
         if(mode==='teacher' || tab==='overview') return overview();
+        if(catalogueUI?.handles(tab))return catalogueUI.view();
         return ({classes:classView,content:contentView,accounts:accountsView,users:usersView,payments:paymentsView,admissions:admissionsView,settings:settingsView,audit:auditView}[tab]||overview)();
     }
 
@@ -466,7 +468,7 @@ const StaffApp = (() => {
                 classList=result.classes;teachers=result.teachers;
             } else {
                 const query=new URLSearchParams({...filter,...(tab==='content'?{kind:topicKind}:{})});
-                let result=await request(tab+(tab==='overview'||tab==='users'||tab==='settings'?'':'?'+query));
+                let result=await request(catalogueUI?.path(tab,query)||(tab+(tab==='overview'||tab==='users'||tab==='settings'?'':'?'+query)));
                 if(ticket!==generation) return;
                 if(tab==='accounts' && !result.rows?.length && filter.page>1) {
                     filter.page=Math.max(1,Math.ceil((result.total||0)/(result.pageSize||25)));
@@ -724,13 +726,13 @@ const StaffApp = (() => {
             <p id="staff-grade-preview" class="staff-grade-preview" role="status" aria-live="polite"></p>
             <p class="staff-note">Admin được sửa năm sinh để điều chỉnh khối theo mốc 01/07. Lịch sử học tập vẫn được giữ; học sinh cần đăng nhập lại khi thay đổi năm sinh.</p></section>
             <section class="staff-account-section"><h3>Quyền học</h3><div class="staff-form-grid">
-            ${select('Loại tài khoản','membership',[['Free','Free'],['VIP','VIP'],['SVip','SVip']],membership)}
+            ${select('Loại tài khoản','membership',[['Free','Free'],['VIP','VIP'],['VIP+','VIP+'],['SVip','SVip']],membership)}
             ${input('Hạn quyền học · giờ Việt Nam','membershipExpiresAt',initialExpiry,'datetime-local','aria-describedby="staff-membership-help"')}</div>
             <p id="staff-membership-help" class="staff-note" aria-live="polite"></p>
             <p class="staff-note">Đây là cấp quyền thủ công, không ghi nhận thanh toán hoặc thưởng giới thiệu. SVip cho quyền học nội bộ; ghi danh vào lớp được quản lý riêng tại Lớp Zoom.</p></section>
             <section class="staff-account-section"><h3>Linh vật & kinh nghiệm</h3><div class="staff-form-grid">
             ${select('Linh vật','mascot',mascots,row?.mascot||'sprout')}
-            ${input('Điểm kinh nghiệm','points',row?.points??1000,'number','required min="1000" max="1000000000" step="1"')}</div></section>
+            ${input('Điểm kinh nghiệm','points',row?.points??0,'number','required min="0" max="1000000000" step="1"')}</div></section>
             <section class="staff-account-section"><h3>Thông tin đăng nhập</h3>
             ${input(row?'Mật khẩu mới · để trống để giữ mật khẩu hiện tại':'Mật khẩu ban đầu','password','','password',(row?'':'required ')+'minlength="6" maxlength="128" autocomplete="new-password"')}
             <p class="staff-note">Một tài khoản dành cho một học sinh. Tên đăng nhập gồm ít nhất 3 chữ cái không dấu, số hoặc . _ @ + -. Đổi tên đăng nhập, đổi mật khẩu hoặc tạm khóa sẽ kết thúc các phiên đăng nhập của học sinh. Mã tài khoản, mã giới thiệu và lịch sử được hệ thống quản lý.</p></section>`,
@@ -750,13 +752,13 @@ const StaffApp = (() => {
             document.querySelector('#staff-grade-preview').textContent=birth.value && Number.isInteger(grade) && grade>=1 && grade<=5?'Khối học sau khi lưu: Khối '+grade+' · Năm học '+year+'–'+(year+1):'Nhập năm sinh từ '+(year-10)+' đến '+(year-6)+' để xếp khối 1–5.';
         };
         const updateMembership=()=>{
-            expiry.disabled=plan.value==='Free';expiry.required=plan.value==='VIP';
+            expiry.disabled=plan.value==='Free';expiry.required=['VIP','VIP+'].includes(plan.value);
             expiry.min=localTime(new Date());
-            document.querySelector('#staff-membership-help').textContent=plan.value==='VIP'?'VIP cần hạn trong tương lai. Khi chọn VIP, hệ thống gợi ý thêm một tháng lịch.':plan.value==='SVip'?'Để trống hạn nếu cấp SVip không giới hạn thời gian; nếu đặt hạn, chọn một thời điểm trong tương lai.':'Free dùng hạn mức miễn phí và không có thời hạn quyền trả phí.';
+            document.querySelector('#staff-membership-help').textContent=['VIP','VIP+'].includes(plan.value)?'VIP cần hạn trong tương lai. Khi chọn VIP, hệ thống gợi ý thêm một tháng lịch.':plan.value==='SVip'?'Để trống hạn nếu cấp SVip không giới hạn thời gian; nếu đặt hạn, chọn một thời điểm trong tương lai.':'Free dùng hạn mức miễn phí và không có thời hạn quyền trả phí.';
         };
         birth.oninput=updateGrade;
         plan.onchange=()=>{
-            if(plan.value==='VIP' && (!expiry.value || new Date(expiry.value+':00+07:00').getTime()<=Date.now())) {
+            if(['VIP','VIP+'].includes(plan.value) && (!expiry.value || new Date(expiry.value+':00+07:00').getTime()<=Date.now())) {
                 const next=new Date(Date.now()+7*3600000),day=next.getUTCDate();
                 next.setUTCDate(1);next.setUTCMonth(next.getUTCMonth()+1);
                 const lastDay=new Date(Date.UTC(next.getUTCFullYear(),next.getUTCMonth()+1,0)).getUTCDate();
@@ -801,7 +803,12 @@ const StaffApp = (() => {
             ${select('Phát hành','status',[['draft','Lưu bản nháp'],['published','Phát hành cho học sinh']],row?.publication_status||'draft')}`;
         else fields=`<div class="staff-form-grid">${base}${select('Chuyên đề','topicId',topicOptions(grade),row?.topic_id)}${select('Mức độ','difficulty',[[1,'Cơ bản'],[2,'Nâng cao'],[3,'Khó'],[4,'Tư duy']],row?.difficulty||1)}${input('Tuần kiến thức','week',row?.curriculum_week||1,'number','required min="1" max="53"')}</div>
             ${text('Nội dung câu hỏi','prompt',row?.prompt||'','required maxlength="10000"')}
-            <div class="staff-form-grid">${text('Lựa chọn · mỗi dòng một đáp án','options',row?.options?.join('\n')||'','required')}${input('Đáp án đúng · khớp một lựa chọn','answer',row?.answer||'','text','required maxlength="500"')}</div>
+            <div class="staff-form-grid">${input('Đáp án đúng','answer',row?.answer||'','text','required maxlength="500"')}${select('Cách chấm','answerKind',[['auto','Tự nhận dạng số hoặc văn bản'],['number','Số / phân số tương đương'],['text','Văn bản / dấu chính xác'],['ordered','Nhiều kết quả · đúng thứ tự'],['unordered','Nhiều kết quả · không xét thứ tự']],row?.answerKind||'auto')}</div><p class="staff-note">Một đáp số dùng ô nhập. Câu nhiều ý hoặc nhiều đối tượng dùng một phương án chứa toàn bộ kết quả; ghi rõ đơn vị.</p>
+            <div class="staff-form-grid">${select('Cấu trúc cần trả lời','answerShape',[['single','Một đáp số'],['parts','Nhiều ý (a, b…)'],['objects','Nhiều đối tượng'],['solutions','Nhiều kết quả']],row?.answerShape||'single')}${select('Hình thức','responseType',[['auto','Tự chọn theo cấu trúc'],['typed','Tự nhập · một đáp số'],['choice','Trắc nghiệm']],row?.responseType||'auto')}</div>
+            ${text('Nhãn các ý / đối tượng · mỗi dòng một nhãn','answerTargets',row?.answerTargets?.join('\n')||'')}
+            ${text('Bốn phương án · mỗi dòng một phương án đầy đủ','options',row?.responseType==='choice'?row.options?.join('\n')||'':'')}
+            ${text('Giải thích 4 phương án · cùng thứ tự, mỗi dòng một giải thích','choiceRationales',row?.choiceRationales?.join('\n')||'')}
+            <p class="staff-note">Câu nhiều ý/đối tượng/kết quả bắt buộc trắc nghiệm. Mỗi phương án ghi đủ Nhãn: đáp số. Nhiễu cần dựa trên lỗi giải cụ thể, cùng đơn vị và cách trình bày; không tự sinh số ngẫu nhiên. Chọn một phương án rồi xác nhận trong Đấu trí.</p>
             ${text('Lời giải · mỗi dòng một bước','steps',row?.steps||'','required maxlength="20000"')}${text('Hướng dẫn tư duy','thinking',row?.thinking||'')}
             ${select('Trạng thái','status',[['draft','Lưu bản nháp'],['published','Phát hành phiên bản mới'],['retired','Ngừng phát hành câu hỏi']],row?.status||'draft')}
             <p class="staff-note">Lưu câu hỏi tạo một phiên bản mới. Các đề đã sinh giữ nội dung và lời giải của phiên bản trước.</p>`;
@@ -809,7 +816,7 @@ const StaffApp = (() => {
             const body={id:row?.id,revision:row?.revision,grade:Number(values.get('grade')||row?.grade_id),topicId:Number(values.get('topicId')||row?.topic_id),
                 title:values.get('title'),intro:values.get('intro'),kind:values.get('kind'),week:Number(values.get('week')),videoUrl:values.get('videoUrl'),exampleText:values.get('exampleText'),exampleSteps:values.get('exampleSteps'),
                 status:values.get('status'),difficulty:Number(values.get('difficulty')),prompt:values.get('prompt'),answer:values.get('answer'),
-                options:String(values.get('options')||'').split('\n').map(value=>value.trim()).filter(Boolean),steps:values.get('steps'),thinking:values.get('thinking')};
+                responseType:values.get('responseType')||'auto',answerShape:values.get('answerShape')||'single',answerTargets:String(values.get('answerTargets')||'').split('\n').map(s=>s.trim()).filter(Boolean),options:String(values.get('options')||'').split('\n').map(s=>s.trim()).filter(Boolean),choiceRationales:String(values.get('choiceRationales')||'').split('\n').map(s=>s.trim()).filter(Boolean),answerKind:values.get('answerKind')||'auto',steps:values.get('steps'),thinking:values.get('thinking')};
             await request(kind,body);
         });
         const form=document.querySelector('#staff-modal-form');
@@ -863,7 +870,7 @@ const StaffApp = (() => {
     }
 
     function paymentForm(row) {
-        openForm('Đối soát đơn '+esc(row.reference),`<div class="staff-payment-summary"><b><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</b><strong>${money(row.amount)}</strong><span>${row.fee_id?'Học phí '+esc(row.month):'VIP một tháng'}</span><div class="staff-payment-referrer"><h3>Người giới thiệu</h3>${paymentReferrerMarkup(row.referrer,true)}</div></div>
+        openForm('Đối soát đơn '+esc(row.reference),`<div class="staff-payment-summary"><b><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</b><strong>${money(row.amount)}</strong><span>${row.fee_id?'Học phí '+esc(row.month):row.purchase_type==='exam'?esc(row.exam_title):esc(row.subscription_plan||'VIP')+' · 1 tháng'}</span><div class="staff-payment-referrer"><h3>Người giới thiệu</h3>${paymentReferrerMarkup(row.referrer,true)}</div></div>
             <p>Chỉ xác nhận sau khi đã đối chiếu khoản tiền thực nhận.</p>${input('Nhập lại mã đơn','reference','','text','required autocomplete="off"')}${input('Số tiền đã nhận · đồng','amount','','number','required min="1" step="1"')}`,
             async values=>{await request('payments/'+row.id+'/confirm',{reference:values.get('reference').trim(),amount:Number(values.get('amount'))});},'Xác nhận đã nhận tiền');
     }
@@ -887,7 +894,8 @@ const StaffApp = (() => {
             const value=action.dataset.staff;
             const id=Number(action.dataset.id);
             action.disabled=true;
-            if(value==='reload') await loadTab();
+            if(value.startsWith('catalog-'))await catalogueUI.action(value,action);
+            else if(value==='reload') await loadTab();
             else if(value==='receipts-reload')await loadTab();
             else if(value==='receipts-previous'||value==='receipts-next'){receipts.page=Math.max(1,receipts.page+(value==='receipts-next'?1:-1));await loadReceipts();}
             else if(value==='settings'||value==='audit') await changeTab(value);
@@ -949,6 +957,8 @@ const StaffApp = (() => {
         root.onchange=event=>{
             if(event.target.name==='record-session') {sessionId=Number(event.target.value);draw();}
         };
+        catalogueUI?.bind();
+        const navSearch=document.querySelector('[data-admin-nav-search]');if(navSearch)navSearch.oninput=()=>{const q=navSearch.value.toLocaleLowerCase('vi');document.querySelectorAll('.staff-sidebar [data-tab]').forEach(b=>b.hidden=!b.textContent.toLocaleLowerCase('vi').includes(q));};
         bindNotificationComposer();
         bindReceipts();
         const login=document.querySelector('#staff-login-form');

@@ -68,7 +68,7 @@ class SharkMascotTests(unittest.TestCase):
         joined = friend.call('arena', {
             'action': 'join', 'code': room['code'], 'scope': 'weekly',
             'mascot': 'ca-map', 'stats': {'mascot': 'ca-map', 'xp': 999999}})
-        shark.call('arena', {'action': 'accept', **room})
+        self.assertEqual(shark.call('arena',{'action':'state',**room})['status'],'preparing')
         self.server.arena.rooms[room['code']]['readyAt'] = 0
         self.assertEqual(friend.call('arena', {'action': 'state', **joined})[
             'battle']['opponentMascot'], 'ca-map')

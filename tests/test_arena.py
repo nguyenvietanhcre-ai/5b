@@ -5,8 +5,8 @@ from backend.arena import Arena, ArenaError
 
 
 class ArenaTests(unittest.TestCase):
-    def test_question_timeouts_follow_grade_and_actual_question_difficulty(self):
-        for grade, expected in [(1, 60), (2, 60), (3, 120), (4, 120), (5, 240)]:
+    def test_all_grades_use_literal_sixty_seconds_and_exact_deadline(self):
+        for grade, expected in [(1,60),(2,60),(3,60),(4,60),(5,60)]:
             with self.subTest(grade=grade):
                 arena = Arena()
                 questions = [{'id':str(i),'text':'Câu thử','answer':'2','options':['1','2'],
@@ -35,7 +35,7 @@ class ArenaTests(unittest.TestCase):
                 self.assertEqual(at(deadline + 2.99)['index'], 0)
                 second = at(deadline + 3)
                 self.assertEqual(second['index'], 1)
-                self.assertEqual(second['deadline'], (deadline + 3 + (180 if grade==5 else expected)) * 1000)
+                self.assertEqual(second['deadline'], (deadline + 3 + 60) * 1000)
 
     def test_long_match_lifetime_covers_all_rounds(self):
         arena = Arena()
@@ -46,11 +46,11 @@ class ArenaTests(unittest.TestCase):
             friend = arena.handle({'action':'join','name':'Bạn','grade':5,'code':owner['code']})
             arena.handle({**owner,'action':'accept'})
         room = arena.rooms[owner['code']]
-        self.assertEqual(room['expiresAt'] - room['created'], 20 * (240 + 3) + 300 + 30 + 3 + 300)
-        room.update(status='playing', deadline=3240)
+        self.assertEqual(room['expiresAt'] - room['created'], 20 * (60 + 6) + 300 + 30 + 3 + 120)
+        room.update(status='playing', deadline=2360)
         for player in room['players'].values():
-            player['seen'] = 3000
-        with patch('backend.arena.time.time', return_value=3000):
+            player['seen'] = 2300
+        with patch('backend.arena.time.time', return_value=2300):
             self.assertEqual(arena.handle({**owner,'action':'state'})['status'], 'playing')
 
     def setUp(self):
@@ -63,8 +63,15 @@ class ArenaTests(unittest.TestCase):
         self.call(self.owner)
 
     def advance(self):
+        self.settle_defense()
         self.arena.rooms[self.owner['code']]['nextAt']=time.time()-1
         return self.call(self.owner)
+
+    def settle_defense(self, player=None):
+        room=self.arena.rooms[self.owner['code']]
+        if room.get('defenseUntil') and not room['resolved']:
+            room['defenseUntil']=time.time()-0.001
+        return self.call(player or self.owner)
 
     def call(self, player, action="state", **values):
         return self.arena.handle({**player, "action": action, **values})
@@ -92,7 +99,7 @@ class ArenaTests(unittest.TestCase):
         self.assertEqual(early['status'], 'preparing')
         self.assertIsNone(room['players'][owner['token']]['answer'])
         started = at(1003)['battle']
-        self.assertEqual(started['deadline'], 1243000)
+        self.assertEqual(started['deadline'], 1063000)
         self.assertEqual(started['roundOutcome'], 'waiting')
         self.assertIsNone(started['roundReason'])
 
@@ -103,7 +110,7 @@ class ArenaTests(unittest.TestCase):
         at(1003, friend)
         started = 1003
         for index in range(20):
-            duration = 240 if index == 0 else 180
+            duration = 60
             deadline = started + duration
             # Neither browser has to submit or poll while reading a question.
             self.assertFalse(at(deadline - 0.001)['battle']['resolved'])
@@ -134,11 +141,11 @@ class ArenaTests(unittest.TestCase):
         at(1000, action='accept')
         at(1003)
         at(1003, friend)
-        self.assertEqual(room['disconnectAfter'], 300)
-        for clock in (1064, 1124, 1184):
+        self.assertEqual(room['disconnectAfter'], 120)
+        for clock in (1030,1050,1062):
             self.assertEqual(at(clock)['status'], 'playing')
-        self.assertTrue(at(1243)['battle']['resolved'])
-        self.assertEqual(at(1246, friend)['battle']['index'], 1)
+        self.assertTrue(at(1063)['battle']['resolved'])
+        self.assertEqual(at(1066, friend)['battle']['index'], 1)
 
         # The returning browser's request renews its own presence before the
         # old last-seen value is considered, even beyond the grace period.
@@ -146,11 +153,11 @@ class ArenaTests(unittest.TestCase):
         at(1000, action='accept')
         at(1003)
         at(1003, friend)
-        for clock in (1064, 1124, 1184, 1243, 1303):
+        for clock in (1033,1063,1093,1123):
             self.assertEqual(at(clock)['status'], 'playing')
-        returned = at(1303.001, friend)
+        returned = at(1123.001, friend)
         self.assertEqual(returned['status'], 'playing')
-        self.assertEqual(room['players'][friend['token']]['seen'], 1303.001)
+        self.assertEqual(room['players'][friend['token']]['seen'], 1123.001)
         self.assertFalse(room['interrupted'])
 
     def test_gone_opponent_interrupts_after_bounded_grace_without_reward(self):
@@ -158,13 +165,13 @@ class ArenaTests(unittest.TestCase):
         at(1000, action='accept')
         at(1003)
         at(1003, friend)
-        for clock in (1063, 1123, 1183, 1243, 1303):
+        for clock in (1033,1063,1093,1123):
             self.assertEqual(at(clock)['status'], 'playing')
-        result = at(1303.001)['result']
+        result = at(1123.001)['result']
         self.assertEqual(result['outcome'], 'left')
         self.assertEqual(result['points'], 0)
         self.assertTrue(room['interrupted'])
-        self.assertEqual(at(1304, friend)['result']['points'], 0)
+        self.assertEqual(at(1124, friend)['result']['points'], 0)
 
     def test_expired_abandoned_room_cannot_be_revived_by_returning_player(self):
         arena, _, _, room, at = self.timed_pair()
@@ -190,6 +197,7 @@ class ArenaTests(unittest.TestCase):
         self.advance()
         question = room['questions'][1]
         self.call(self.owner, 'answer', index=1, answer=question['answer'])
+        self.settle_defense()
         opponent = self.call(self.friend)['battle']
         self.assertEqual((opponent['roundOutcome'], opponent['roundReason']), ('opponent', 'correct'))
         self.assertNotIn('answer', opponent['questions'][1])
@@ -239,10 +247,11 @@ class ArenaTests(unittest.TestCase):
         self.assertEqual(at(1009, friend, action='emote', emote=5)['battle']['myEmote'], 5)
 
     def test_emote_cooldown_and_bubble_survive_question_transition(self):
-        _, _, _, _, at = self.timed_pair()
+        _, _, friend, _, at = self.timed_pair()
         at(1000, action='accept')
         at(1003)
         at(1003, action='emote', emote=1)
+        at(1003.4, friend, action='answer', index=0, answer='1')
         at(1003.5, action='answer', index=0, answer='2')
         next_round = at(1006.5)['battle']
         self.assertEqual(next_round['index'], 1)
@@ -291,8 +300,9 @@ class ArenaTests(unittest.TestCase):
         with patch.object(self.arena.random, 'choice', side_effect=spells) as draw:
             for index, spell in enumerate(spells):
                 answer = room['questions'][index]['answer']
-                hit = self.call(self.owner, 'answer', index=index, answer=answer)['battle']['lastAttack']
-                self.assertEqual(set(hit), {'id', 'spell', 'index', 'attacker'})
+                self.call(self.owner, 'answer', index=index, answer=answer)
+                hit = self.settle_defense()['battle']['lastAttack']
+                self.assertEqual(set(hit), {'id', 'spell', 'index', 'attacker', 'damage', 'defended'})
                 self.assertEqual((hit['spell'], hit['index'], hit['attacker']), (spell, index, 'me'))
                 self.assertNotIn(hit['id'], attack_ids)
                 attack_ids.add(hit['id'])
@@ -318,7 +328,7 @@ class ArenaTests(unittest.TestCase):
         room = self.arena.rooms[self.owner['code']]
         with patch.object(self.arena.random, 'choice', return_value='vine') as draw:
             with self.assertRaises(ArenaError):
-                self.call(self.owner, 'answer', index=0, answer='not-an-option')
+                self.call(self.owner, 'answer', index=0, answer='')
             question = room['questions'][0]
             wrong = next(option for option in question['options'] if option != question['answer'])
             self.call(self.owner, 'answer', index=0, answer=wrong)
@@ -331,7 +341,8 @@ class ArenaTests(unittest.TestCase):
             self.assertIsNone(self.call(self.owner)['battle']['lastAttack'])
             draw.assert_not_called()
             self.advance()
-            hit = self.call(self.owner, 'answer', index=2, answer=room['questions'][2]['answer'])['battle']['lastAttack']
+            self.call(self.owner, 'answer', index=2, answer=room['questions'][2]['answer'])
+            hit = self.settle_defense()['battle']['lastAttack']
             self.advance()
             room['deadline'] = time.time() - 0.001
             self.call(self.owner)
@@ -365,6 +376,9 @@ class ArenaTests(unittest.TestCase):
         self.call(self.owner, "answer", index=0, answer=answer)
         self.call(self.owner, "answer", index=0, answer=answer)
         view = self.call(self.friend)["battle"]
+        self.assertEqual(view['hp'],100)
+        self.assertFalse(view['resolved'])
+        view = self.settle_defense(self.friend)['battle']
         self.assertEqual(view["hp"], 80)
         self.assertTrue(view["resolved"])
         self.assertNotIn("answer", view["questions"][0])

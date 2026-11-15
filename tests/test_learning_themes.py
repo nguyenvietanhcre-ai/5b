@@ -46,7 +46,7 @@ class LearningThemeTests(unittest.TestCase):
 
     def test_all_themes_persist_through_logout_new_session_and_preserve_learning(self):
         client, initial, login, password = self.user()
-        self.assertEqual(initial['state']['theme'], 'garden-adventure')
+        self.assertEqual(initial['state']['theme'], 'clay-sprout')
         lesson = initial['lessons'][0]['id']
         completed = client.call(f'lessons/{lesson}/complete', {})['state']['completed']
         for theme in sorted(LEARNING_THEMES):
@@ -134,10 +134,14 @@ class LearningThemeTests(unittest.TestCase):
             for table in tables:
                 with self.subTest(table=table):
                     selected = ','.join('"' + name + '"' for name in columns[table])
-                    self.assertEqual(rows[table], [tuple(row) for row in db.execute('SELECT ' + selected + ' FROM "' + table + '"')])
+                    where = " WHERE name<>'premium'" if table == 'system_settings' else ''
+                    self.assertEqual(rows[table], [tuple(row) for row in db.execute('SELECT ' + selected + ' FROM "' + table + '"' + where)])
+                    if table == 'system_settings':
+                        self.assertEqual(db.execute("SELECT count(*) FROM system_settings WHERE name='premium'").fetchone()[0], 1)
             preference = db.execute('SELECT * FROM learning_preferences WHERE student_id=?', (sid,)).fetchone()
             self.assertEqual(preference['last_lesson'], 'legacy-lesson')
-            self.assertEqual(preference['theme'], DEFAULT_THEME)
+            # Historical0017 schema is immutable; its old stored values survive.
+            self.assertEqual(preference['theme'], 'garden-adventure')
             self.assertEqual(db.execute("SELECT count(*) FROM schema_migrations WHERE name='0017_learning_themes.sql'").fetchone()[0], 1)
             self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
             self.assertEqual(db.execute('PRAGMA foreign_key_check').fetchall(), [])

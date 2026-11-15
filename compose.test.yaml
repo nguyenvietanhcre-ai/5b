@@ -1,7 +1,14 @@
 services:
   web:
+    image: mam-toan:test
+    build:
+      target: test
     tmpfs:
       - /tmp
       - /app/work:uid=65532,gid=65532
     volumes:
       - ./tests:/app/tests:ro
+      - ./qa-inputs:/app/qa-inputs:ro
+      - ./round8-inputs:/app/round8-inputs:ro
+      - ./pilot-inputs:/app/pilot-inputs:ro
+      - ./restructure-inputs:/app/restructure-inputs:ro

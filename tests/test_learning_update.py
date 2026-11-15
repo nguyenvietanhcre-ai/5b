@@ -42,8 +42,10 @@ class LearningUpdateTests(unittest.TestCase):
             self.assertEqual(caught.exception.status, 429)
             c.call('exams', {'requestKey':'combined-key','category':'combined'})
             with self.assertRaises(APIError): c.call('exams', {'requestKey':'combined-again','category':'combined'})
-            for i in range(5): c.call('bot/start', {'requestKey':f'bot-key-{i}'})
-            c.call('bot/start', {'requestKey':'bot-key-0'})
+            for i in range(5):
+                started=c.call('bot/start', {'requestKey':f'bot-key-{i}'})
+                self.assertEqual(c.call('bot/start', {'requestKey':f'bot-key-{i}'})['gameClaim']['claimId'],started['gameClaim']['claimId'])
+                c.call('game-claim',{'action':'release','claimId':started['gameClaim']['claimId'],'reason':'finish'})
             with self.assertRaises(APIError): c.call('bot/start', {'requestKey':'bot-key-5'})
         with patch('backend.learning_update.now', return_value=day.replace(hour=17, minute=0)):
             c.call('exams', {'requestKey':'tomorrow-key','count':3,'topic':'decimal'})
@@ -100,9 +102,9 @@ class LearningUpdateTests(unittest.TestCase):
         with self.assertRaises(APIError): c.call('exams', {'requestKey':'school-free-key','category':'school','school':'cau-giay'})
         c.call('dev/upgrade', {'requestKey':secrets.token_hex(12)})
         self.assertIn('Phiếu',c.call('materials')['title'])
-        exam = c.call('exams', {'requestKey':'school-vip-key','category':'school','school':'cau-giay'})['exam']
-        self.assertIn('Mẫu tự biên soạn', exam['title'])
-        self.assertNotIn('answer',exam['questions'][0])
+        with self.assertRaises(APIError) as caught:
+            c.call('exams', {'requestKey':'school-vip-key','category':'school','school':'cau-giay'})
+        self.assertEqual(caught.exception.status,403)
         self.assertEqual(len([l for l in c.call('session')['lessons'] if l['week']==c.call('session')['state']['week']+1]),3)
 
     def test_public_challenge_acceptance_countdown_cancel_and_limits(self):
@@ -112,9 +114,8 @@ class LearningUpdateTests(unittest.TestCase):
             room = first.call('arena', {'action':'create','public':True})
             self.assertIn(room['code'],[r['code'] for r in second.call('arena', {'action':'list'})['rooms']])
             join = second.call('arena', {'action':'join','code':room['code']})
-            self.assertTrue(first.call('arena', {'action':'state',**room})['host'])
-            self.assertFalse(second.call('arena', {'action':'state',**join})['host'])
-            first.call('arena', {'action':'accept',**room})
+            self.assertEqual(first.call('arena', {'action':'state',**room})['status'],'preparing')
+            self.assertEqual(second.call('arena', {'action':'state',**join})['status'],'preparing')
             runtime = self.server.arena.rooms[room['code']]
             answer = runtime['questions'][0]['answer']
             first.call('arena', {'action':'answer',**room,'answer':answer,'index':0})
@@ -126,6 +127,8 @@ class LearningUpdateTests(unittest.TestCase):
             self.assertEqual(view['myEmote'],1)
             first.call('arena', {'action':'answer',**room,'answer':answer,'index':0})
             self.assertEqual(first.call('arena', {'action':'next',**room,'index':0})['battle']['index'],0)
+            runtime['defenseUntil']=time.time()-1
+            first.call('arena', {'action':'state',**room})
             runtime['nextAt']=0
             self.assertEqual(first.call('arena', {'action':'state',**room})['battle']['index'],1)
             # Finish normally: this test checks the daily match quota, while
@@ -133,6 +136,8 @@ class LearningUpdateTests(unittest.TestCase):
             for index in range(1, 5):
                 first.call('arena', {'action':'answer',**room,'index':index,
                                     'answer':runtime['questions'][index]['answer']})
+                runtime['defenseUntil']=time.time()-1
+                first.call('arena', {'action':'state',**room})
                 runtime['nextAt'] = 0
                 completed = first.call('arena', {'action':'state',**room})
             self.assertTrue(completed['result']['completed'])
@@ -147,8 +152,8 @@ class LearningUpdateTests(unittest.TestCase):
         runtime=self.server.arena.rooms[room['code']]
         runtime['created']=time.time()-301
         self.assertEqual(a.call('arena',{'action':'state',**room})['status'],'cancelled')
-        room=a.call('arena',{'action':'quick'})
-        join=b.call('arena',{'action':'quick'})
+        room=a.call('arena',{'action':'create','public':False})
+        join=b.call('arena',{'action':'join','code':room['code']})
         self.assertEqual(room['code'],join['code'])
         self.server.arena.rooms[room['code']]['challengeUntil']=0
         self.assertEqual(a.call('arena',{'action':'state',**room})['status'],'cancelled')

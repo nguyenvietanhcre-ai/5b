@@ -24,8 +24,8 @@ from .nickname_policy import safe_nickname, validate_nickname
 VN = timezone(timedelta(hours=7))
 COOKIE = '5bmath_session'
 ITERATIONS = 600_000
-DEFAULT_THEME = 'garden-adventure'
-LEARNING_THEMES = frozenset((DEFAULT_THEME, 'morning-garden', 'crayon-workshop',
+DEFAULT_THEME = 'clay-sprout'
+LEARNING_THEMES = frozenset(('garden-adventure', 'morning-garden', 'crayon-workshop',
                             'clay-sprout', 'garden-notebook'))
 MASCOT_NAMES = {'voi': 'Voi', 'sprout': 'Mầm Sách', 'fox': 'Cáo Nâu', 'cat': 'Mèo', 'rabbit': 'Thỏ', 'gau': 'Gấu'}
 MASCOT_NAMES['sparrow'] = 'Chim sẻ'
@@ -169,12 +169,21 @@ def academic():
     return year, week
 
 
-def seed_catalog(path):
-    catalog = json.loads(Path(__file__).with_name('learning-catalog.json').read_text(encoding='utf-8'))
+def initialize_catalog(path):
+    """Initialize system reference data without creating or editing learning content."""
     with connect(path, True) as db:
         for name in MASCOT_NAMES.values():
             db.execute('INSERT OR IGNORE INTO mascots(name) VALUES (?)', (name,))
-        db.execute('INSERT OR IGNORE INTO mascot_levels(level,min_xp) VALUES (1,1000)')
+        db.executemany('INSERT OR IGNORE INTO mascot_levels(level,min_xp) VALUES (?,?)', [(n,(n-1)*20) for n in range(1,16)])
+
+
+def seed_catalog(path):
+    """Explicit test/demo fixture only. Never call from application startup."""
+    initialize_catalog(path)
+    catalog = json.loads(Path(__file__).with_name('learning-catalog.json').read_text(encoding='utf-8'))
+    with connect(path, True) as db:
+        from .content_retirement import retired
+        if retired(db,5):raise APIError('Kho lớp5 đã ngừng cấp; không tái sinh mẫu cũ.',409)
         # Three actual reading/revision lessons for next week, reusing the
         # self-authored bank. Stable IDs retain progress as the week changes.
         future=[]
@@ -250,15 +259,21 @@ def limit_auth(handler):
         attempts.append(clock)
 
 
+def student_cookie_name(handler):
+    # Trusted server configuration only. Product startup leaves this unset.
+    return getattr(getattr(handler, 'server', None), 'student_cookie_name', COOKIE)
+
+
 def read_session(handler, db):
     cookie = SimpleCookie()
     try:
         cookie.load(handler.headers.get('Cookie', ''))
-        token = cookie[COOKIE].value if COOKIE in cookie else ''
+        name = student_cookie_name(handler)
+        token = cookie[name].value if name in cookie else ''
     except Exception:
         token = ''
     digest = hashlib.sha256(token.encode()).hexdigest()
-    return db.execute('SELECT s.*, a.birth_year, a.invite_code, a.vip_expires_at, '
+    return db.execute('SELECT s.*, a.birth_year, a.invite_code, a.vip_expires_at, a.vip_plus_expires_at, '
                       'p.id student_id,p.full_name FROM auth_sessions s JOIN accounts a ON a.id=s.account_id '
                       'JOIN students p ON p.account_id=a.id WHERE s.token_hash=? AND s.expires_at>? '
                       'AND a.status=\'active\' AND p.status=\'active\'', (digest, stamp())).fetchone()
@@ -269,7 +284,7 @@ def issue_session(handler, db, account_id):
     db.execute('DELETE FROM auth_sessions WHERE expires_at<=?', (stamp(),))
     db.execute('INSERT INTO auth_sessions VALUES (?,?,?,?,?)',
                (hashlib.sha256(token.encode()).hexdigest(), account_id, csrf, stamp(), stamp(now()+timedelta(days=7))))
-    handler.api_headers = {'Set-Cookie': session_cookie(COOKIE, token, 604800)}
+    handler.api_headers = {'Set-Cookie': session_cookie(student_cookie_name(handler), token, 604800)}
     return db.execute('SELECT s.*,a.birth_year,a.invite_code,a.vip_expires_at,p.id student_id,p.full_name '
                       'FROM auth_sessions s JOIN accounts a ON a.id=s.account_id JOIN students p ON p.account_id=a.id '
                       'WHERE s.token_hash=?', (hashlib.sha256(token.encode()).hexdigest(),)).fetchone()
@@ -319,7 +334,12 @@ def register(handler, db, body, credential=None):
     ensure_grade(db, sid, birth)
     mascot = db.execute('SELECT id FROM mascots WHERE name=\'Mầm Sách\'').fetchone()[0]
     db.execute('INSERT INTO student_companions(student_id,mascot_id) VALUES (?,?)', (sid,mascot))
-    db.execute('INSERT INTO learning_preferences(student_id) VALUES (?)', (sid,))
+    # Historical migration fixtures may register before0017 adds the column.
+    # Current initialized databases always write the new default explicitly.
+    if any(column['name']=='theme' for column in db.execute('PRAGMA table_info(learning_preferences)')):
+        db.execute('INSERT INTO learning_preferences(student_id,theme) VALUES (?,?)', (sid,DEFAULT_THEME))
+    else:
+        db.execute('INSERT INTO learning_preferences(student_id) VALUES (?)', (sid,))
     if inviter:
         db.execute('INSERT INTO account_referrals(inviter_account_id,invitee_account_id,invite_code,registered_at) VALUES (?,?,?,?)',
                    (inviter[0],aid,invite.strip().upper(),stamp()))
@@ -380,7 +400,7 @@ def ensure_grade(db, sid, birth):
 
 
 def owned_attempt(db, session, exam_id):
-    row = db.execute('SELECT a.*,e.title,e.exam_code,e.grade_level FROM exam_attempts a JOIN exams e ON e.id=a.exam_id '
+    row = db.execute('SELECT a.*,e.title,e.exam_code,e.grade_level,e.response_mode FROM exam_attempts a JOIN exams e ON e.id=a.exam_id '
                      'WHERE a.exam_id=? AND a.student_id=?', (exam_id,session['student_id'])).fetchone()
     if not row:
         raise APIError('Không tìm thấy bài làm của tài khoản này.',404)
@@ -407,20 +427,37 @@ def exam_view(db, attempt, summary=False):
         # options are immutable per exam, not a client-generated shuffle.
         options = json.loads(row[1])
         question = {'id':str(row['position']),'text':blocks_text(prompt),'prompt':prompt,
-                    'options':options,'topicTitle':row['topic_title']}
+                    'topicTitle':row['topic_title']}
+        from .answers import response_mode
+        from .practice_catalogue import item_pin
+        pin=item_pin(db,attempt['exam_id'],row['position'])
+        item_mode=pin['response_mode'] if pin else response_mode(json.loads(row['grading_rule_json']),attempt['response_mode'])
+        if pin:question.update(contentKey=pin['content_key'],topicTitle=pin['topic_title'])
+        question['responseMode']=item_mode
+        if item_mode == 'choice':
+            question['options'] = options
+        else:
+            question['answerKind'] = json.loads(row['grading_rule_json']).get('answerKind', 'auto')
+            if db.execute("SELECT 1 FROM sqlite_master WHERE name='mcq_versions'").fetchone():
+                metadata=db.execute('SELECT metadata_json FROM mcq_versions WHERE version_id=?',(row['id'],)).fetchone()
+                guide=json.loads(metadata[0]).get('inputGuide') if metadata else None
+                if guide:question['inputGuide']={k:guide[k] for k in ('instruction','labels','units','separator')}
         if submitted:
             rule = json.loads(row['grading_rule_json'])
             steps = json.loads(row['solution_steps_json'])
             question.update(answer=rule['answer'],steps=[blocks_text([b]) for b in steps],
                             solution=steps,thinking=blocks_text(json.loads(row['hints_json'])))
+            awarded = db.execute('SELECT awarded_points FROM exam_answers WHERE attempt_id=? AND position=?', (attempt['id'],row['position'])).fetchone()
+            question['correct'] = bool(awarded[0]) if awarded else False
         questions.append(question)
     assets = [dict(r) for r in db.execute('SELECT DISTINCT m.* FROM media_assets m JOIN question_assets a ON a.asset_id=m.id '
                                          'JOIN exam_items i ON i.question_version_id=a.question_version_id WHERE i.exam_id=?', (attempt['exam_id'],))]
     start = datetime.fromisoformat(attempt['started_at'].replace('Z','+00:00'))
     due = datetime.fromisoformat(attempt['due_at'].replace('Z','+00:00'))
     result = {'id':str(attempt['exam_id']),'code':attempt['exam_code'],'title':attempt['title'],
-              'grade':attempt['grade_level'],'questions':questions,'assets':assets,'answers':answers,
+              'grade':attempt['grade_level'],'responseMode':attempt['response_mode'],'questions':questions,'assets':assets,'answers':answers,
               'index':attempt['cursor'],'startedAt':int(start.timestamp()*1000),'expiresAt':int(due.timestamp()*1000)}
+    result['reference']='pilot:'+str(attempt['exam_id']) if db.execute("SELECT 1 FROM sqlite_master WHERE name='pilot_environment'").fetchone() else 'main:'+str(attempt['exam_id'])
     if submitted:
         end = datetime.fromisoformat(attempt['submitted_at'].replace('Z','+00:00'))
         result.update(submittedAt=attempt['submitted_at'],correct=attempt['earned_points'],
@@ -439,7 +476,12 @@ def submit(db, attempt):
                        (attempt['id'],attempt['exam_id'])).fetchall()
     for row in rows:
         answer = row['answer'] or ''
-        correct = int(answer == str(json.loads(row['grading_rule_json'])['answer']))
+        from .answers import matches, response_mode
+        rule = json.loads(row['grading_rule_json'])
+        from .practice_catalogue import item_pin
+        pin=item_pin(db,attempt['exam_id'],row['position'])
+        mode=pin['response_mode'] if pin else response_mode(rule,attempt['response_mode'])
+        correct = int(matches(answer, rule) if mode == 'typed' else answer == str(rule['answer']))
         earned += correct
         db.execute('INSERT INTO exam_answers VALUES (?,?,?,?,?)',
                    (attempt['id'],attempt['exam_id'],row['position'],packed({'answer':answer}),correct))
@@ -460,6 +502,8 @@ def create_exam(db, session, body):
                   (session['student_id'],stamp(now()-timedelta(hours=1)))).fetchone()[0] >= 60:
         raise APIError('Em đã tạo nhiều đề. Hãy tiếp tục bài đang làm trước.',429)
     grade, ayid = ensure_grade(db,session['student_id'],session['birth_year'])
+    from .content_retirement import retired
+    if retired(db,grade):raise APIError('Kho lớp5 cũ đã ngừng cấp đề mới; em hãy dùng Luyện tập mới.',503)
     topic = body.get('topic','')
     if not isinstance(topic,str) or len(topic)>60:
         raise APIError('Chuyên đề không hợp lệ.')
@@ -471,10 +515,10 @@ def create_exam(db, session, body):
         raise APIError('Chọn chuyên đề hoặc chương trình trên lớp.')
     if category=='combined' and difficulty==3: raise APIError('Đề tổng hợp có ba mức: Cơ bản, Nâng cao, Khó.')
     if category=='school':
-        if membership(db,session)=='Free': raise APIError('Đề theo trường dành cho VIP và SVip.',403)
+        if membership(db,session) not in ('VIP+','SVip'): raise APIError('Đề theo trường dành cho VIP+.',403)
         if grade!=5: raise APIError('Đề theo trường chỉ dành cho khối 5.',403)
         if body.get('school') not in ('cau-giay','ngoai-ngu','ntt'): raise APIError('Trường không hợp lệ.')
-        difficulty=1
+        raise APIError('Bộ đề theo trường đang được biên tập; chưa cấp đề hoặc trừ lượt.',503)
     max_week = academic()[1] if body.get('maxWeek') is not None else 35
     exact_week = body.get('week')
     if exact_week is not None and (type(exact_week) is not int or exact_week not in range(1,academic()[1]+1)):
@@ -500,6 +544,7 @@ def create_exam(db, session, body):
     eid = db.execute('INSERT INTO exams(exam_code,title,grade_level,duration_minutes,status,academic_year_id,owner_student_id,mode,week_limit,created_at) '
                      'VALUES (?,?,?,?,\'published\',?,?,\'test\',?,?)',
                      (code,title,grade,minutes,ayid,session['student_id'],max_week,stamp())).lastrowid
+    db.execute("UPDATE exams SET response_mode='typed' WHERE id=?", (eid,))
     for position, qid in enumerate(selected,1):
         options = json.loads(db.execute('SELECT options_json FROM question_versions WHERE id=?',(qid,)).fetchone()[0])
         secrets.SystemRandom().shuffle(options)
@@ -581,7 +626,7 @@ def identity_view(db, session):
             'account':{'id':session['account_id'],'login':profile['login_identifier']},'partial':True,
             'state':{'birthYear':session['birth_year'],'completed':completed,
                      'mascot':mascot_code(companion['name'] if companion else None),
-                     'points':companion['xp'] if companion else 1000,
+                     'points':companion['xp'] if companion else 0,
                      'theme':theme if theme in LEARNING_THEMES else DEFAULT_THEME}}
 
 
@@ -599,6 +644,8 @@ def state_view(db, session, review=False, read_only=False):
     membership = member_label(db,session)
     lessons = []
     for row in db.execute("SELECT l.*,t.client_key topic_client FROM lessons l LEFT JOIN topics t ON t.id=l.topic_id WHERE l.grade_id=? AND l.client_key IS NOT NULL AND l.publication_status='published' AND l.week_no<=? ORDER BY l.week_no,l.id",(grade,academic()[1]+1)):
+        from .content_retirement import retired
+        if retired(db,grade):continue
         lesson = lesson_payload(row)
         lesson['assets']=[dict(a) for a in db.execute('SELECT m.* FROM media_assets m JOIN lesson_assets a ON a.asset_id=m.id WHERE a.lesson_id=?',(row['id'],))]
         lessons.append(lesson)
@@ -606,7 +653,7 @@ def state_view(db, session, review=False, read_only=False):
         'SELECT l.client_key,l.grade_id,p.first_completed_at FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id '
         'WHERE p.student_id=? AND l.client_key IS NOT NULL',(sid,))}
     exams = {}
-    for row in db.execute('SELECT a.*,e.title,e.exam_code,e.grade_level FROM exam_attempts a JOIN exams e ON e.id=a.exam_id '
+    for row in db.execute('SELECT a.*,e.title,e.exam_code,e.grade_level,e.response_mode FROM exam_attempts a JOIN exams e ON e.id=a.exam_id '
                           'WHERE a.student_id=? ORDER BY a.id DESC LIMIT 100',(sid,)).fetchall():
         if not read_only and row['status']=='in_progress' and row['due_at']<=stamp():
             submit(db,row)
@@ -638,14 +685,15 @@ def state_view(db, session, review=False, read_only=False):
             battles[battle['id']]=battle
     from .system_settings import settings
     return {'authenticated':True,'csrf':session['csrf_token'],'features':settings(db),'arenaDiscipline':arena_discipline(db,sid),'name':safe_nickname(db.execute('SELECT full_name FROM students WHERE id=?',(sid,)).fetchone()[0]),
-            'account':{'id':aid,'login':current['login_identifier'],'membership':membership,'vipExpiresAt':current['vip_expires_at'],
+            'account':{'id':aid,'login':current['login_identifier'],'membership':membership,'vipExpiresAt':current['vip_expires_at'],'vipPlusExpiresAt':current['vip_plus_expires_at'],
                        'notifications':notification_page['rows'],'notificationUnreadCount':notification_page['unreadCount'],
                        'notificationTotal':notification_page['total'],'referrals':referral_result['rows'],
                        'referralTotal':referral_result['total'],'classes':classes if internal else [],'usage':usage(db,session),
                        'classroomUnread':unread_summary(db,session)},
+            'questionBankReady': bool(db.execute("SELECT 1 FROM questions q JOIN question_versions v ON v.question_id=q.id JOIN topics t ON t.id=q.topic_id WHERE q.grade_id=? AND v.status='published' AND t.client_key IS NOT NULL LIMIT 1", (grade,)).fetchone()),
             'lessons':lessons,'state':{'birthYear':session['birth_year'],'inviteCode':session['invite_code'],
             'invitedBy':invited[0] if invited else '', 'grade':grade,'week':academic()[1],
-            'mascot':mascot_code(companion['name'] if companion else None),'points':companion['xp'] if companion else 1000,
+            'mascot':mascot_code(companion['name'] if companion else None),'points':companion['xp'] if companion else 0,
             'theme':theme if theme in LEARNING_THEMES else DEFAULT_THEME,
             'completed':completed,'exams':exams,'battles':battles,'activity':activity,'lastLesson':preferences['last_lesson'] if preferences else '', 'activeExam':active}}
 
@@ -683,7 +731,7 @@ def leaderboard(db, session, query):
                       (start,ayid,scope,grade,scope,session['student_id'])).fetchall()
     return {'rows':[{'rank':i+1,'name':safe_nickname(r['full_name']),'value':round(r['value']/3600,2) if kind=='activity' else r['value'],
                      'mine':r['id']==session['student_id'],'class':r['class_name'] if scope=='class' else 'Lớp '+str(r['grade_id']),
-                     'mascot':mascot_code(r['mascot']),'level':(r['xp']-1000)//20+1,'xp':r['xp'],
+                     'mascot':mascot_code(r['mascot']),'level':min(15,max(0,r['xp'])//20+1),'xp':r['xp'],
                      'wins':r['wins'],'losses':r['losses']} for i,r in enumerate(rows)]}
 
 
@@ -776,7 +824,7 @@ def _settle_arena_results(db, arena):
                 db.execute('DELETE FROM daily_usage WHERE student_id=? AND category=\'human\' AND request_key=?',
                            (sid, room['id']))
             xp = db.execute('SELECT xp FROM student_companions WHERE student_id=?', (sid,)).fetchone()[0]
-            delta = max(1000, xp + trusted['points']) - xp
+            delta = max(0, xp + trusted['points']) - xp
             p = db.execute('SELECT id FROM duel_players WHERE duel_id=? AND student_id=?', (did, sid)).fetchone()
             db.execute('INSERT OR IGNORE INTO xp_events(student_id,duel_player_id,delta,awarded_at) VALUES (?,?,?,?)',
                        (sid, p[0], delta, stamp()))
@@ -784,7 +832,7 @@ def _settle_arena_results(db, arena):
             db.execute('UPDATE duel_players SET outcome=?,hp=? WHERE id=?',
                        (trusted['outcome'], player['hp'], p[0]))
             penalty['xpDelta'] = delta
-            trusted.update(points=delta, completed=not incomplete,
+            trusted.update(points=delta, xpBefore=xp, xpAfter=xp+delta, completed=not incomplete,
                            penalty=penalty, quotaRefunded=refund)
             db.execute('UPDATE arena_members SET result_json=? WHERE token_hash=?', (packed(trusted), digest))
             changed = True
@@ -823,34 +871,165 @@ def _arena_preflight(db, arena, session, credentials=None):
         db.execute('BEGIN IMMEDIATE')
 
 
+def qa_arena_source(handler, db):
+    """Server-only opt-in; body flags and production/8765/LAN cannot enable it."""
+    source=getattr(handler.server,'qa_arena_source',None)
+    if source is None or getattr(handler.server,'qa_arena_enabled',False) is not True:return None
+    address=getattr(handler.server,'server_address',('',0))
+    if not isinstance(address,tuple) or address[0] not in ('127.0.0.1','::1') or type(address[1]) is not int or address[1]==8765 or not 1024<=address[1]<=65535:return None
+    if getattr(source,'qa_only',False) is not True or getattr(source,'purpose','')!='arena-duel-QA':return None
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='group_games_qa_owner'").fetchone():return None
+    marker=db.execute('SELECT label FROM group_games_qa_owner').fetchone()
+    return source if marker and marker[0]=='group-games-qa-new-synthetic-only' else None
+
+
+def with_qa_arena_metadata(handler,db,value):
+    if getattr(handler.server,'native_python_backend',False) is True or getattr(handler.server,'cloud_pdf_enabled',False) is True:
+        from .practice_export_api import available
+        value={**value,'practiceExport':{'enabled':available(handler),'scope':'local-only','websiteLookupPublished':False}}
+    native=native_test_games(handler)
+    if native is not None:
+        return {**value,'arenaQuestionSource':native.metadata('pvp'),'arenaBotQuestionSource':native.metadata('bot')}
+    source=qa_arena_source(handler,db)
+    if source is not None:
+        value={**value,'arenaQuestionSource':source.metadata()}
+        bot=qa_arena_bot_source(handler,db)
+        if bot is not None:value['arenaBotQuestionSource']=bot.metadata()
+    return value
+
+
+def native_test_games(handler):
+    runtime=getattr(handler.server,'local_test_games',None)
+    return runtime if runtime is not None and runtime.allowed(handler) else None
+
+
+def qa_arena_bot_source(handler,db):
+    if qa_arena_source(handler,db) is None:return None
+    source=getattr(handler.server,'qa_arena_bot_source',None)
+    return source if getattr(source,'qa_only',False) is True and getattr(source,'purpose','')=='arena-bot-qa' else None
+
+
 def arena_request(handler, db, session, body):
+    # SQLite owns the writer before this lock. Keep the RAM admission and its
+    # durable membership/claims atomic, including exceptional persistence paths.
+    from copy import deepcopy
+    arena=handler.server.arena
+    snapshot={}
+    with arena.lock:
+        try:
+            result=_arena_request_locked(handler,db,session,body,snapshot)
+            # Native SQLite must commit while the compensating RAM snapshot and
+            # Arena lock still exist. Worker storage owns its transaction callback.
+            if isinstance(db,sqlite3.Connection):db.commit()
+            return result
+        except Exception:
+            if snapshot:
+                arena.rooms=snapshot['rooms']
+                arena.retired=snapshot['retired']
+            raise
+
+
+def _arena_request_locked(handler, db, session, body, snapshot):
     from .arena import ArenaError
+    from . import game_claims as claims
     from .learning_update import consume, usage
     arena = handler.server.arena
     action=body.get('action')
-    payload=dict(body)
+    payload={k:v for k,v in body.items() if not k.startswith('_')}
     grade,_=ensure_grade(db,session['student_id'],session['birth_year'])
     payload.update(name=safe_nickname(session['full_name']),grade=grade,
                    accountId=session['account_id'],difficulty=0)
     member = None
     entering = action in ('create', 'quick', 'join', 'challenge')
+    native=native_test_games(handler)
+    qa_source=native.arena if native is not None else qa_arena_source(handler,db)
+    # Source namespace is authoritative server configuration, never body data.
+    # LAN keeps the old provider while localhost test rooms stay isolated.
+    payload['sourcePool']='local-test' if native is not None else 'qa-separate' if qa_source is not None else 'legacy'
+    if entering and getattr(handler.server,'qa_arena_enabled',False) is True and qa_source is None:
+        raise APIError('Nguồn Đấu trí QA chưa được cấu hình an toàn.',503)
+    from .content_retirement import retired
+    if entering and retired(db,grade) and qa_source is None:raise APIError('Đấu trí lớp5 đang chờ ngân hàng mới; trận đang diễn và lịch sử được giữ.',503)
     if not entering and action != 'list':
         token=body.get('token')
         if not isinstance(token,str): raise APIError('Phiên phòng không hợp lệ.',403)
         member=db.execute('SELECT * FROM arena_members WHERE token_hash=? AND student_id=? AND revoked_at IS NULL',
                           (hashlib.sha256(token.encode()).hexdigest(),session['student_id'])).fetchone()
         if not member: raise APIError('Phòng không thuộc tài khoản đang đăng nhập.',403)
+        if action in ('leave','accept'):claims.guard_generation(handler,db,session,body,member['room_id'])
+        # Reject wrong-origin active requests before presence renewal/admission
+        # or quota consumption. Finished owner history remains readable below.
+        with arena.lock:
+            active_room=arena.rooms.get(body.get('code'))
+            if (active_room and active_room['status'] not in ('finished','cancelled') and action!='leave'
+                    and active_room.get('sourcePool','legacy')!=payload['sourcePool']):
+                raise APIError('Nguồn câu của phòng không mở ở địa chỉ truy cập này.',403)
+    presence_pool=payload['sourcePool']
+    if member and action=='leave':
+        with arena.lock:
+            owned_room=arena.rooms.get(body.get('code'))
+            if owned_room and owned_room['id']==member['room_id']:presence_pool=owned_room.get('sourcePool','legacy')
     _arena_preflight(db, arena, session,
-                     {'code': body.get('code'), 'token': body.get('token')} if member else None)
+                     {'code': body.get('code'), 'token': body.get('token'),'sourcePool':presence_pool} if member else None)
+    admission=None
+    if entering:
+        nonce,fingerprint,replayed=claims.begin(handler,db,session,'duel',action,body)
+        if replayed:return replayed
+        admission=(nonce,fingerprint)
+        with arena.lock:
+            candidates=list(arena.rooms.values())
+        eligible=[]
+        for candidate in candidates:
+            students=[db.execute('SELECT id FROM students WHERE account_id=?',(p['accountId'],)).fetchone() for p in candidate['players'].values()]
+            if claims.occupants_available(handler,db,'duel',candidate['id'],[s[0] for s in students if s]):eligible.append(candidate['id'])
+        # Public queues are consent to start. Skip ineligible hosts without
+        # changing their room, charging either player, or exposing the reason.
+        eligible_public=[]
+        for candidate in candidates:
+            if candidate['id'] not in eligible:continue
+            good=True
+            for player in candidate['players'].values():
+                record=db.execute('SELECT id student_id,account_id FROM students WHERE account_id=?',(player['accountId'],)).fetchone()
+                if not record:good=False;break
+                try:
+                    _require_arena_available(db,record['student_id'])
+                    budget=usage(db,record)['human']
+                    already=db.execute("SELECT 1 FROM daily_usage WHERE student_id=? AND category='human' AND request_key=?",(record['student_id'],candidate['id'])).fetchone()
+                    if not already and budget['limit'] is not None and budget['used']>=budget['limit']:good=False
+                except APIError:good=False
+            if good:eligible_public.append(candidate['id'])
+        payload['_eligibleRoomIds']=eligible_public
+        payload['_autoStartPublic']=False
+        payload['_quickRoomId']=None
+        if action=='quick':
+            compatible=[r for r in candidates if r['id'] in eligible_public and r['public'] and r['status']=='waiting' and len(r['players'])<2
+                        and (r['grade'],r['difficulty'],r['scope'],r.get('sourcePool','legacy'))==(grade,0,payload.get('scope','weekly'),payload['sourcePool'])]
+            selected=min(compatible,key=lambda r:(-len(r['players']),r['created'],r['id'])) if compatible else None
+            payload['_quickRoomId']=selected['id'] if selected else None
+        elif action=='join':
+            selected=arena.rooms.get(str(body.get('code','')).upper())
+        else:selected=None
+        if selected and selected['public'] and selected['status']=='waiting' and len(selected['players'])==1:
+            if selected['id'] not in eligible_public:raise APIError('Phòng chưa thể bắt đầu. Em hãy thử phòng khác.',409)
+            payload['_autoStartPublic']=True
+            # Both consumes roll back together with membership/claims on failure.
+            payload['_newPairCharges']=[]
+            for player in selected['players'].values():
+                record=db.execute('SELECT id student_id,account_id FROM students WHERE account_id=?',(player['accountId'],)).fetchone()
+                if not db.execute("SELECT 1 FROM daily_usage WHERE student_id=? AND category='human' AND request_key=?",(record['student_id'],selected['id'])).fetchone():payload['_newPairCharges'].append(record['student_id'])
+                consume(db,record,'human',selected['id'])
+            if not db.execute("SELECT 1 FROM daily_usage WHERE student_id=? AND category='human' AND request_key=?",(session['student_id'],selected['id'])).fetchone():payload['_newPairCharges'].append(session['student_id'])
+            consume(db,session,'human',selected['id'])
+            payload['_budgetRoomId']=selected['id']
     pet = db.execute('SELECT c.xp,m.name FROM student_companions c JOIN mascots m ON m.id=c.mascot_id WHERE c.student_id=?',
                      (session['student_id'],)).fetchone()
     outcomes = dict(db.execute("SELECT p.outcome,count(*) FROM duel_players p JOIN duels d ON d.id=p.duel_id "
                               "WHERE p.student_id=? AND d.status='completed' GROUP BY p.outcome", (session['student_id'],)))
-    xp = pet['xp'] if pet else 1000
-    payload['stats'] = {'xp':xp, 'level':(xp-1000)//20+1, 'wins':outcomes.get('win',0),
+    xp = pet['xp'] if pet else 0
+    payload['stats'] = {'xp':xp, 'level':min(15,max(0,xp)//20+1), 'wins':outcomes.get('win',0),
                         'losses':outcomes.get('lose',0), 'mascot':mascot_code(pet['name'] if pet else None)}
     if action == 'list':
-        result = arena.handle({'action': 'list', 'grade': grade, 'accountId': session['account_id']})
+        result = arena.handle({'action': 'list', 'grade': grade, 'accountId': session['account_id'],'sourcePool':payload['sourcePool']})
         return {**result, 'arenaDiscipline': arena_discipline(db, session['student_id'])}
     if entering:
         _require_arena_available(db, session['student_id'])
@@ -858,7 +1037,9 @@ def arena_request(handler, db, session, body):
         cached = db.execute('SELECT result_json FROM arena_members WHERE token_hash=?',
                             (member['token_hash'],)).fetchone()[0]
         if cached and action in ('state', 'leave', 'next', 'answer', 'emote'):
+            claims.sync_duel(db,arena)
             return {'status': 'finished', 'result': json.loads(cached),
+                    'gameClaim':claims.public(handler,db,claims._row(db,session['student_id'])),
                     'arenaDiscipline': arena_discipline(db, session['student_id'])}
         if action=='accept':
             with arena.lock:
@@ -866,13 +1047,16 @@ def arena_request(handler, db, session, body):
                 valid=room and room['status']=='challenged' and room['host']==token and time.time()<room['challengeUntil']
             if valid:
                 records = list(db.execute('SELECT m.student_id,s.account_id FROM arena_members m JOIN students s ON s.id=m.student_id WHERE m.room_id=?',(member['room_id'],)))
+                current=claims.current(handler,db,session)
+                if current and current['room_id']!=member['room_id']:claims.conflict(handler,db,session,row=current)
+                if not claims.occupants_available(handler,db,'duel',member['room_id'],[r['student_id'] for r in records]):raise APIError('Một người chơi đang có phòng khác cần khép lại trước.',409)
                 for record in records:
                     _require_arena_available(db, record['student_id'], session['student_id'])
                 for record in records:
                     consume(db,record,'human',member['room_id'])
     else:
         remaining=usage(db,session)['human']
-        if remaining['limit'] is not None and remaining['used']>=remaining['limit']:
+        if not payload.get('_budgetRoomId') and remaining['limit'] is not None and remaining['used']>=remaining['limit']:
             raise APIError('Em đã dùng hết 3 lượt đấu với bạn hôm nay. Vào Nâng cấp gói để tiếp tục.',429)
         code=body.get('code','')
         if isinstance(code,str) and action=='join':
@@ -887,15 +1071,23 @@ def arena_request(handler, db, session, body):
             with arena.lock:
                 if any(r['id'] in own and r['status']=='waiting' and r['public'] for r in arena.rooms.values()):
                     raise APIError('Em đang có phòng chờ. Hãy quay lại phòng đó hoặc rời phòng trước.')
+    from copy import deepcopy
+    snapshot.update(rooms=deepcopy(arena.rooms),retired=deepcopy(arena.retired))
     try:
         from .question_bank import arena_questions
-        result=arena.handle(payload, question_provider=lambda g,d,s: arena_questions(db,g,d,s,academic()[1]))
+        result=arena.handle(payload, question_provider=(qa_source.questions if qa_source is not None else lambda g,d,s: arena_questions(db,g,d,s,academic()[1])))
     except ArenaError as error:
         raise APIError(str(error),error.status)
     code=result.get('code') or body.get('code')
     with arena.lock:
         room=arena.rooms.get(code)
         if not room: raise APIError('Phòng đã hết hạn.',404)
+        if payload.get('_budgetRoomId'):
+            if room['id']!=payload['_budgetRoomId']:
+                # A candidate can expire at the exact clock boundary inside
+                # Arena cleanup. Undo only this attempt's fresh reservations.
+                for sid in payload['_newPairCharges']:
+                    db.execute("DELETE FROM daily_usage WHERE student_id=? AND category='human' AND request_key=?",(sid,payload['_budgetRoomId']))
         if action in ('create','quick','join'):
             existing=db.execute('SELECT duel_id FROM arena_members WHERE room_id=? LIMIT 1',(room['id'],)).fetchone()
             if existing:
@@ -920,6 +1112,16 @@ def arena_request(handler, db, session, body):
             if cached:
                 result['result'] = json.loads(cached)
     result['arenaDiscipline'] = arena_discipline(db, session['student_id'])
+    claims.sync_duel(db,arena)
+    if admission:
+        source=room.get('sourcePool','legacy')
+        row=claims.bind(handler,db,session,'duel','human',room['id'],source,{'code':room['code'],'resumeUrl':'/phong-dau/'},int(room['expiresAt']*1000))
+        for p in room['players'].values():
+            if p['accountId']==session['account_id']:continue
+            other=db.execute('SELECT id student_id,account_id FROM students WHERE account_id=?',(p['accountId'],)).fetchone()
+            if other and claims._row(db,other['student_id']) is None:claims.bind(handler,db,other,'duel','human',room['id'],source,{'code':room['code'],'resumeUrl':'/phong-dau/'},int(room['expiresAt']*1000))
+        return claims.remember(handler,db,session,*admission,row,result)
+    result['gameClaim']=claims.public(handler,db,claims._row(db,session['student_id']))
     return result
 
 
@@ -971,6 +1173,17 @@ def read_needs_maintenance(handler, path):
 def dispatch(handler, method, path, body=None):
     """Return payload, status. Header mutation is limited to the session cookie."""
     body = body or {}
+    if path in ('/api/v1/game-claim','/api/v1/bot/adopt'):
+        from .game_claims import dispatch as claim_dispatch
+        return claim_dispatch(handler,method,path,body)
+    if path in ('/api/v1/practice-export','/api/v1/practice-lookup'):
+        if getattr(handler.server,'native_python_backend',False) is not True and getattr(handler.server,'cloud_pdf_enabled',False) is not True:
+            raise APIError('PDF và tra cứu mã cục bộ chưa mở trên môi trường này.',503)
+        from .practice_export_api import dispatch as export_dispatch
+        return export_dispatch(handler,method,path,body)
+    if path.startswith('/api/v1/group-games'):
+        from .group_games import dispatch as group_games_dispatch
+        return group_games_dispatch(handler, method, path, body)
     if path.startswith('/api/v1/admissions'):
         from .admissions import dispatch as admissions_dispatch
         return admissions_dispatch(handler, method, path, body)
@@ -1005,6 +1218,11 @@ def dispatch(handler, method, path, body=None):
     write = method == 'POST' or method == 'GET' and not compact and read_needs_maintenance(handler, path)
     with connect(handler.server.database_path, write) as db:
         session = read_session(handler,db)
+        def snapshot(*args, **kwargs):
+            if not getattr(handler.server, 'free_vip_pilot', None):
+                return with_qa_arena_metadata(handler,db,state_view(*args, **kwargs))
+            from .free_vip_pilot import snapshot as pilot_snapshot
+            return with_qa_arena_metadata(handler,db,pilot_snapshot(handler, db, session, state_view(*args, **kwargs)))
         if path in ('/api/v1/auth/register','/api/v1/auth/login') and method=='POST':
             if path.endswith('/register'):
                 session = register(handler,db,body,credential)
@@ -1016,13 +1234,35 @@ def dispatch(handler, method, path, body=None):
                     from .staff_api import issue_session as issue_staff_session
                     return {**issue_staff_session(handler, db, account), 'principal': 'staff'}, 200
                 session = issue_session(handler,db,account['id'])
-            return (identity_view(db,session) if compact else state_view(db,session,review)),200
+            return (with_qa_arena_metadata(handler,db,identity_view(db,session)) if compact else snapshot(db,session,review)),200
         if path=='/api/v1/session' and method=='GET' and not session:
             return {'authenticated':False},200
         if not session:
             raise APIError('Em hãy đăng nhập để tiếp tục.',401)
         if method=='POST' and not hmac.compare_digest(handler.headers.get('X-CSRF-Token',''),session['csrf_token']):
             raise APIError('Phiên đăng nhập cần được tải lại.',403)
+        if method == 'POST' and re.fullmatch(r'/api/v1/premium/purchases/\d+/start',path):
+            from .exam_commerce import start_order
+            from .system_settings import require_feature
+            require_feature(db,'practice_open')
+            return start_order(db,session,int(path.split('/')[5])),200
+        if method == 'POST' and path == '/api/v1/premium/start':
+            from .premium_content import start_set
+            from .system_settings import require_feature
+            require_feature(db, 'practice_open')
+            return start_set(db, session, body), 200
+        if method == 'GET' and path == '/api/v1/premium':
+            from .premium_content import catalogue
+            return catalogue(db, session), 200
+        if method == 'GET' and re.fullmatch(r'/api/v1/premium/videos/\d+', path):
+            from .premium_content import video
+            return video(db, session, int(path.rsplit('/', 1)[1])), 200
+        pilot = None
+        if getattr(handler.server, 'free_vip_pilot', None):
+            from .free_vip_pilot import guard, metadata, create_exam as pilot_exam
+            pilot = guard(handler, db, session, path)
+        if pilot and method == 'GET' and path == '/api/v1/pilot/sets':
+            return metadata(db, session, pilot), 200
         from .system_settings import require_feature
         if method=='POST' and path=='/api/v1/exams':
             require_feature(db, 'practice_open')
@@ -1037,10 +1277,10 @@ def dispatch(handler, method, path, body=None):
         if method=='GET' and path in ('/api/v1/session','/api/v1/state'):
             if write:
                 _arena_preflight(db, handler.server.arena, session)
-            return (identity_view(db,session) if compact else state_view(db,session,review,read_only=not write)),200
+            return (with_qa_arena_metadata(handler,db,identity_view(db,session)) if compact else snapshot(db,session,review,read_only=not write)),200
         if method=='POST' and path=='/api/v1/auth/logout':
             db.execute('DELETE FROM auth_sessions WHERE token_hash=?',(session['token_hash'],))
-            handler.api_headers={'Set-Cookie': session_cookie(COOKIE, '', 0)}
+            handler.api_headers={'Set-Cookie': session_cookie(student_cookie_name(handler), '', 0)}
             return {'authenticated':False},200
         if method=='POST' and path=='/api/v1/profile':
             if set(body)-{'name'}: raise APIError('Chỉ được đổi tên hiển thị. Năm sinh đã cố định.')
@@ -1062,12 +1302,17 @@ def dispatch(handler, method, path, body=None):
             lesson=db.execute("SELECT id,grade_id FROM lessons WHERE client_key=? AND publication_status='published'",(path.split('/')[4],)).fetchone()
             grade,_=ensure_grade(db,session['student_id'],session['birth_year'])
             if not lesson or lesson['grade_id']!=grade: raise APIError('Bài học không thuộc khối của em.',404)
-            db.execute('INSERT INTO learning_preferences(student_id,last_lesson) VALUES (?,?) '
-                       'ON CONFLICT(student_id) DO UPDATE SET last_lesson=excluded.last_lesson',(session['student_id'],path.split('/')[4]))
+            from .content_retirement import retired
+            if retired(db,grade):raise APIError('Bài cũ đã ngừng mở mới; tiến độ và lịch sử đã lưu được giữ.',409)
+            db.execute('INSERT INTO learning_preferences(student_id,last_lesson,theme) VALUES (?,?,?) '
+                       'ON CONFLICT(student_id) DO UPDATE SET last_lesson=excluded.last_lesson',(session['student_id'],path.split('/')[4],DEFAULT_THEME))
             if path.endswith('/complete'):
                 db.execute('INSERT OR IGNORE INTO lesson_progress VALUES (?,?,?)',(session['student_id'],lesson['id'],stamp()))
         elif method=='POST' and path=='/api/v1/exams':
-            return {'exam':create_exam(db,session,body)},200
+            return {'exam':pilot_exam(db,session,body,pilot) if pilot else create_exam(db,session,body)},200
+        elif re.fullmatch(r'/api/v1/exams/\d+/scratch',path):
+            from .scratchpads import access
+            return access(db,session,int(path.split('/')[4]),method,body,parse_qs(urlsplit(handler.path).query)),200
         elif re.fullmatch(r'/api/v1/exams/\d+(/answers|/submit)?',path):
             attempt=owned_attempt(db,session,int(path.split('/')[4]))
             expired=attempt['due_at']<=stamp()
@@ -1076,7 +1321,11 @@ def dispatch(handler, method, path, body=None):
                 if type(position) is not int or not isinstance(answer,str) or len(answer)>500:
                     raise APIError('Câu trả lời không hợp lệ.')
                 item=db.execute('SELECT options_json FROM exam_items WHERE exam_id=? AND position=?',(attempt['exam_id'],position)).fetchone()
-                if not item or answer not in json.loads(item[0]): raise APIError('Đáp án không nằm trong lựa chọn của câu hỏi.')
+                if not item: raise APIError('Câu hỏi không thuộc bài làm.')
+                from .answers import response_mode
+                rule_row=db.execute('SELECT v.grading_rule_json FROM exam_items i JOIN question_versions v ON v.id=i.question_version_id WHERE i.exam_id=? AND i.position=?',(attempt['exam_id'],position)).fetchone()
+                if response_mode(json.loads(rule_row[0]),attempt['response_mode'])=='choice' and answer not in json.loads(item[0]):
+                    raise APIError('Đáp án không nằm trong lựa chọn của câu hỏi.')
                 db.execute('INSERT INTO exam_draft_answers VALUES (?,?,?,?,?) ON CONFLICT(attempt_id,position) '
                            'DO UPDATE SET answer=excluded.answer,saved_at=excluded.saved_at',
                            (attempt['id'],attempt['exam_id'],position,answer,stamp()))
@@ -1112,12 +1361,31 @@ def dispatch(handler, method, path, body=None):
             from .learning_update import payment
             return payment(db,session,body),200
         elif method=='POST' and path=='/api/v1/bot/start':
-            from .learning_update import consume
-            consume(db,session,'bot',text_field(body,'requestKey',80,8))
-            return {'status':'started'},200
+            from . import game_claims as claims
+            from .arena import ArenaError
+            from .question_bank import arena_questions
+            scope = body.get('scope', 'weekly')
+            if scope not in ('weekly', 'all'):
+                raise APIError('Phạm vi luyện tập không hợp lệ.')
+            grade, _ = ensure_grade(db, session['student_id'], session['birth_year'])
+            native=native_test_games(handler)
+            qa_bot=native.bot if native is not None else qa_arena_bot_source(handler,db)
+            if getattr(handler.server,'qa_arena_enabled',False) is True and qa_bot is None:
+                raise APIError('Nguồn câu bot QA riêng chưa được cấu hình an toàn.',503)
+            text_field(body,'requestKey',80,8)
+            def questions():
+                try:return qa_bot.questions(grade,0,scope) if qa_bot is not None else arena_questions(db,grade,0,scope,academic()[1])
+                except ArenaError as error:raise APIError(str(error),error.status)
+            metadata=native.metadata('bot') if native is not None else qa_bot.metadata() if qa_bot is not None else None
+            return claims.bot_start(handler,db,session,body,questions,metadata),200
         elif method=='GET' and path=='/api/v1/materials':
+            from .content_retirement import retired
+            if retired(db,max(1,min(5,academic()[0]-session['birth_year']-5))):raise APIError('Phiếu lớp 5 đang được cập nhật; chưa có nguồn mới đã duyệt.',503)
             from .learning_update import membership
             if membership(db,session)=='Free': raise APIError('Tải tài liệu dành cho VIP và SVip.',403)
+            if not db.execute("SELECT 1 FROM questions q JOIN question_versions v ON v.question_id=q.id WHERE q.grade_id=? AND v.status='published' LIMIT 1",
+                              (ensure_grade(db, session['student_id'], session['birth_year'])[0],)).fetchone():
+                raise APIError('Tài liệu đang được cập nhật.', 404)
             return {'title':'Phiếu luyện tập tự biên soạn','text':'5BMath — Phiếu luyện tập mẫu\n1. Tính 25% của 240.\n2. Hình chữ nhật dài 18 cm, rộng 9 cm. Tính diện tích.\n3. So sánh 2,35 và 2,305.\n\nĐáp án: 60; 162 cm²; 2,35 > 2,305.'},200
         elif method=='POST' and path=='/api/v1/arena':
             return arena_request(handler,db,session,body),200
@@ -1134,7 +1402,7 @@ def dispatch(handler, method, path, body=None):
         elif method=='POST' and re.fullmatch(r'/api/v1/notifications/\d+/read',path):
             from .notifications import read_notice
             selected = read_notice(db,session['account_id'],int(path.split('/')[4]))
-            return {**state_view(db,session,review),'notification':selected},200
+            return {**snapshot(db,session,review),'notification':selected},200
         elif method=='POST' and path=='/api/v1/dev/upgrade' and review:
             # Explicit opt-in local review only, never a payment webhook.
             key=text_field(body,'requestKey',80,8)
@@ -1142,4 +1410,4 @@ def dispatch(handler, method, path, body=None):
                        (session['account_id'],'LOCAL-REVIEW-'+str(session['account_id'])+'-'+key,stamp()))
         else:
             raise APIError('API không tồn tại.',404)
-        return state_view(db,session,review),200
+        return snapshot(db,session,review),200
