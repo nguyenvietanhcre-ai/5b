@@ -24,6 +24,7 @@ CMD ["python", "-m", "backend", "--host", "0.0.0.0", "--port", "8000"]
 
 FROM runtime AS test
 USER 0:0
+COPY tools/qa-study ./tools/qa-study
 COPY requirements-pdf-test.txt ./requirements-pdf-test.txt
 RUN python -m pip install --no-cache-dir --disable-pip-version-check -r requirements-pdf-test.txt
 USER 65532:65532
