@@ -1,6 +1,7 @@
 """Check the published HTML and crawl graph before uploading the Pages build."""
 
 import argparse
+import json
 import re
 from html.parser import HTMLParser
 from pathlib import Path
@@ -39,6 +40,11 @@ class PageHTML(HTMLParser):
 
 
 def check(output, target):
+    if target == 'cloudflare-live':
+        gateway = json.loads((output / '_routes.json').read_text(encoding='utf-8'))
+        required = {'/api/v1/*', '/api/staff/*', '/api/local-pilot/*', '/api/webhooks/sepay', '/api/health', '/api/grade'}
+        assert required <= set(gateway['include']), 'Pages gateway is missing a live backend route'
+        assert not gateway['exclude'], 'Live API routes must reach the backend'
     routes = {"/": "home", **PAGES}
     titles = set()
     descriptions = set()

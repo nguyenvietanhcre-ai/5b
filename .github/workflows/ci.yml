@@ -39,6 +39,8 @@ jobs:
         run: |
           node scripts/build-pages.cjs work/ci-cloudflare
           python -m scripts.check_pages work/ci-cloudflare
+          node scripts/build-pages.cjs work/ci-cloudflare-live cloudflare-live
+          python -m scripts.check_pages work/ci-cloudflare-live cloudflare-live
           node scripts/build-pages.cjs work/ci-github github
           python -m scripts.check_pages work/ci-github github
   worker:

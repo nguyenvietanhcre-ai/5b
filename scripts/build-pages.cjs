@@ -95,7 +95,7 @@ if (['cloudflare', 'cloudflare-live'].includes(target)) {
     fs.writeFileSync(path.join(output, '_worker.js'), worker);
     fs.writeFileSync(path.join(output, '_routes.json'),
         JSON.stringify({ version: 1, include: target === 'cloudflare-live'
-            ? ['/api/database-demo', '/api/database-demo/*', '/api/v1/*', '/api/staff/*', '/api/webhooks/sepay', '/api/health', '/api/grade']
+            ? ['/api/database-demo', '/api/database-demo/*', '/api/v1/*', '/api/staff/*', '/api/local-pilot/*', '/api/webhooks/sepay', '/api/health', '/api/grade']
             : ['/api/database-demo', '/api/database-demo/*'], exclude: [] }));
 }
 if (target !== 'github') {
