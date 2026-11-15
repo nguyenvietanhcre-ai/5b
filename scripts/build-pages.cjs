@@ -37,6 +37,7 @@ for (const [id, page] of Object.entries(pages)) {
         .replace(/\s*<link rel="canonical"[^>]*>/, '')
         .replace('data-grading="server"', 'data-grading="' + (live ? 'server' : 'browser') + '" data-backend="' + (live ? 'database' : 'static') + '" data-page="' + id + '"')
         .replace(/<title>[^<]*<\/title>/, () => metadata.join('\n    '))
+        .replace('</head>', (page.noindex ? '<noscript><link rel="stylesheet" href="learning.css">' + (id.startsWith('staff-') ? '<link rel="stylesheet" href="staff.css">' : '') + '</noscript>\n' : '') + '</head>')
         .replace('<body>', id.startsWith('staff-') ? '<body class="staff-mode">' : page.noindex ? '<body class="learning-mode">' : '<body>')
         .replace('<main id="app"></main>', () => '<main id="app">' +
             page.render() + '</main>');

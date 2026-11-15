@@ -59,6 +59,7 @@ def check(output, target):
         assert main and len(re.findall(r"<h1\b", main[1])) == 1, route
         if route not in public:
             assert page.meta.get("robots") == "noindex" and not page.canonicals, route
+            assert '<noscript><link rel="stylesheet" href="learning.css">' in html, (route, 'Missing no-JavaScript layout')
             continue
         assert page.canonicals == [urljoin(SITE, route)], route
         assert "noindex" not in page.meta.get("robots", ""), route
