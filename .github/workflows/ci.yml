@@ -33,6 +33,8 @@ jobs:
           node tests/test_themes.cjs
           node tests/test_bank_boundary.cjs
           node tests/test_typed_answers.cjs
+          node tests/test_site_visibility_gateway.cjs
+          node tests/test_site_visibility_portal.cjs
           node scripts/export-learning-catalog.cjs
           node scripts/check-prerender.cjs
       - name: Both static release targets
@@ -63,6 +65,7 @@ jobs:
           python cloudflare/build_worker.py --vendor-sdk
           python cloudflare/test_runtime.py
           python cloudflare/test_migration_runtime.py
+          python cloudflare/test_site_visibility_runtime.py --port 8901
   docker:
     runs-on: ubuntu-latest
     steps:

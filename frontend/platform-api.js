@@ -1,6 +1,18 @@
 'use strict';
 const PlatformAPI = (() => {
     const enabled = document.documentElement.dataset.backend === 'database';
+    function maintenance(response) {
+        if(response.headers.get('X-5BMath-Maintenance')==='1') {
+            location.reload();
+            throw new Error('Hệ thống đang được cập nhật, vui lòng quay lại sau.');
+        }
+    }
+    if(enabled) {
+        let checking=false;
+        const check=async()=>{if(checking||document.visibilityState==='hidden')return;checking=true;try{maintenance(await fetch('/api/site-visibility/check',{cache:'no-store',credentials:'same-origin'}));}catch{}finally{checking=false;}};
+        addEventListener('hashchange',check);addEventListener('popstate',check);addEventListener('focus',check);
+        document.addEventListener('visibilitychange',check);setInterval(check,15000);
+    }
     let snapshot = {authenticated:false};
     let sessionRevision = 0;
     function requestSignal(parent) {
@@ -26,6 +38,7 @@ const PlatformAPI = (() => {
                 headers:body === undefined ? {} : {'Content-Type':'application/json','X-CSRF-Token':snapshot.csrf || ''},
                 body:body === undefined ? undefined : JSON.stringify(body),signal:pending.signal,
             });
+            maintenance(response);
             const result = await response.json();
             // A response sent for the previous login must not restore its profile/theme.
             if(!authMutation && revision !== sessionRevision) {

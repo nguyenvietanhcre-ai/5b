@@ -16,7 +16,7 @@ import transfer
 
 
 def api_path(path):
-    return path.startswith(('/api/v1/', '/api/staff/', '/api/local-pilot/')) or path in ('/api/health', '/api/grade', '/api/webhooks/sepay')
+    return path.startswith(('/api/v1/', '/api/staff/', '/api/local-pilot/')) or path in ('/api/health', '/api/grade', '/api/webhooks/sepay','/api/site-visibility/check','/quan-tri/bao-tri/','/quan-tri/bao-tri')
 
 
 async def bounded_body(request, limit):
@@ -106,6 +106,13 @@ class SchoolBackend(DurableObject):
             if pending_import:
                 raise APIError('Hệ thống đang chuyển dữ liệu. Vui lòng quay lại sau.', 503)
             self.initialize()
+            from backend import site_visibility as visibility
+            if path in (visibility.PORTAL,visibility.PORTAL.rstrip('/')) and method in ('GET','HEAD'):
+                return Response(visibility.page(True) if method=='GET' else b'',status=200,headers=visibility.headers(True))
+            if not visibility.exempt(method,path) and self.database.run(lambda:visibility.read(self.database))['hidden']:
+                return Response(visibility.page() if method!='HEAD' else b'',status=503,headers=visibility.headers())
+            if path=='/api/site-visibility/check' and method in ('GET','HEAD'):
+                return Response(None,status=204,headers={'Cache-Control':'no-store'})
             crypto_compat.install()
             body = None
             raw = b''
@@ -190,6 +197,9 @@ class Default(WorkerEntrypoint):
     async def fetch(self, request):
         path = urlsplit(request.url).path
         if path == '/api/grade':
+            stub=self.env.SCHOOLS.getByName(self.env.TENANT_KEY)
+            check=await stub.fetch(Request(urlsplit(request.url)._replace(path='/api/site-visibility/check',query='').geturl(),method='GET'))
+            if check.status!=204:return check
             try:
                 if str(request.method) != 'POST':
                     raise APIError('API không tồn tại.', 404)

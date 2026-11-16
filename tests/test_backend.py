@@ -44,6 +44,10 @@ class HttpTests(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
         cls.thread.join(timeout=5)
+    def tearDown(self):
+        # The database-demo test owns a temporary path; do not leak it into the
+        # shared HTTP server after TemporaryDirectory removes that database.
+        if hasattr(self.server,'database_path'):del self.server.database_path
     def test_health_frontend(self):
         with urlopen(self.base+"/api/health",timeout=5) as response:
             self.assertEqual(json.load(response)["backend"], "python")

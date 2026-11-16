@@ -152,12 +152,13 @@ def move_item(db,user,kind,body):
     return {'saved':True}
 
 def management(handler,db):
+    from .site_visibility import state as visibility_state
     from .system_settings import settings
     from .admin_native import overview as native_overview
     from .payments import automation_enabled,bank_configuration
     counters={table:db.execute('SELECT count(*) FROM '+table).fetchone()[0] for table in ('video_series','series_videos','exam_products','premium_sets','accounts','exam_attempts','account_scratchpads')}
     native=native_overview(handler)
-    return {'counts':counters,'native':native,'controls':controls(db),'platform':settings(db),
+    return {'counts':counters,'native':native,'controls':controls(db),'platform':settings(db),'visibility':visibility_state(db),
             'payments':{'automationEnabled':automation_enabled(),'bankConfigured':all(bank_configuration())},
             'groups':[
                 {'title':'Nội dung và học tập','items':[
@@ -174,7 +175,7 @@ def management(handler,db):
                     {'title':'Đối soát và giao dịch','tab':'payments','copy':'VIP/VIP+, mua đề, học phí, giao dịch ngân hàng và hỗ trợ thưởng giới thiệu.'},
                     {'title':'Gửi thông báo','tab':'notifications','copy':'Theo nhóm gói, gồm VIP+, hoặc theo lớp; xem số người nhận trước khi gửi.'},
                     {'title':'Cấu hình chức năng và hạn mức','tab':'settings','copy':'Bật/tạm dừng đăng ký, học, luyện, game, bảng hạng và hạn mức Free.'},
-                    {'title':'Video, bán đề và quyền học nâng cao','tab':'operations','copy':'Bật/tạm dừng từng nhóm, xem trạng thái dữ liệu/thanh toán.'},
+                    {'title':'Công khai, ẩn và vận hành website','tab':'operations','copy':'Ẩn website để bảo trì, mở lại công khai; bật/tạm dừng video, bán đề và VIP+.'},
                     {'title':'Nhân sự và phân quyền','tab':'users','copy':'Giáo viên/admin, lớp phụ trách, khóa tài khoản và đổi mật khẩu.'},
                     {'title':'Nhật ký thay đổi','tab':'audit','copy':'Lịch sử người lưu, nội dung và thời gian; nhật ký bài giảng lớp 5 có trong mục tương ứng.'}]}],
             'protected':[

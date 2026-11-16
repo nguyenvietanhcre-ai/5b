@@ -75,7 +75,25 @@ class Handler(BaseHTTPRequestHandler):
     def json_response(self, status, payload):
         self.respond(status, json.dumps(payload, ensure_ascii=False).encode(),
                      "application/json; charset=utf-8")
+    def visibility_gate(self):
+        from . import site_visibility as visibility
+        route=unquote(urlsplit(self.path).path)
+        admin=route in (visibility.PORTAL,visibility.PORTAL.rstrip('/')) and self.command in ('GET','HEAD')
+        if admin:
+            status=200
+        elif visibility.exempt(self.command,route):return False
+        else:
+            try:hidden=visibility.read(self.server.database_path)['hidden'] if hasattr(self.server,'database_path') else False
+            except (sqlite3.Error,ValueError,APIError):hidden=True
+            if not hidden:
+                if route=='/api/site-visibility/check':self.respond(204,b'','text/plain');return True
+                return False
+            status=503
+        self.api_headers={k:v for k,v in visibility.headers(admin).items() if k not in ('Cache-Control','Content-Type')}
+        self.respond(status,visibility.page(admin),'text/html; charset=utf-8')
+        return True
     def do_GET(self):
+        if self.visibility_gate():return
         url = urlsplit(self.path)
         route = unquote(url.path)
         if route.startswith('/api/local-pilot/'):
@@ -142,7 +160,11 @@ class Handler(BaseHTTPRequestHandler):
             self.json_response(404, {"error":"Not found"})
     def do_HEAD(self):
         self.do_GET()
+    def do_other(self):
+        if not self.visibility_gate():self.json_response(405,{'error':'Method not allowed'})
+    do_PUT=do_PATCH=do_DELETE=do_OPTIONS=do_other
     def do_POST(self):
+        if self.visibility_gate():return
         endpoint = urlsplit(self.path).path
         if endpoint.startswith('/api/local-pilot/'):
             self.local_pilot_request('POST',endpoint)

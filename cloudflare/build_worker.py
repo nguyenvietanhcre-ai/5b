@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / 'cloudflare' / 'runtime'
 MODULES = ('backend_worker.py', 'sqlite_storage.py', 'crypto_compat.py', 'pbkdf2_fallback.py', 'transfer.py', 'learning_storage.py', 'native_learning.py')
-BACKEND_MODULES = ('__init__.py', 'admissions.py', 'answers.py', 'arena.py', 'content.py', 'database.py',
+BACKEND_MODULES = ('__init__.py', 'site_visibility.py', 'admissions.py', 'answers.py', 'arena.py', 'content.py', 'database.py',
                    'group_games.py', 'group_game_bots.py', 'game_claims.py', 'content_retirement.py',
                    'learning_update.py', 'nickname_policy.py', 'notifications.py', 'payments.py',
                    'platform_api.py', 'scratchpads.py', 'premium_content.py', 'exam_commerce.py', 'question_bank.py', 'referral_support.py', 'rich_content.py',

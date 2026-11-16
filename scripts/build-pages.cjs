@@ -92,11 +92,12 @@ fs.writeFileSync(path.join(output, '404.html'), `<!doctype html>
 
 if (['cloudflare', 'cloudflare-live'].includes(target)) {
     const worker = fs.readFileSync(path.join(__dirname, 'pages-worker.mjs'), 'utf8')
+        .replace('const liveBackend = false; // BUILD_LIVE_BACKEND','const liveBackend = '+String(target==='cloudflare-live')+'; // BUILD_LIVE_BACKEND')
         .replace("'__DEMO_REPORT_SQL__'", JSON.stringify(fs.readFileSync(path.join(frontend, '../backend/demo-report.sql'), 'utf8')));
     fs.writeFileSync(path.join(output, '_worker.js'), worker);
     fs.writeFileSync(path.join(output, '_routes.json'),
         JSON.stringify({ version: 1, include: target === 'cloudflare-live'
-            ? ['/api/database-demo', '/api/database-demo/*', '/api/v1/*', '/api/staff/*', '/api/local-pilot/*', '/api/webhooks/sepay', '/api/health', '/api/grade']
+            ? ['/*']
             : ['/api/database-demo', '/api/database-demo/*'], exclude: [] }));
 }
 if (target !== 'github') {

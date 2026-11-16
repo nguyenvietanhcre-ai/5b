@@ -973,29 +973,38 @@ def prepare_credentials(handler, path, body):
 
 def dispatch(handler, method, path, body=None):
     body = body or {}
+    from .site_visibility import ENDPOINT,state as visibility_state,save as visibility_save
+    recovery=path.startswith(ENDPOINT)
+    login_path=path in ('/api/staff/login',ENDPOINT+'/login')
     if method == 'POST':
         if not same_origin(handler):
             raise APIError('Yêu cầu phải xuất phát từ website đang mở.', 403)
     credential = password_proof = login_proof = None
     if method == 'POST':
-        if path == '/api/staff/login':
+        if login_path:
             limit_auth(handler)
             login_proof = prepare_login(handler.server.database_path, body, staff_only=True)
         else:
             credential, password_proof = prepare_credentials(handler, path, body)
     with connect(handler.server.database_path, method == 'POST') as db:
         user = read_session(handler, db)
-        if method == 'POST' and path == '/api/staff/login':
+        if method == 'POST' and login_path:
             account = verified_login(db, login_proof)
+            if recovery:require_admin(account)
             return issue_session(handler, db, account), 200
-        if path == '/api/staff/session' and method == 'GET':
+        if path in ('/api/staff/session',ENDPOINT+'/session') and method == 'GET':
+            if recovery and user:require_admin(user)
             return ({'authenticated': True, 'csrf': user['csrf_token'], 'user': public_user(user)} if user else
                     {'authenticated': False, 'setupNeeded': not bool(db.execute("SELECT 1 FROM staff_users WHERE role='admin'").fetchone())}), 200
         if not user:
             raise APIError('Đăng nhập tài khoản giáo viên hoặc quản trị viên để tiếp tục.', 401)
         if method == 'POST' and not hmac.compare_digest(handler.headers.get('X-CSRF-Token', ''), user['csrf_token']):
             raise APIError('Phiên đăng nhập cần được tải lại.', 403)
-        if path == '/api/staff/logout' and method == 'POST':
+        if recovery:require_admin(user)
+        if path == ENDPOINT:
+            if method=='GET':return {'visibility':visibility_state(db)},200
+            if method=='POST':return visibility_save(db,user,body),200
+        if path in ('/api/staff/logout',ENDPOINT+'/logout') and method == 'POST':
             db.execute('DELETE FROM staff_sessions WHERE token_hash=?', (user['token_hash'],))
             handler.api_headers = {'Set-Cookie': session_cookie(COOKIE, '', 0)}
             return {'authenticated': False}, 200
