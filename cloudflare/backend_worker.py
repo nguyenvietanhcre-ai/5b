@@ -147,8 +147,14 @@ class SchoolBackend(DurableObject):
                 return Response.json(payload, headers={'Cache-Control': 'no-store'})
             if not api_path(path):
                 raise APIError('API không tồn tại.', 404)
+            from backend import site_visibility as visibility
+            # The recovery HTML is self-contained and must remain reachable
+            # even if release storage or the learning subsystem is unavailable.
+            if path in (visibility.PORTAL,visibility.PORTAL.rstrip('/')) and method in ('GET','HEAD'):
+                return Response(visibility.page(True) if method=='GET' else b'',status=200,headers=visibility.headers(True))
+            recovery=path in visibility.RECOVERY
             release_id=getattr(self.env,'RELEASE_ID','')
-            if release_id and path!='/api/health' and not release_audit.is_open(self.database,release_id):
+            if release_id and path!='/api/health' and not recovery and not release_audit.is_open(self.database,release_id):
                 return Response('Bản cập nhật đang được kiểm tra. Vui lòng quay lại sau ít phút.',status=503,headers={'Cache-Control':'no-store','Retry-After':'30','X-5BMath-Maintenance':'1'})
             pending_import = getattr(self.env, 'TRANSFER_ENABLED', 'false') == 'true' and not transfer.table_names(self.database)
             if path == '/api/health' and method == 'GET':
@@ -156,11 +162,11 @@ class SchoolBackend(DurableObject):
                                       'backend': 'python-durable-object-sqlite'}, headers={'Cache-Control': 'no-store'})
             if pending_import:
                 raise APIError('Hệ thống đang chuyển dữ liệu. Vui lòng quay lại sau.', 503)
-            self.initialize()
-            await self.schedule_trial_cleanup()
-            from backend import site_visibility as visibility
-            if path in (visibility.PORTAL,visibility.PORTAL.rstrip('/')) and method in ('GET','HEAD'):
-                return Response(visibility.page(True) if method=='GET' else b'',status=200,headers=visibility.headers(True))
+            if recovery:
+                self.database.initialize()
+            else:
+                self.initialize()
+                await self.schedule_trial_cleanup()
             if not visibility.exempt(method,path) and self.database.run(lambda:visibility.read(self.database))['hidden']:
                 return Response(visibility.page() if method!='HEAD' else b'',status=503,headers=visibility.headers())
             if path=='/api/site-visibility/check' and method in ('GET','HEAD'):

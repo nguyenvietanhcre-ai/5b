@@ -37,7 +37,9 @@ def get(database,release_id):
     values=list(database.storage.sql.exec('SELECT baseline_json,is_open FROM '+TABLE+' WHERE release_id=?',valid_id(release_id)))
     return values[0] if values else None
 def is_open(database,release_id):
-    item=get(database,release_id)
+    if not list(database.storage.sql.exec("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",TABLE)):return False
+    values=list(database.storage.sql.exec('SELECT is_open FROM '+TABLE+' WHERE release_id=?',valid_id(release_id)))
+    item=values[0] if values else None
     return bool(item and item['is_open'])
 def begin(database,release_id):
     release_id=valid_id(release_id)

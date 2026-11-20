@@ -27,6 +27,14 @@ def fallback_vectors():
 
 
 class CryptoDiagnosticsTests(unittest.TestCase):
+    def test_storage_failure_categories_never_log_exception_values(self):
+        cases=[('Daily SQL rows read limit exceeded; private-value','storage_quota'),
+               ('Cannot perform I/O on behalf of a different request; private-value','cross_request_io')]
+        for message,category in cases:
+            report=safe_error_report(RuntimeError(message))
+            self.assertEqual(report['category'],category)
+            self.assertNotIn('private-value',str(report))
+
     def test_iteration_limit_reports_no_exception_values(self):
         try:
             raise RuntimeError('NotSupportedError: Pbkdf2 failed: iteration counts above 100000 are not supported; secret-fixture-value')

@@ -14,6 +14,12 @@ def safe_error_report(error):
         if current is None:
             break
         message = str(current).lower()
+        if 'quota' in message or 'daily limit' in message or (('rows read' in message or 'rows written' in message) and ('limit' in message or 'exceed' in message)):
+            category = 'storage_quota'
+            break
+        if ('different' in message or 'another' in message) and ('i/o' in message or 'execution context' in message):
+            category = 'cross_request_io'
+            break
         if 'pbkdf' in message and ('iteration counts above' in message or 'iteration' in message and 'not supported' in message):
             category = 'crypto_pbkdf2_iteration_limit'
             break
