@@ -21,8 +21,11 @@ await family('select',{childId:kid.addedChildId});await layout('child','/hoc-the
 const scripts=await p.evaluate(()=>typeof RuntimeAssets==='object'?RuntimeAssets.inspect().scripts:[]);assert.equal(new Set(scripts).size,scripts.length);
 await layout(null,'/trai-nghiem/','trial');
 await family('logout',{});await p.goto(B+'/gia-dinh/');
-await p.getByLabel('Email của ba mẹ').fill(email);await p.getByLabel('Mật khẩu 5BMath',{exact:true}).fill(password);await p.locator('form').getByRole('button',{name:'Đăng nhập',exact:true}).click();
-await p.waitForFunction(async()=>{const r=await fetch('/api/family/state');return (await r.json()).authenticated===true;});
+await p.getByLabel('Email của ba mẹ').fill(email);await p.getByLabel('Mật khẩu 5BMath',{exact:true}).fill(password);
+const loggedIn=p.waitForResponse(r=>new URL(r.url()).pathname==='/api/family/login'&&r.request().method()==='POST');
+await p.locator('form').getByRole('button',{name:'Đăng nhập',exact:true}).click();
+const loginResponse=await loggedIn;assert.equal(loginResponse.status(),200);assert.equal((await loginResponse.json()).authenticated,true);
+await p.waitForFunction(()=>window.FamilyProfiles?.state.authenticated===true);
 const fresh=await(await c.request.get(B+'/api/family/state')).json();assert.equal(fresh.authenticated,true);assert.notEqual(fresh.scope,'parent_full');
 await family('select',{childId:kid.addedChildId});const selected=await(await c.request.get(B+'/api/family/state')).json();assert.equal(selected.selectedChildId,kid.addedChildId);
 
