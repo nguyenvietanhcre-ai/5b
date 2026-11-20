@@ -88,6 +88,16 @@ class NativeLearningTests(unittest.TestCase):
         self.assertEqual(self.storage.db.execute('SELECT count(*) FROM questions').fetchone()[0],0)
         self.assertGreater(self.storage.db.execute('SELECT count(*) FROM native_learning_questions').fetchone()[0],0)
 
+    def test_paid_inventory_can_be_read_before_the_first_catalogue(self):
+        self.assertIsNone(self.pilot.week_cache)
+        def read():
+            with api.connect(self.pilot.path) as db:return self.pilot.paid_inventory(db,5)
+        before=self.main.run(read)
+        total,largest=before
+        self.assertEqual((total,largest),(30,60))
+        self.call('GET','catalogue')
+        self.assertEqual(self.main.run(read),before)
+
     def test_namespace_rollback_is_atomic_with_main(self):
         def broken():
             with api.connect(self.main,True) as db:db.execute("UPDATE accounts SET login_identifier='changed'")

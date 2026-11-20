@@ -1,5 +1,7 @@
 # 5BMath — Python / GitHub / Docker
 
+Bản đồng bộ localhost ngày 20/11/2026 gồm Gia đình, trải nghiệm, giỏ hàng, bài giảng/video, khung câu hỏi và thanh điều hướng PC/Mobile. [Phạm vi và kiểm thử](docs/LOCALHOST_SYNC_2026-11-20.md).
+
 Website tiếng Việt của 5BMath, có bài đọc công khai và khu vực học sinh lớp 1–5. Học liệu và ngân hàng mẫu được gắn nhãn, chưa thay cho chương trình/đề chính thức đã duyệt.
 
 Bản chuyển đầy đủ chức năng localhost sang Cloudflare, ranh giới dữ liệu học

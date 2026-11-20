@@ -1,0 +1,11 @@
+{
+  "package": "tus-js-client",
+  "version": "4.3.1",
+  "license": "MIT",
+  "registry": "https://registry.npmjs.org/tus-js-client/-/tus-js-client-4.3.1.tgz",
+  "integrity": "sha512-ZLeYmjrkaU1fUsKbIi8JML52uAocjEZtBx4DKjRrqzrZa0O4MYwT6db+oqePlspV+FxXJAyFBc/L5gwUi2OFsg==",
+  "files": {
+    "tus.min.js": "8cbb1b63fccc3bba0ae73ad1deb160ce046c3750851d0c3e94921ae3ef070eb8",
+    "tus-LICENSE.txt": "2ec372e137fa65938a6551e9abaa3d3ea21f5ebd398fca00a13354ea881e6539"
+  }
+}

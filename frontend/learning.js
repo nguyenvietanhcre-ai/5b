@@ -1,88 +1,5 @@
 'use strict';
-const PracticeScratchpad=(()=>{
- const entries=new Map(),prefix='5bmath-scratch-v1:';let stop=()=>{};
- const blank=()=>({version:1,open:false,text:'',color:'#203a32',strokes:[]});
- const pack=n=>({version:1,open:n.open,text:n.text,color:n.color,strokes:n.strokes});
- const copy=n=>JSON.parse(JSON.stringify(pack(n)));
- function valid(n){return n?.version===1&&typeof n.open==='boolean'&&typeof n.text==='string'&&n.text.length<=20000&&/^#[0-9a-f]{6}$/i.test(n.color)&&Array.isArray(n.strokes)&&n.strokes.every(l=>l&&/^#[0-9a-f]{6}$/i.test(l.color)&&Array.isArray(l.points)&&l.points.length&&l.points.every(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1));}
- function markup(){return `<section class="practice-scratch"><button type="button" class="btn outline" data-scratch-toggle aria-expanded="false" aria-controls="practice-scratch-panel">Nháp</button><div id="practice-scratch-panel" class="scratch-panel" hidden><h3>Bảng nháp</h3><p>Nháp tự lưu theo tài khoản và từng câu. Đăng nhập lại để tiếp tục trên thiết bị khác.</p><div class="scratch-tools"><label>Màu bút <input type="color" data-scratch-color value="#203a32"></label><button type="button" class="btn outline" data-scratch-undo>Hoàn tác nét</button><button type="button" class="btn outline" data-scratch-clear>Xóa nét vẽ</button></div><canvas data-scratch-canvas width="1000" height="500" aria-label="Bảng trắng để vẽ nháp; có ô nhập văn bản bên dưới"></canvas><label class="field"><span>Nháp bằng văn bản</span><textarea data-scratch-text rows="5" maxlength="20000" placeholder="Gõ cách tính hoặc ghi chú của em…"></textarea></label><p data-scratch-status role="status" aria-live="polite"></p><div class="scratch-tools"><button type="button" class="btn outline" data-scratch-retry hidden>Thử đồng bộ lại</button><button type="button" class="btn outline" data-scratch-remote hidden>Dùng bản trên tài khoản</button><button type="button" class="btn outline" data-scratch-local hidden>Lưu bản nháp này</button></div></div></section>`;}
- function mount(identity){
-  stop();const el=document.querySelector('.practice-scratch');if(!el)return;
-  const owner=typeof PlatformAPI!=='undefined'?PlatformAPI.snapshot.account?.id:null,parts=identity.split(':'),provider=parts[0],eid=parts[1],position=Number(parts[2]),key=prefix+JSON.stringify([owner??'offline',identity]);
-  const online=Boolean(owner&&PlatformAPI.enabled),url=(provider==='pilot'?'/api/local-pilot/':'/api/v1/')+'exams/'+encodeURIComponent(eid)+'/scratch';
-  if(!entries.has(key)){
-   let cache=null;try{const raw=localStorage.getItem(key);if(raw){const n=JSON.parse(raw);if(valid(n))cache=n;}}catch{}
-   entries.set(key,{note:cache?copy(cache):blank(),revision:Number(cache?.serverRevision)||0,dirty:Boolean(cache?.pending),legacy:Boolean(cache&&!Object.hasOwn(cache,'serverRevision')),ready:!online,saving:null,loading:null,pending:null,conflict:null,error:false,notify:()=>{}});
-  }
-  const entry=entries.get(key),panel=el.querySelector('.scratch-panel'),toggle=el.querySelector('[data-scratch-toggle]'),canvas=el.querySelector('canvas'),ctx=canvas.getContext('2d'),text=el.querySelector('textarea'),color=el.querySelector('[data-scratch-color]'),status=el.querySelector('[data-scratch-status]'),retry=el.querySelector('[data-scratch-retry]'),remote=el.querySelector('[data-scratch-remote]'),local=el.querySelector('[data-scratch-local]');let stroke=null,pointer=null,timer=null,disposed=false;
-  const cache=()=>{try{localStorage.setItem(key,JSON.stringify({...pack(entry.note),serverRevision:entry.revision,pending:entry.dirty,updatedAt:Date.now()}));return true;}catch{return false;}};
-  const call=async(body,keepalive=false)=>{
-   if(PlatformAPI.snapshot.account?.id!==owner)throw new Error('Tài khoản đã thay đổi.');
-   const response=await fetch(url+(body===undefined?'?position='+position:''),{method:body===undefined?'GET':'POST',credentials:'same-origin',headers:body===undefined?{}:{'Content-Type':'application/json','X-CSRF-Token':PlatformAPI.snapshot.csrf||''},body:body===undefined?undefined:JSON.stringify(body),keepalive});
-   const result=await response.json();if(PlatformAPI.snapshot.account?.id!==owner)throw new Error('Tài khoản đã thay đổi.');if(!response.ok)throw new Error(result.error||'Chưa thể lưu nháp.');return result;
-  };
-  const syncUI=()=>{
-   if(disposed)return;const note=entry.note;
-   panel.hidden=!note.open;toggle.setAttribute('aria-expanded',String(note.open));
-   if(document.activeElement!==text)text.value=note.text;color.value=note.color;
-   retry.hidden=!entry.error;remote.hidden=local.hidden=!entry.conflict;
-   status.textContent=entry.conflict?'Nháp đã thay đổi ở nơi khác. Chọn bản muốn giữ trước khi lưu tiếp.':!online?'Nháp lưu trên trình duyệt này; cần đăng nhập để đồng bộ.':entry.error?'Chưa đồng bộ được. Bản nháp trên máy được giữ để thử lại.':!entry.ready?'Đang tải nháp theo tài khoản…':entry.dirty||entry.saving?'Đang lưu nháp theo tài khoản…':'Đã lưu nháp theo tài khoản.';
-   const locked=online&&!entry.ready;text.disabled=color.disabled=locked;canvas.style.pointerEvents=locked?'none':'';el.querySelector('[data-scratch-clear]').disabled=locked;el.querySelector('[data-scratch-undo]').disabled=locked||!note.strokes.length;
-  };
-  const draw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.lineCap='round';ctx.lineJoin='round';for(const line of entry.note.strokes){ctx.strokeStyle=ctx.fillStyle=line.color;ctx.lineWidth=3;ctx.beginPath();const first=line.points[0];ctx.moveTo(first.x*canvas.width,first.y*canvas.height);for(const p of line.points.slice(1))ctx.lineTo(p.x*canvas.width,p.y*canvas.height);if(line.points.length===1){ctx.arc(first.x*canvas.width,first.y*canvas.height,1.5,0,Math.PI*2);ctx.fill();}else ctx.stroke();}syncUI();};
-  const resize=()=>{const width=canvas.getBoundingClientRect().width;if(!width)return;const ratio=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*ratio);canvas.height=Math.round(300*ratio);draw();};
-  entry.notify=()=>{syncUI();resize();};
-  const save=(keepalive=false)=>{
-   clearTimeout(timer);timer=null;cache();
-   if(!online){entry.dirty=false;syncUI();return Promise.resolve();}
-   if(!entry.ready||entry.conflict||!entry.dirty)return entry.saving||Promise.resolve();
-   if(entry.saving)return entry.saving;
-   entry.saving=(async()=>{try{
-    while(entry.dirty&&!entry.conflict){
-     if(!entry.pending)entry.pending={position,revision:entry.revision,requestKey:crypto.randomUUID(),note:copy(entry.note)};
-     const pending=entry.pending,result=await call(pending,keepalive);
-     if(result.conflict){entry.conflict=result.scratch;entry.pending=null;break;}
-     entry.revision=result.scratch.revision;entry.pending=null;entry.dirty=JSON.stringify(pack(entry.note))!==JSON.stringify(pending.note);entry.legacy=false;entry.error=false;cache();
-    }
-   }catch{entry.error=true;cache();}finally{entry.saving=null;entry.notify();}})();syncUI();return entry.saving;
-  };
-  const load=()=>{
-   if(!online)return Promise.resolve();if(entry.loading)return entry.loading;
-   entry.loading=(async()=>{try{
-    if(entry.saving)await entry.saving;
-    const result=await call(),server=result.scratch;
-    if(server.note&&!valid(server.note))throw Error('Nháp tài khoản không hợp lệ.');
-    const differs=server.note&&JSON.stringify(pack(entry.note))!==JSON.stringify(pack(server.note));
-    if((entry.dirty||entry.legacy)&&server.note&&differs&& (entry.legacy||entry.revision!==server.revision)){entry.conflict=server;}
-    else if(entry.dirty&&entry.revision===server.revision){}
-    else if(server.note){entry.note=copy(server.note);entry.revision=server.revision;entry.dirty=false;entry.legacy=false;}
-    else {entry.revision=0;entry.dirty=entry.dirty||entry.legacy;entry.legacy=false;}
-    entry.ready=true;entry.error=false;cache();entry.notify();if(entry.dirty&&!entry.conflict)await save();
-   }catch{entry.ready=true;entry.error=true;entry.notify();}finally{entry.loading=null;}})();return entry.loading;
-  };
-  const changed=()=>{entry.dirty=true;cache();clearTimeout(timer);timer=setTimeout(()=>save(),500);syncUI();};
-  const point=ev=>{const rect=canvas.getBoundingClientRect();return {x:+Math.max(0,Math.min(1,(ev.clientX-rect.left)/rect.width)).toFixed(5),y:+Math.max(0,Math.min(1,(ev.clientY-rect.top)/rect.height)).toFixed(5)};};
-  const finish=()=>{stroke=null;pointer=null;save();};
-  canvas.onpointerdown=ev=>{if(ev.button!==0||pointer!==null||online&&!entry.ready)return;ev.preventDefault();pointer=ev.pointerId;canvas.setPointerCapture(pointer);stroke={color:entry.note.color,points:[point(ev)]};entry.note.strokes.push(stroke);draw();changed();};
-  canvas.onpointermove=ev=>{if(!stroke||ev.pointerId!==pointer)return;ev.preventDefault();stroke.points.push(point(ev));draw();changed();};
-  canvas.onpointerup=canvas.onpointercancel=canvas.onlostpointercapture=finish;
-  toggle.onclick=()=>{entry.note.open=!entry.note.open;syncUI();resize();changed();};
-  text.value=entry.note.text;text.oninput=()=>{entry.note.text=text.value;changed();};
-  color.oninput=()=>{entry.note.color=color.value;changed();};
-  el.querySelector('[data-scratch-undo]').onclick=()=>{stroke=null;pointer=null;entry.note.strokes.pop();draw();changed();save();};
-  el.querySelector('[data-scratch-clear]').onclick=()=>{stroke=null;pointer=null;entry.note.strokes=[];draw();changed();save();};
-  retry.onclick=async()=>{entry.error=false;await load();if(!entry.conflict)await save();};
-  remote.onclick=()=>{entry.note=entry.conflict.note?copy(entry.conflict.note):blank();entry.revision=entry.conflict.revision;entry.conflict=null;entry.dirty=false;entry.pending=null;entry.legacy=false;cache();entry.notify();};
-  local.onclick=()=>{entry.revision=entry.conflict.revision;entry.conflict=null;entry.pending=null;entry.dirty=true;cache();save();};
-  const onHide=()=>{save(true);},onVisibility=()=>{if(document.hidden)save(true);else if(!entry.dirty&&!stroke)load();};
-  window.addEventListener('pagehide',onHide);document.addEventListener('visibilitychange',onVisibility);
-  const observer=new ResizeObserver(resize);observer.observe(canvas);syncUI();resize();load();
-  stop=()=>{clearTimeout(timer);observer.disconnect();stroke=null;pointer=null;save();disposed=true;window.removeEventListener('pagehide',onHide);document.removeEventListener('visibilitychange',onVisibility);};
- }
- return {markup,mount,unmount:()=>{stop();stop=()=>{};}};
-})();
-
-'use strict';
+const PracticeScratchpad = typeof document==='undefined'?require('./practice-scratchpad.js'):{markup(...args){return window.PracticeScratchpad.markup(...args);},mount(...args){return window.PracticeScratchpad.mount(...args);},unmount(){window.PracticeScratchpad?.unmount();}};
 const LearningApp = (() => {
 const icons = {
   home: 'M3 10 12 3l9 7v10H3z M9 20v-7h6v7',
@@ -117,12 +34,19 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
 
     const browser = typeof document !== 'undefined';
     const mascotVisuals = browser ? window.BadgeMascots : require('./arena-art/badge-mascots/runtime.js');
-    const groupGames = browser ? window.FivePlayerGames : require('./group-games.js');
+    let groupGames = browser ? window.FivePlayerGames : require('./group-games.js');
+    let arenaLobby = browser ? window.ArenaLobby : require('./arena-shared.js');
+    let gameAllowance = browser ? window.GameAllowance : null;
+    let lessonStudy = browser ? window.LessonStudy : require('./lesson-study.js');
+    let stopLessonStudy=()=>{};
     const nicknames = browser ? NicknamePolicy : require('./nickname-policy.js');
     const live = browser && typeof PlatformAPI !== 'undefined' && PlatformAPI.enabled;
     const content = browser ? LearningContent : require('./learning-content.js');
     const solutionView = browser ? window.SolutionView : require('./solution-view.js');
-    const gameRulesView = browser ? window.GameRules : require('./game-rules.js');
+    const controls = browser ? window.UIControls : require('./ui-controls.js');
+    const studySolution = browser ? window.StudySolution : require('./solution-format.js');
+    const questionFrame = browser ? window.QuestionFrame : require('./question-frame.js');
+    let gameRulesView = browser ? window.GameRules : require('./game-rules.js');
     const storageKey = '5bmath-learning-v1';
     const themeSettings = () => browser && typeof ThemeManager !== 'undefined' ? ThemeManager.renderSettings() : '';
     const routes = {
@@ -145,12 +69,6 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         zoomRegistration:['dang-ky-hoc-zoom/','Đăng ký học Zoom'],
         classroom:['lop-zoom/','Lớp Zoom'], upgrade:['nang-cap/','Nâng cấp gói'], payment:['thanh-toan/','Thanh toán'],
     };
-    const navigation = [
-        ['dashboard','Tổng quan','home'], ['weekly','Bài giảng','book'],
-        ['exams','Luyện tập','file'], ['arena','Trò chơi','zap'],
-        ['mascot','Linh vật','leaf'],
-        ['profile','Tài khoản','users'], ['upgrade','Nâng cấp gói','spark'], ['zoomRegistration','Đăng ký học Zoom','calendar'], ['classroom','Lớp Zoom','video'],
-    ];
     const sections = {topics:'weekly',lesson:'weekly',advanced:'weekly',testing:'exams',results:'exams',room:'arena',battle:'arena',battleResult:'arena',rank:'arena',payment:'upgrade'};
     const emptyState = () => ({
         birthYear:null, inviteCode:'', invitedBy:'', mascot:'sprout', points:0, xpScale:2,
@@ -173,7 +91,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     let arenaMode='quick';
     if(browser)try{const saved=sessionStorage.getItem('5bmath-arena-mode');if(['quick','friends','bot'].includes(saved))arenaMode=saved;}catch{}
     let arenaScope='all',arenaDiscipline={availableAt:0,recentAbandons:0,recentStrikes:0,warning:''},arenaDisciplineUntil=0;
-    let arenaPreflight=null;
+    let arenaPreflight=null,duelAllowance=null;
     const accountPages={notifications:{page:1,rows:null,total:0,error:'',request:0},referrals:{page:1,rows:null,total:0,error:'',request:0}};
     let accountPageOwner=null,notificationPollTimer=null,notificationPolling=false,notificationPollBusy=false;
     let notificationLifecycle=0,notificationVersion=0,notificationLastRefresh=0,notificationPending=null;
@@ -226,6 +144,11 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         return new URLSearchParams(search).get(key);
     };
     const href = (route, parameters = {}) => {
+        if(route==='mascot')route='profile';
+        if(['upgrade','payment'].includes(route)&&browser){
+            const childId=query('childId')||query('child');
+            if(childId)parameters={childId,...parameters};
+        }
         const search = new URLSearchParams(parameters).toString();
         const offline = browser && location.protocol === 'file:';
         const routePath = offline ? route === 'dashboard' ? '#dashboard' : '#learn-' + route : routes[route][0];
@@ -241,11 +164,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     function art(pet,label='',animated=false,xp=state.points){if(animated)return animatedArt(pet,label);const code=Object.hasOwn(mascotAvatars,pet)?pet:'sprout';return mascotVisuals.portrait(code,xp,label,'mascot-art '+code);}
     const evolutionRows={dog:[0,0],cat:[0,1],rabbit:[0,2],horse:[0,3],voi:[1,0],tiger:[1,1],lion:[1,2],gau:[1,3],sparrow:[2,0],eagle:[2,1],'cu-meo':[2,2],butterfly:[2,3],bee:[3,0],'ca-map':[3,1],dolphin:[3,2],octopus:[3,3],crab:[4,0],starfish:[4,1],fox:[4,2],sprout:[4,3]};
     const evolutionBoxes=[{x:[116,381,659,1018],y:[226,534,833,1125,1444]},{x:[140,370,638,1018],y:[199,495,790,1103,1451]},{x:[116,374,646,1018],y:[239,536,839,1139,1448]},{x:[127,367,630,1018],y:[217,517,816,1107,1444]},{x:[130,391,666,1018],y:[210,505,789,1117,1468]}];
-    function showEvolution(pet){
-        if(!Object.hasOwn(evolutionRows,pet))return;
-        const [board,row]=evolutionRows[pet],box=evolutionBoxes[board],title=mascotAvatars[pet][0];
-        host.showModal(`<section class="pet-evolution"><p class="eyebrow">Hành trình trưởng thành</p><h2 class="modal-title">Tiến hóa của ${escape(title)}</h2><p>Bắt đầu với 0 kinh nghiệm ở Đồng I. Mỗi 20 kinh nghiệm lên một bậc. Chọn linh vật khác vẫn giữ kinh nghiệm đã tích lũy.</p><div class="pet-evolution-grid">${['Đồng','Bạc','Vàng'].map((name,i)=>{const x=box.x[i]+5,y=box.y[row]+5,w=box.x[i+1]-box.x[i]-10,h=box.y[row+1]-box.y[row]-10;return `<article class="pet-evolution-form">${mascotVisuals.portrait(pet,i*100,title+' dạng '+name)}<div><h3>${name} I–V</h3><strong>Từ ${i*100} kinh nghiệm</strong><ul>${['I','II','III','IV','V'].map((roman,k)=>`<li><span>${name} ${roman}</span><b>${i*100+k*20} XP</b></li>`).join('')}</ul></div></article>`}).join('')}</div><p class="learning-notice">Vàng V là bậc cao nhất hiện tại, đạt từ 280 kinh nghiệm. Em vẫn tích lũy kinh nghiệm sau mốc này.</p></section>`);
-    }
+    function showEvolution(...args) { return feature('profile').showEvolution(...args); }
 
     const scenery = [
         ['01-forest-clearing','Rừng xanh'], ['02-stream','Bên suối'],
@@ -269,7 +188,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         return `<span class="garden-activity-art" aria-hidden="true"><svg viewBox="0 0 80 80" width="80" height="80" fill="none" stroke="#164F3D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">${shapes}<path d="m6 5 4 5M2 15h6m61 53 5 4m0-13 3 2" stroke="#F5A14B" stroke-width="3.5"/></svg><img class="clay-activity-icon" src="theme-art/clay-${clayIcon}.webp" width="192" height="192" alt="" loading="lazy"></span>`;
     };
     const link = (label, to, kind = 'dark', symbol = 'arrow', parameters = {}) => `<a class="btn ${kind}" href="${href(to,parameters)}">${escape(label)}${symbol ? icon(symbol,17) : ''}</a>`;
-    const button = (label, action, kind = 'outline', symbol = '', extra = '') => `<button class="btn ${kind}" type="button" data-learning="${action}" ${extra}>${symbol ? icon(symbol,17) : ''}${escape(label)}</button>`;
+    const button = (label, action, kind = 'outline', symbol = '', extra = '') => controls.markup(label, {kind, actionAttribute:'data-learning', action, icon:symbol ? icon(symbol,17) : '', extra});
     const heading = title => `<div class="section-head"><h2>${escape(title)}</h2></div>`;
     const intro = (title, copy, right = '') => `<header class="intro"><div><h1>${escape(title)}</h1><p>${escape(copy)}</p></div>${right}</header>`;
     const back = (label, route) => `<a class="back-link" href="${href(route)}">${icon('back',17)} ${escape(label)}</a>`;
@@ -280,8 +199,10 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     const notice = text => `<p class="learning-notice">${escape(text)}</p>`;
     const lessonList = () => live ? PlatformAPI.snapshot.lessons || [] : content.lessons(grade());
     const bankNotice = () => live && PlatformAPI.snapshot.questionBankReady === false ? notice((PlatformAPI.snapshot.arenaQuestionSource?.qaOnly||PlatformAPI.snapshot.arenaQuestionSource?.localTest)?'Bài tập đang được cập nhật. Em vẫn có thể xem lại bài đã làm; chưa thể tạo đề mới.':'Bài tập đang được cập nhật. Em vẫn có thể xem lại bài đã làm; chưa thể tạo đề hoặc bắt đầu trận mới.') : '';
-    const selectedLesson = () => lessonList().find(lesson => lesson.id === query('id')) || lessonList()[0];
-    const submittedExams = () => Object.values(state.exams).filter(exam => exam.submittedAt);
+    const selectedLesson = () => {const id=query('id'),lessons=lessonList();return id?lessons.find(lesson=>lesson.id===id):lessons[0];};
+    const submittedExams = () => {
+        const rows=new Map();for(const exam of Object.values(state.exams)){if(!exam.submittedAt)continue;const key=String(exam.rootExamId||exam.id),prior=rows.get(key);if(!prior||exam.submittedAt>prior.submittedAt||(exam.submittedAt===prior.submittedAt&&Number(exam.id)>Number(prior.id)))rows.set(key,exam);}return [...rows.values()];
+    };
     const level = () => Math.min(15,Math.floor(Math.max(0,state.points)/20)+1);
     const petName = () => (mascotAvatars[state.mascot] || mascotAvatars.sprout)[0];
 
@@ -307,6 +228,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     }
 
     function configure(options) {
+        if(browser){groupGames=window.FivePlayerGames;arenaLobby=window.ArenaLobby;gameAllowance=window.GameAllowance;lessonStudy=window.LessonStudy;gameRulesView=window.GameRules;}
         host = options;
         if(live){applySnapshot(PlatformAPI.snapshot);return;}
         load();
@@ -370,169 +292,31 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             ${notice(live ? 'Tài khoản và tiến độ được lưu trên hệ thống 5BMath. Học liệu là các bài mẫu tự biên soạn.' : 'Tài khoản trải nghiệm lưu trên trình duyệt này. Học liệu trong khu học tập là các bài mẫu tự biên soạn.')}`;
     }
 
-    function homeworkPanel() {
-        return `<details class="card card-pad"><summary>Phiếu luyện tập mẫu · Khối 5</summary><p>Phiếu luyện tập tự biên soạn để tham khảo. Nộp bài cho thầy cô ở đúng bài tập của buổi học phía trên.</p>${button('Tải phiếu bài tập','download-material','outline')}</details>`;
-    }
+    function homeworkPanel(...args) { return feature('study').homeworkPanel(...args); }
 
-    function lessonVideoUrl(lesson) {
-        try {
-            const url=new URL(lesson.videoRef||lesson.video_ref||'');
-            return ['https:','http:'].includes(url.protocol)&&!url.username&&!url.password?url.href:'';
-        } catch {return '';}
-    }
-    function lessonVideo(lesson) {
-        const url=lessonVideoUrl(lesson);
-        if(!url)return '<div class="video-art"><div class="formula">'+escape(lesson.symbol||'Toán')+'</div><p>Video bài giảng đang được chuẩn bị.</p></div>';
-        const parsed=new URL(url),direct=/\.(mp4|webm|ogv|ogg)$/i.test(parsed.pathname);
-        return '<div class="lesson-video">'+(direct?'<video controls preload="none" playsinline src="'+escape(url)+'" aria-label="Video bài giảng '+escape(lesson.title)+'"></video>':'')+'<a class="btn outline" href="'+escape(url)+'" target="_blank" rel="noopener noreferrer">Mở video bài giảng ↗</a></div>';
-    }
-    function lessonExample(example) {
-        if(!example||typeof example.text!=='string'||!example.text.trim())return '<p class="learning-notice">Ví dụ đang được biên soạn.</p>';
-        const steps=Array.isArray(example.steps)?example.steps.filter(step=>typeof step==='string'):[];
-        return '<p>'+escape(example.text)+'</p>'+(steps.length?'<ol>'+steps.map(step=>'<li>'+solutionView.text(step)+'</li>').join('')+'</ol>':'')+(example.answer!==undefined?solutionView.answer(example.answer):'')+(example.thinking?'<details class="hint"><summary>Hướng dẫn tư duy</summary><p>'+escape(example.thinking)+'</p></details>':'');
-    }
+    function lessonVideo(...args) { return feature('study').lessonVideo(...args); }
+    function lessonExamples(...args) { return feature('study').lessonExamples(...args); }
+    function lessonSamples(...args) { return feature('study').lessonSamples(...args); }
 
     const views = {
-        dashboard() {
-            const lesson = lessonList().find(item => item.id === state.lastLesson) || lessonList()[0];
-            const learned = Object.values(state.completed).filter(item => item.grade === grade()).length;
-            if (!lesson) return `${intro('Góc Học Tập','Chào '+name()+'! · Khối '+grade())}<section class="card card-pad"><h2>Học liệu đang được cập nhật</h2><p>Em có thể xem lịch sử luyện tập, tài khoản và lớp học trong menu.</p>${link('Xem luyện tập','exams','dark')}${link('Tài khoản','profile','outline')}</section>`;
-            return `<div class="garden-dashboard"><section class="hero-app garden-welcome"><div class="hero-copy"><div class="garden-welcome-kicker">${badge('GÓC HỌC TẬP','light')}<span>Chào ${escape(name())}! · Khối ${grade()} · Tuần ${week()}</span></div><h1 class="garden-welcome-heading">Mỗi ngày một<br><span class="garden-heading-emphasis">mầm tri thức</span></h1><p class="garden-welcome-description">Cùng khám phá <strong>${escape(lesson.title)}</strong>.</p><div class="garden-welcome-actions">${link('Học tiếp','lesson','orange','arrow',{id:lesson.id})}${link('Xem bài học','weekly','outline','')}</div></div><div class="hero-art">${art('sprout','Mầm Sách đang đọc sách')}<span class="orbit" aria-hidden="true">✦</span></div></section>
-            <div class="grid3 stats garden-stats">${stat('book',learned + ' bài','Đã học')}${stat('file',submittedExams().length + ' đề','Đã hoàn thành','peach')}${stat('zap',content.format(state.points) + ' điểm','Kinh nghiệm linh vật','sand')}</div>
-            <div class="section-head garden-activities-heading"><h2>Hôm nay em muốn làm gì?</h2></div><div class="grid3 garden-shortcuts">${[['book','Bài giảng','Bài giảng theo tuần và chuyên đề.','weekly','sage'],['file','Luyện tập','Làm đề ngẫu nhiên và xem lời giải.','exams','peach'],['zap','Đấu trí','Luyện phản xạ toán học cùng linh vật.','arena','sand']].map(([symbol,title,copy,route,color]) => `<a class="card card-pad shortcut garden-shortcut" href="${href(route)}">${gardenActivityArt(symbol)}<span class="garden-classic-icon">${tile(symbol,color)}</span><h3>${title}</h3><p>${copy}</p><span class="inline-arrow">${icon('arrow')}</span></a>`).join('')}</div>
-            <aside class="garden-tip"><strong class="garden-tip-label">${icon('leaf',23)}Mẹo học tốt</strong><p class="garden-tip-copy">Đọc kỹ đề, làm <mark>từng bước.</mark></p></aside></div>`;
-        },
-
-        weekly() {
-            const lessons=lessonList();
-            if (!lessons.length) return `${intro('Bài giảng','Bài giảng khối '+grade())}<div class="toolbar">${tabs('weekly')}</div>${notice('Học liệu đang được cập nhật.')}`;
-            const filtered=lessons.filter(l=>l.week<=week() && (lessonRange==='all'||(lessonRange==='current'?l.week<=week():!state.completed[l.id]))).sort((a,b)=>b.week-a.week);
-            const upcoming=lessons.filter(l=>l.week===week()+1).slice(0,3);
-            return `${intro('Bài giảng',live?'Học liệu tự biên soạn, sắp xếp từ tuần gần nhất.':'Demo ngoại tuyến · Học liệu mẫu tự biên soạn, chỉ lưu trên trình duyệt này.',badge('Khối '+grade(),'sage'))}<div class="toolbar">${tabs('weekly')}${field('Hiển thị','learning-range',[['all','Tất cả bài mẫu'],['current','Đến tuần hiện tại'],['unfinished','Bài chưa học']],lessonRange)}</div>
-            ${heading('Bài giảng theo tuần')}<div class="card list">${filtered.map(lesson=>lessonRow(lesson)).join('')||'<p class="card-pad">Chưa có bài trong bộ lọc này.</p>'}</div>
-            ${heading('Khám phá tuần sau')}<div class="grid3">${upcoming.map(l=>`<a class="card card-pad" href="${href('lesson',{id:l.id})}">${badge('HỌC TRƯỚC','peach')}<h3>Tuần ${l.week}: ${escape(l.title)}</h3><p>${escape(l.description)}</p></a>`).join('')||'<p>Ba bài học tuần sau đang được biên soạn.</p>'}</div>`;
-        },
-
-        topics() {
-            const lessons=[...new Map(lessonList().map(l=>[l.topic,l])).values()];
-            if (!lessons.length) return `${intro('Bài giảng','Chuyên đề khối '+grade())}<div class="toolbar">${tabs('topics')}</div>${notice('Học liệu đang được cập nhật.')}`;
-            return `${intro('Bài giảng','Chọn một chuyên đề để đọc lý thuyết và tự luyện.',badge('Khối '+grade(),'sage'))}<div class="toolbar">${tabs('topics')}<label class="search">${icon('search',17)}<input id="topic-search" type="search" value="${escape(topicSearch)}" placeholder="Tìm chuyên đề" aria-label="Tìm chuyên đề"></label></div><p id="topic-count" role="status"></p>
-            <div class="grid3 topic-results">${lessons.map((lesson,index)=>`<a data-topic-title="${escape(lesson.title.toLocaleLowerCase('vi'))}" class="card topic" href="${href('advanced',{id:lesson.id})}"><div class="topic-art ${index%2?'sage':'peach'}" aria-hidden="true">${escape(lesson.symbol)}</div><div class="card-pad"><h3>${escape(lesson.title)}</h3><p>${escape(lesson.description)}</p><small>Lý thuyết · Ví dụ · Luyện tập</small></div></a>`).join('')}</div><p id="topic-empty" hidden>Chưa tìm thấy chuyên đề phù hợp.</p>`;
-        },
-
-        lesson(advanced = false) {
-            const lesson = selectedLesson();
-            if (!lesson) return `${back('Bài giảng','weekly')}${intro('Bài giảng','Học liệu đang được cập nhật.')}`;
-            const example = live ? lesson.example : content.problem(grade(),lesson.topic,1,0);
-            const isDone = Boolean(state.completed[lesson.id]);
-            return `${back(advanced ? 'Chuyên đề' : 'Bài giảng',advanced ? 'topics' : 'weekly')}${intro(lesson.title,'Khối ' + grade() + ' · ' + (advanced ? 'Chuyên đề' : 'Tuần ' + lesson.week),badge('Học liệu tự biên soạn','peach'))}
-            <div class="grid-wide"><article class="card video-card">${lessonVideo(lesson)}<div class="card-pad"><h2>Nhớ quy tắc</h2>${live && lesson.body ? rich(lesson.body,lesson.assets || []) : '<p>'+escape(lesson.theory)+'</p>'}<h3>Ví dụ</h3>${lessonExample(example)}</div></article>
-            <aside class="card card-pad self-start"><h2>Trong bài này</h2><div class="steps"><div>${tile('book')}<span><b>Lý thuyết và ví dụ</b><small>Đọc và thử giải lại</small></span></div><div>${tile('target','peach')}<span><b>Luyện tập</b><small>3 câu theo chuyên đề</small></span></div></div>${button(isDone ? 'Đã học xong' : 'Đánh dấu đã học','complete',isDone ? 'outline' : 'dark','check')}${button('Luyện 3 câu','practice','outline','target')}${isPaid()?button('Tải tài liệu','download-material','outline'):link('Mở quyền tải tài liệu','upgrade','outline','lock')}${notice(lessonVideoUrl(lesson)?'Đọc bài và xem video để ôn lại từng bước.':'Video đang chờ bản quay. Em có thể đọc bài học tại đây.')}</aside></div>`;
-        },
-
-        exams() {
-            const history=submittedExams().sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt));
-            const active=state.exams[state.activeExam];
-            return `${intro('Luyện tập','Chọn nội dung, làm đề và xem lại lời giải.',badge('Khối '+grade(),'sage'))}${bankNotice()}
-            ${active&&!active.submittedAt?`<section class="card card-pad"><h2>Tiếp tục đề đang làm</h2><p>${escape(active.code)}</p>${link('Làm tiếp','testing','dark','arrow',{id:active.id})}</section>`:''}
-            <div class="grid3 exam-types"><section class="card card-pad">${tile('target')}<h2>Ôn theo nội dung</h2><p>Luyện tập theo chương trình trên lớp hoặc theo chuyên đề nâng cao</p>${usagePanel('content')}${field('Phạm vi','exam-scope',[['weekly','Theo chương trình học trên lớp'],['topic','Chuyên đề nâng cao']])}<label class="field"><span>Nội dung · Tìm kiếm</span><input id="exam-content-search" type="search" placeholder="Tìm tuần hoặc nội dung" aria-label="Tìm nội dung luyện tập"></label><label class="field"><span>Nội dung</span><select id="exam-topic" size="5" aria-label="Nội dung luyện tập">${examOptions('weekly')}</select></label>${canUse('content')?button('Tạo đề theo nội dung','create-topic','dark','arrow'):link('Nâng cấp gói','upgrade')}</section>
-            <section class="card card-pad">${tile('file','peach')}<h2>Đề tổng hợp</h2><p>Thi thử với mẫu đề thi cấp 2 CLC trên cả nước</p>${usagePanel('combined')}${field('Độ khó','exam-difficulty',content.levels.slice(0,3).map((label,index)=>[index,label]))}${canUse('combined')?button('Tạo đề ngẫu nhiên','create-exam','dark','arrow'):link('Nâng cấp gói','upgrade')}<small>Đề luyện mẫu tự biên soạn.</small></section>
-            <section class="card card-pad"><div class="split">${tile('lock','sand')}${badge('Chỉ dành cho khối 5','peach')}</div><h2>Đề theo trường</h2><p>Đề theo mẫu chuẩn của các trường cấp 2 CLC trên địa bàn Hà Nội. Phù hợp với học sinh có mục tiêu trường cụ thể hoặc các bạn HSG trên cả nước muốn thử sức.</p>${badge(['VIP+','SVip'].includes(member())?'Đã mở khóa · VIP+':'Dành cho VIP+','sand')}${field('Trường','exam-school',[['cau-giay','THCS Cầu Giấy'],['ngoai-ngu','THCS Ngoại ngữ'],['ntt','Nguyễn Tất Thành']])}${['VIP+','SVip'].includes(member())&&grade()===5?button('Luyện đề theo trường','create-school','dark'):isPaid()?notice('Chức năng dành cho học sinh khối 5.'):link('Nâng cấp gói','upgrade','outline','lock')}<small>Hiện dùng ngân hàng mẫu tự biên soạn; cấu trúc chuẩn theo từng trường đang được biên tập, chưa phải đề chính thức.</small></section></div>
-            <section class="card card-pad practice-lookup"><h2>Tra cứu câu hỏi</h2><p>Xem lại câu hỏi bằng mã khi cần ôn tập.</p>${link('Tra cứu mã câu hỏi','lookup','outline','search')}</section>${heading('Đề đã làm')}<div class="card list">${history.map(exam=>`<a class="list-row" href="${href('results',{id:exam.id})}">${tile('file','peach')}<div><strong>${escape(exam.title)}</strong><small>${escape(exam.code)} · ${new Date(exam.submittedAt).toLocaleDateString('vi-VN')}</small></div>${badge(exam.score+'/10','sage')}${icon('chevron',17)}</a>`).join('')||'<p class="card-pad">Em chưa hoàn thành đề nào.</p>'}</div>`;
-        },
-
-        testing() {
-            const exam = getExam();
-            if (!exam) return intro('Làm đề','Chọn một đề để bắt đầu.') + link('Chọn cách luyện','exams');
-            if (exam.submittedAt) return views.results();
-            const index = Math.min(exam.index || 0,exam.questions.length - 1);
-            const question = exam.questions[index];
-            const count = exam.questions.filter(item => String(exam.answers[item.id] || '').trim()).length;
-            return `${back('Thi thử','exams')}${intro(exam.title,'Khối ' + exam.grade + ' · ' + exam.code,`<div class="timer" id="learning-timer">${icon('clock')} ${timeLeft(exam.expiresAt)}</div>`)}
-            <div class="grid-wide"><section class="card card-pad question"><div class="split">${badge('Câu ' + (index + 1) + ' / ' + exam.questions.length,'sage')}${badge(question.topicTitle)}</div><div class="question-prompt">${live && question.prompt ? rich(question.prompt,exam.assets) : '<h2>'+escape(question.text)+'</h2>'}</div>${(question.responseMode==='choice'||exam.responseMode==='choice')?`<div class="answers">${question.options.map((option,optionIndex) => `<label class="answer"><input type="radio" name="learning-answer" value="${escape(option)}" ${exam.answers[question.id] === option ? 'checked' : ''}><b>${'ABCD'[optionIndex]}</b>${escape(typeof question.answer === 'number' ? content.format(Number(option)) : option)}</label>`).join('')}</div>`:answerInput(exam.answers[question.id]||'',false,question.answerKind)}${PracticeScratchpad.markup()}<div class="split wrap-row">${button('Câu trước','previous','outline','back',index === 0 ? 'disabled' : '')}${button('Câu tiếp theo','next','dark','arrow',index === exam.questions.length - 1 ? 'disabled' : '')}</div></section>
-            <aside class="card card-pad self-start"><h2>Phiếu làm bài</h2><p id="learning-answered">${count} / ${exam.questions.length} câu đã trả lời</p><div class="question-grid">${exam.questions.map((item,n) => `<button type="button" data-question="${n}" class="${n === index ? 'current ' : ''}${String(exam.answers[item.id]??'').trim() ? 'done' : ''}" aria-current="${n===index?'step':'false'}" aria-label="Câu ${n + 1}${String(exam.answers[item.id]??'').trim()?' · Đã trả lời':' · Chưa trả lời'}">${n + 1}</button>`).join('')}</div><div class="practice-export-actions">${button('Nộp bài','submit-exam','dark','check')}${browser&&live&&PlatformAPI.snapshot.practiceExport?.enabled&&typeof PracticeExport!=='undefined'?PracticeExport.button('main',exam.id):''}</div></aside></div>`;
-        },
-
-        results() {
-            const exam = getExam();
-            if (!exam?.submittedAt) return intro('Kết quả thi thử','Chưa có kết quả cho đề này.') + link('Về thi thử','exams');
-            if (exam.legacy) {
-                return `${back('Thi thử','exams')}${intro('Kết quả đã lưu',exam.title + ' · ' + new Date(exam.submittedAt).toLocaleDateString('vi-VN'))}<section class="card card-pad"><h2>${exam.score} / 10 điểm</h2><p>Bản ghi trước đây lưu điểm và ngày làm. Em có thể xem lại đề mẫu và lời giải ở trang thi thử ban đầu.</p><a class="btn outline" href="${browser && location.protocol === 'file:' ? '#exam' : 'de-thi-thu-toan-vao-lop-6/'}">Mở đề mẫu ban đầu</a></section>`;
-            }
-            return `${back('Thi thử','exams')}${intro('Kết quả thi thử',exam.title + ' · ' + exam.code)}<section class="result-band sage"><div class="score-circle"><strong>${exam.score}<span>/10</span></strong><small>Điểm của em</small></div><div><h2>Đã chấm xong!</h2><p>${exam.correct} / ${exam.questions.length} câu đúng · Thời gian ${timeText(exam.duration)}</p>${link('Tạo đề khác','exams')}</div></section>${heading('Lời giải theo câu')}
-            <div class="solution-list">${exam.questions.map((question,index) => `<article class="card card-pad solution"><div class="split">${badge('Câu ' + (index + 1) + ' · ' + question.topicTitle,'sage')}${badge(isCorrect(question,exam.answers[question.id]) ? 'Trả lời đúng' : 'Cần xem lại',isCorrect(question,exam.answers[question.id]) ? 'sage' : 'peach')}</div><div>${live && question.prompt ? rich(question.prompt,exam.assets) : '<h3>'+escape(question.text)+'</h3>'}</div><p>Em trả lời ${escape(exam.answers[question.id] ?? 'chưa trả lời')}</p>${solutionView.answer(question.answer,'Đáp án')}<div class="solution-grid"><div><b>Hướng dẫn tư duy</b><p>${escape(question.thinking)}</p></div><div><b>Lời giải từng bước</b>${live && question.solution ? rich(question.solution,exam.assets,true) : '<ol>'+question.steps.map(step => '<li>'+solutionView.text(step)+'</li>').join('')+'</ol>'}</div></div></article>`).join('')}</div>`;
-        },
-
-        arena() {
-            const controls=[['quick','zap','Đấu nhanh'],['friends','users','Với bạn'],['bot','bot','Với máy']];
-            return `${groupGames.tabs('duel')}${intro('Đấu trí toán học','Chọn cách chơi và đồng hành cùng linh vật của em.')}
-            <div class="arena-lobby"><section class="card card-pad arena-player"><a href="${href('mascot')}" class="arena-player-pet">${art(state.mascot)}<div><strong>${escape(petRank(level()))}</strong><small>${content.format(state.points)} kinh nghiệm</small></div></a><div class="arena-player-usage" id="arena-mode-usage">${usagePanel(arenaMode==='bot'?'bot':'human')}</div>${meter(rankPercent(),'Tiến độ linh vật')}<small>${rankProgress()}</small></section>
-            ${disciplinePanel()}<div class="arena-modes" role="tablist" aria-label="Chế độ đấu trí">${controls.map(([key,symbol,label])=>`<button type="button" role="tab" id="arena-tab-${key}" data-arena-mode="${key}" aria-controls="arena-panel-${key}" aria-selected="${arenaMode===key}" tabindex="${arenaMode===key?'0':'-1'}" class="${arenaMode===key?'selected':''}">${icon(symbol,25)}<span>${label}</span></button>`).join('')}</div>
-            <section class="arena-mode-panel" id="arena-panel-quick" role="tabpanel" aria-labelledby="arena-tab-quick" ${arenaMode==='quick'?'':'hidden'}>
-              <h2 class="arena-panel-title">Tìm trận nhanh</h2><button type="button" class="arena-action arena-action-quick" data-human-play data-human-quota="true" data-learning="quick-match" ${canPlayHuman()?'':'disabled'}>${icon('search',30)}<span><strong>Tìm đối thủ</strong><small>Ghép với bạn cùng lớp ${grade()} hoặc mở phòng công khai</small></span></button>
-              <div class="section-head arena-rooms-heading"><h3>Phòng đang mở</h3>${badge('Lớp '+grade(),'sage')}</div><section class="card card-pad" id="public-rooms" aria-live="polite">Đang tìm phòng…</section>
-            </section>
-            <section class="arena-mode-panel" id="arena-panel-friends" role="tabpanel" aria-labelledby="arena-tab-friends" ${arenaMode==='friends'?'':'hidden'}>
-              <h2 class="arena-panel-title">Đấu với bạn</h2><button type="button" class="arena-action arena-action-friends" data-human-play data-human-quota="true" data-learning="create-room" ${canPlayHuman()?'':'disabled'}>${art('sprout')}<span><strong>Tạo phòng đấu</strong><small>Mời bạn bằng mã hoặc mở phòng cho tất cả</small></span>${icon('plus',24)}</button>
-              <section class="card card-pad arena-join"><h3>Có mã phòng?</h3><form id="learning-join-form"><label class="field"><span>Mã phòng hoặc liên kết</span><input id="learning-room-code" placeholder="Nhập mã hoặc dán liên kết" required maxlength="500" autocomplete="off"></label><button class="btn dark" data-human-play data-human-quota="true" type="submit" ${canPlayHuman()?'':'disabled'}>Vào phòng</button></form><small>Dán liên kết bạn gửi cũng được. Câu hỏi của trận do hệ thống chuẩn bị cho hai bạn.</small></section>
-            </section>
-            <section class="arena-mode-panel" id="arena-panel-bot" role="tabpanel" aria-labelledby="arena-tab-bot" ${arenaMode==='bot'?'':'hidden'}>
-              <h2 class="arena-panel-title">Luyện với Bot</h2>
-              <button type="button" class="arena-action arena-action-bot" data-learning="start-bot" ${canUse('bot')?'':'disabled'}>${art('fox','',false,0)}<span><strong>Bắt đầu luyện với Bot</strong></span>${icon('play',22)}</button>
-            </section>
-            ${gameRulesView.markup('duel')}</div>`;
-        },
-
-        room() {
-            return `${back('Đấu trí','arena')}${intro('Phòng chờ','Chia sẻ mã hoặc chờ một lời thách đấu.')}<section class="card card-pad"><h2>Phòng của em</h2><div id="learning-room-status" role="status">Đang kết nối phòng…</div><div id="learning-room-content"></div><div class="actions">${button('Đi học tiếp trong thời gian chờ','minimize-room','dark','book')}${button('Rời phòng','leave-room','outline')}</div></section>`;
-        },
-
-        battle() {
-            if(!currentBattle)return intro('Trận đấu','Đang kết nối trận đấu…')+link('Về đấu trí','arena');
-            const b=currentBattle,q=b.questions[b.index],scene=battleScenery(b),time=battleTime(b);
-            return `${intro('Đấu trí toán học','Khối '+b.grade+' · '+(b.mode==='bot'?'Luyện với Bot':'Đấu với bạn'))}
-            <div class="battle-play-layout"><div class="battle-stage illustrated-arena" id="battle-stage" data-scenery="${scene[0]}" style="--arena-background:url('arena-art/${scene[0]}.webp')"><span class="arena-scene-name">${escape(scene[1])}</span><span class="spell-announcement" id="spell-announcement" role="status"></span><div class="fighter" id="fighter-me"><div class="split"><b>${escape(name())}</b><b id="my-hp">${b.hp} / 100 ♥</b></div>${meter(b.hp,'Máu của em')}<div class="pet-body">${battlePet(state.mascot,petName())}<span class="spell-effect" aria-hidden="true"></span><span class="damage" aria-hidden="true">−20 ♥</span><span class="emote-bubble" id="my-emote"></span></div><strong>${escape(petName())}</strong></div><div class="versus">VS</div><div class="energy-beam" aria-hidden="true"></div><div class="fighter right" id="fighter-opponent"><div class="split"><b>${escape(displayName(b.opponent))}</b><b id="opponent-hp">${b.opponentHp} / 100 ♥</b></div>${meter(b.opponentHp,'Máu đối thủ')}<div class="pet-body">${battlePet(b.opponentMascot||(state.mascot==='fox'?'sprout':'fox'),'Linh vật đối thủ','idle',b.opponentXp??0)}<span class="spell-effect" aria-hidden="true"></span><span class="damage" aria-hidden="true">−20 ♥</span><span class="emote-bubble" id="opponent-emote"></span></div><strong>${b.mode==='bot'?'Bot luyện tập':'Đối thủ'}</strong></div></div>
-            <section class="card card-pad battle-question"><div class="battle-round-content"><div class="battle-question-content"><div class="battle-question-meta">${badge('Câu '+(b.index+1)+' / '+b.questions.length,'sage')}<div class="battle-countdown"><div class="meter battle-time-meter" id="learning-battle-time-meter" role="progressbar" aria-label="Thời gian còn lại" aria-valuemin="0" aria-valuemax="${time.duration}" aria-valuenow="${time.remaining}" aria-valuetext="${timeText(time.remaining)} còn lại"><span style="--value:${time.percent}%"></span></div><span class="battle-time-remaining" id="learning-battle-timer">${timeText(time.remaining)}</span></div></div><h2>${escape(q.text)}</h2><form id="battle-answer-form">${answerInput(b.answer??b.draftAnswer??'',true,q.answerKind,q)}</form><p id="battle-defense-status" class="defense-status" role="status" hidden></p><p id="learning-battle-feedback" class="learning-feedback ${b.feedback?.includes('chưa đúng')?'wrong':''}" role="status">${escape(b.feedback||(q.responseMode==='choice'?'Chọn đáp án để gửi ngay.':'Em hãy nhập đáp án rồi bấm Gửi.'))}</p></div><section class="battle-round-status" aria-labelledby="battle-round-title" hidden><div class="battle-round-message" role="status" aria-atomic="true"><span class="battle-round-symbol" aria-hidden="true"></span><h2 id="battle-round-title"></h2><p id="battle-round-detail"></p></div><p class="battle-round-next" id="battle-round-next"></p><div class="battle-round-countdown" aria-live="off"><strong id="next-round-count"></strong></div><p class="battle-round-wait" id="battle-round-wait"></p></section></div><div class="emote-bar" role="group" aria-label="Gửi lời cổ vũ">${emotes.map(([symbol,text],i)=>`<button type="button" data-emote="${i}" title="${escape(text)}" aria-label="${escape(text)}" ${emoteSeconds(b)>0?'disabled':''}>${symbol}<small>${text}</small></button>`).join('')}</div>${button('Rời trận','leave-battle','outline')}</section></div>`;
-        },
-
-        battleResult() {
-            let cached=null; if(browser)try{cached=JSON.parse(sessionStorage.getItem('5bmath-last-battle')||'null');}catch{}
-            const result=state.battles[query('id')]||(cached?.id===query('id')?cached:null)||Object.values(state.battles).at(-1);
-            if(!result)return intro('Kết quả trận','Chưa có trận hoàn thành.')+link('Vào đấu trí','arena');
-            const win=result.outcome==='win',lose=result.outcome==='lose',unfinished=result.mode!=='bot'&&result.completed===false;
-            const resultTitle=unfinished?(result.reason==='server_restart'?'Trận đấu đã dừng':win?(result.reason==='disconnect'?'Đối thủ đã mất kết nối':'Đối thủ đã rời trận'):result.reason==='disconnect'?'Trận đấu bị gián đoạn':'Em đã rời trận'):(win?'Chúc mừng! Em đã chiến thắng!':lose?'Cố lên, em sẽ tiến bộ mỗi ngày!':result.outcome==='left'?'Đã rời trận':'Hai bạn đã rất cố gắng!');
-            const interruptionNote=unfinished?`<p class="battle-interruption-note">${result.reason==='server_restart'?'Trận đấu đã dừng do máy chủ khởi động lại. Em không bị trừ kinh nghiệm.':win?'Em thắng do đối thủ rời trận và không nhận kinh nghiệm.':result.penalty?.disconnectForgiven?'Lần mất kết nối kéo dài đầu tiên trong 24 giờ được bỏ qua; em không bị trừ kinh nghiệm.':result.points<0?'Em bị trừ 1 kinh nghiệm vì bỏ trận.':lose?'Rời trận tính là thua.':'Trận đấu chưa hoàn thành.'} Trận này không cộng vào số trận thắng/thua của cả hai.${result.quotaRefunded?' Em đã được hoàn lượt đấu trong ngày.':''}</p>${result.penalty?.kind&&!result.penalty?.disconnectForgiven?`<p class="battle-penalty-note">${result.penalty.cooldownSeconds?'Em cần nghỉ đấu với người '+Math.ceil(result.penalty.cooldownSeconds/60)+' phút.':'Đây là lần vi phạm đầu tiên trong 24 giờ. Hãy chơi trọn trận cùng bạn nhé.'}</p>`:''}`:'';
-            return `${back('Đấu trí','arena')}${intro('Kết quả trận đấu',result.mode==='bot'?'Luyện với Bot':'Đấu với bạn')}
-            <section class="result-band sage battle-result ${win&&!unfinished?'victory':lose?'defeat':''}"><div class="score-circle"><strong>${result.points>0?'+':''}${result.points}</strong><small>Kinh nghiệm</small></div><div><h2>${resultTitle}</h2><p>${result.correct} câu đúng · ${Math.max(0,result.rounds-result.correct)} câu chưa đúng · ${result.rounds} câu đã chơi</p>${interruptionNote}${link('Chơi tiếp','arena')}</div><div class="result-pet">${art(state.mascot,petName())}</div>${win&&!unfinished?celebrationMarkup({seed:'battle:'+result.id,className:'confetti'}):''}</section>${disciplinePanel()}
-            ${heading('Xem lại câu hỏi')}<label class="review-filter"><input type="checkbox" id="review-incorrect"> Chỉ xem câu chưa đúng</label><div class="solution-list">${(result.review||[]).map((item,i)=>`<article class="card card-pad" data-review-correct="${Boolean(item.correct)}"><div class="split"><b>Câu ${i+1}. ${escape(item.text)}</b>${badge(item.correct?'Đúng':'Cần xem lại',item.correct?'sage':'peach')}</div><p>Em chọn: ${escape(item.myAnswer??'Chưa trả lời')}</p><details class="hint"><summary>Xem cách giải</summary>${solutionView.answer(item.answer,'Đáp án')}<ol>${(item.steps||[]).map(step=>'<li>'+solutionView.text(step)+'</li>').join('')}</ol></details></article>`).join('')||'<p>Chưa có câu hỏi để xem lại.</p>'}</div>`;
-        },
-
-        mascot() {
-            const history = Object.values(state.battles).filter(battle => battle.mode !== 'bot' && battle.outcome !== 'left' && battle.completed !== false);
-            return `${intro('Linh vật của em','Chọn bạn đồng hành và xem kinh nghiệm sau mỗi trận.')}
-            <section class="card feature-row sage mascot-feature"><div>${badge('Đang đồng hành · '+petRank(level()),'white')}<h2>${escape(petName())}</h2><p>${content.format(state.points)} kinh nghiệm · Mỗi 20 kinh nghiệm lên một bậc</p>${meter(rankPercent(),'Tiến độ huy hiệu')}<small>${rankProgress()}</small></div>${art(state.mascot,petName())}</section>
-            <div class="grid3 stats">${stat('cup',history.filter(item => item.outcome === 'win').length + ' trận','Thắng · +2 điểm','sand')}${stat('flag',history.filter(item => item.outcome === 'lose').length + ' trận','Thua · −1 điểm','peach')}${stat('users',history.filter(item => item.outcome === 'draw').length + ' trận','Hòa · 0 điểm')}</div>
-            ${heading('Chọn linh vật')}<div class="grid2">${['dog','horse','dolphin','octopus','starfish','bee','butterfly','ca-map','tiger','crab','eagle','sparrow','sprout','cu-meo','fox','voi','rabbit','cat','gau','lion'].map(pet => {const title=mascotAvatars[pet][0];return `<section class="card card-pad pet-option">${art(pet,title)}<div><h3>${title}</h3>${pet === state.mascot ? badge('Đang chọn','sage') : button('Chọn ' + title,'choose-' + pet,'outline')}<button type="button" class="btn outline pet-evolution-button" data-evolution="${pet}" aria-label="Xem tiến hóa của ${title}">Xem tiến hóa</button></div></section>`;}).join('')}</div>`;
-        },
-
-        rank() { return groupGames.tabs('rank')+intro('Bảng xếp hạng','Linh vật · Đấu trí · Cướp Cờ · Đua Thú')+'<section class="card card-pad"><p>Đăng nhập trên máy chủ để xem kết quả thật của bốn bảng xếp hạng.</p></section>'; },
-
-        profile() {
-            if(live)return liveProfile();
-            const academicGrade = state.birthYear ? content.gradeFor(state.birthYear) : null;
-            const invitation = browser ? new URL('./?invite=' + state.inviteCode,document.baseURI).href : '';
-            return `${intro('Tài khoản & quyền học','Mỗi tài khoản tương ứng một học sinh.',badge('Tài khoản trải nghiệm','peach'))}${themeSettings()}<div class="grid2"><section class="card card-pad profile-card"><div class="split"><span class="rank-avatar">${escape(initials())}</span>${badge('Thường','sage')}</div><h2>${escape(name())}</h2><p>${academicGrade ? academicGrade >= 1 && academicGrade <= 5 ? 'Khối ' + academicGrade : 'Đã ngoài khối tiểu học · Ôn tập khối ' + grade() : 'Khối 5 minh họa · Chưa nhập năm sinh'}</p>
-            ${state.birthYear ? `<label class="field"><span>Năm sinh đã đăng ký</span><input value="${state.birthYear}" readonly aria-readonly="true"></label><p class="learning-notice">Năm sinh cố định sau đăng ký. Liên hệ hỗ trợ nếu cần điều chỉnh khối học.</p>` : `<form id="learning-birth-form"><label class="field"><span>Năm sinh</span><input name="birthYear" type="number" required></label><button class="btn dark" type="submit">Lưu năm sinh</button></form>`}
-            ${button('Đổi tên hiển thị','rename','outline')}${button('Thoát tài khoản mẫu','logout','outline')}</section>
-            <section class="card card-pad"><h2>Mời bạn học cùng</h2><p>Người mời nhận một tháng VIP khi bạn được mời nâng cấp VIP lần đầu.</p><label class="field"><span>Mã giới thiệu của em</span><input readonly value="${escape(state.inviteCode)}"></label><div class="actions">${button('Sao chép mã','copy-invite','dark','copy')}${button('Sao chép liên kết','copy-invite-link','outline','copy')}</div><label class="field"><span>Liên kết giới thiệu</span><input readonly value="${escape(invitation)}"></label>${state.invitedBy ? '<p>Mã người giới thiệu đã ghi nhận ' + escape(state.invitedBy) + '.</p>' : ''}<p class="learning-notice">Mã và liên kết dùng thử lưu trên thiết bị này. Ghi nhận thanh toán và thưởng VIP đang chờ kết nối tài khoản thật.</p></section></div>
-            ${accountRecordsSection('notifications')}${accountRecordsSection('referrals')}
-            ${heading('Quyền học')}<div class="grid3">${[['video','Nội bộ','Đầy đủ chức năng trong thời gian theo học lớp Zoom.','sage'],['spark','VIP','Đầy đủ chức năng trong thời hạn gói. Hết hạn chuyển về Thường.','sand'],['leaf','Thường','Truy cập học liệu và chức năng miễn phí được mở.','peach']].map(([symbol,title,copy,color]) => `<section class="card card-pad">${tile(symbol,color)}<h3>${title}</h3><p>${copy}</p></section>`).join('')}</div>`;
-        },
-
-        zoomRegistration() { return intro('Đăng ký học Zoom','Cùng thầy cô xây nền tảng Toán và phát triển tư duy.')+'<div class="zoom-svip-plan">'+svipPlan(true)+'</div>'; },
-        classroom() { return liveClassroom(); },
-        upgrade() { return upgradeView(); },
-        payment() { return intro('Thanh toán','Kiểm tra thông tin trước khi chuyển khoản.')+'<section class="card card-pad" id="payment-content" role="status">Đang chuẩn bị thông tin…</section>'; },
+"dashboard"(...args){return feature('study').views["dashboard"](...args);},
+"weekly"(...args){return feature('study').views["weekly"](...args);},
+"topics"(...args){return feature('study').views["topics"](...args);},
+"lesson"(...args){return feature('study').views["lesson"](...args);},
+"exams"(...args){return feature('practice').views["exams"](...args);},
+"testing"(...args){return feature('practice').views["testing"](...args);},
+"results"(...args){return feature('practice').views["results"](...args);},
+"arena"(...args){return feature('arena').views["arena"](...args);},
+"room"(...args){return feature('arena').views["room"](...args);},
+"battle"(...args){return feature('arena').views["battle"](...args);},
+"battleResult"(...args){return feature('arena').views["battleResult"](...args);},
+"mascot"(...args){return feature('profile').views["mascot"](...args);},
+"rank"(...args){return feature('arena').views["rank"](...args);},
+"profile"(...args){return feature('profile').views["profile"](...args);},
+"zoomRegistration"(...args){return feature('commerce').views["zoomRegistration"](...args);},
+"classroom"(...args){return feature('classroom').views["classroom"](...args);},
+"upgrade"(...args){return feature('commerce').views["upgrade"](...args);},
+"payment"(...args){return feature('commerce').views["payment"](...args);}
     };
 
     function syncAccountPages(snapshot) {
@@ -600,24 +384,9 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         if(PlatformAPI.snapshot.account)PlatformAPI.snapshot.account.classroomUnread=summary;
         updateClassUnread();
     }
-    function accountPagination(kind,record){
-        const pages=Math.max(1,Math.ceil(record.total/5)),label=kind==='notifications'?'thông báo':'lượt giới thiệu';
-        return record.total?`<nav class="account-pagination" aria-label="Trang ${label}"><span>${record.total} ${label} · Trang ${record.page} / ${pages}</span><div class="actions"><button type="button" class="btn outline" data-account-page="${kind}" data-page="${record.page-1}" ${record.page<=1||record.loading?'disabled':''}>Trang trước</button><button type="button" class="btn outline" data-account-page="${kind}" data-page="${record.page+1}" ${record.page>=pages||record.loading?'disabled':''}>Trang sau</button></div></nav>`:'';
-    }
-    function accountRecordsMarkup(kind){
-        const record=accountPages[kind],rows=record.rows||[];
-        const title=kind==='notifications'?'Thông báo tài khoản':'Lịch sử giới thiệu';
-        let body;
-        if(kind==='notifications')body=rows.map(item=>`<article class="account-notification ${item.read_at?'is-read':'is-unread'}" data-notification-row="${Number(item.id)}"><div class="account-notification-copy"><div class="account-notification-state">${item.read_at?'Đã đọc':'Chưa đọc'}<time datetime="${escape(item.created_at)}">${escape(accountDate(item.created_at))}</time></div><h3>${escape(notificationTitle(item))}</h3><p class="account-notification-sender"><span>Người gửi</span><strong>${escape(notificationSender(item))}</strong></p></div><button class="btn ${item.read_at?'outline':'dark'}" type="button" data-notification="${Number(item.id)}" aria-label="Xem thông báo: ${escape(notificationTitle(item))}" ${notificationPending===item.id?'disabled':''}>${notificationPending===item.id?'Đang mở…':'Xem'}</button></article>`).join('');
-        else body=rows.map(item=>{
-            const supported=Boolean(item.support_confirmed_at),granted=item.reward_status==='granted',support=item.reward_status==='customer_service';
-            const label=supported||granted?'Đã nhận thưởng':support?'Cần hỗ trợ nhận thưởng':'Chờ nâng cấp VIP';
-            return `<article class="account-referral" data-referral-row="${Number(item.id)}"><header><h3>${escape(displayName(item.full_name))}</h3><span class="referral-status ${supported||granted?'is-granted':support?'needs-support':'is-pending'}">${label}</span></header><dl class="referral-dates"><div><dt>Ngày đăng ký</dt><dd>${escape(accountDate(item.registered_at))}</dd></div><div><dt>Nâng cấp VIP lần đầu</dt><dd>${escape(accountDate(item.first_vip_upgraded_at))}</dd></div></dl><div class="referral-reward ${supported||granted?'is-granted':support?'needs-support':''}">${supported?`<strong>Đã được hỗ trợ nhận thưởng</strong><span>Ngày xác nhận hỗ trợ: ${escape(accountDate(item.support_confirmed_at))}</span>`:granted?`<strong>Đã cộng 1 tháng VIP</strong><span>Ngày cộng thưởng: ${escape(accountDate(item.reward_granted_at))}</span><b>VIP sau cộng thưởng đến: ${item.reward_vip_expires_at?escape(accountDate(item.reward_vip_expires_at)):'Chờ cập nhật thời hạn'}</b>`:support?'<strong>Liên hệ chăm sóc khách hàng</strong><span>Đội ngũ 5BMath sẽ hỗ trợ tài khoản nội bộ nhận thưởng.</span>':'<strong>Chưa phát sinh thưởng</strong><span>Thưởng được ghi nhận khi bạn nâng cấp VIP lần đầu.</span>'}</div></article>`;
-        }).join('');
-        const empty=kind==='notifications'?'Em chưa có thông báo.':'Chưa có tài khoản đăng ký qua mã của em.';
-        return `<div class="account-records-head"><h2 data-account-heading tabindex="-1">${title}</h2>${kind==='notifications'?`<span class="account-record-count">${unreadNotificationCount()} chưa đọc</span>`:''}</div><div class="account-records-list">${body||`<p class="account-records-empty">${empty}</p>`}</div><p class="account-records-feedback" id="${kind}-feedback" role="alert" ${record.error?'':'hidden'}>${escape(record.error)}</p>${record.loading?'<p class="account-records-loading" role="status">Đang tải…</p>':''}${accountPagination(kind,record)}`;
-    }
-    function accountRecordsSection(kind){return `<section class="card card-pad account-records" id="account-${kind}" aria-label="${kind==='notifications'?'Thông báo tài khoản':'Lịch sử giới thiệu'}">${accountRecordsMarkup(kind)}</section>`;}
+    function accountPagination(...args) { return feature('profile').accountPagination(...args); }
+    function accountRecordsMarkup(...args) { return feature('profile').accountRecordsMarkup(...args); }
+    function accountRecordsSection(...args) { return feature('profile').accountRecordsSection(...args); }
     function updateAccountSection(kind){
         const container=document.querySelector('#account-'+kind);if(!container)return;
         const position={x:scrollX,y:scrollY},focused=container.contains(document.activeElement)?document.activeElement:null;
@@ -641,21 +410,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             for(const control of pager.querySelectorAll('[data-account-page]'))control.disabled=record.loading||(Number(control.dataset.page)<record.page?record.page<=1:record.page>=pages);
         }
     }
-    async function loadAccountPage(kind,page=accountPages[kind].page,{quiet=false}={}){
-        if(!live||!PlatformAPI.snapshot.authenticated)return;
-        const record=accountPages[kind],owner=accountPageOwner,ticket=++record.request;
-        record.loading=!quiet;record.error='';if(!quiet)updateAccountSection(kind);
-        try{
-            let result=await PlatformAPI.request(kind+'?page='+Math.max(1,page));
-            const last=Math.max(1,Math.ceil(result.total/5));
-            if(result.page>last)result=await PlatformAPI.request(kind+'?page='+last);
-            if(owner!==accountPageOwner||ticket!==record.request)return;
-            Object.assign(record,{page:result.page,rows:result.rows,total:result.total,error:''});
-            if(kind==='notifications')adoptNotificationSummary(result);
-            else if(result.page===1){PlatformAPI.snapshot.account.referrals=result.rows;PlatformAPI.snapshot.account.referralTotal=result.total;}
-        }catch(error){if(owner===accountPageOwner&&ticket===record.request){record.error='Chưa tải được '+(kind==='notifications'?'thông báo':'lịch sử giới thiệu')+'. '+error.message;}}
-        finally{if(owner===accountPageOwner&&ticket===record.request){record.loading=false;updateAccountSection(kind);}}
-    }
+    function loadAccountPage(...args) { return feature('profile').loadAccountPage(...args); }
     function stopNotificationPolling(){
         notificationPolling=false;notificationLifecycle++;clearTimeout(notificationPollTimer);notificationPollTimer=null;
     }
@@ -663,7 +418,14 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         clearTimeout(notificationPollTimer);notificationPollTimer=null;
         if(notificationPolling&&!document.hidden&&navigator.onLine!==false&&PlatformAPI.snapshot.authenticated)notificationPollTimer=setTimeout(()=>refreshNotificationSummary(),30000);
     }
+    function learnerBackgroundAllowed(){
+        if(!live)return true;
+        const family=PlatformAPI.familyState;
+        return Boolean(PlatformAPI.snapshot.authenticated&&(!family||(family.activeProfile?.type==='child'&&family.scope==='child')));
+    }
     async function refreshNotificationSummary({focus=false}={}){
+        if(!learnerBackgroundAllowed())return;
+        if(PlatformAPI.familyContext&&currentRoute==='profile'){await loadPersonalNotices();scheduleNotificationPolling();return;}
         if(!notificationPolling||document.hidden||navigator.onLine===false||!PlatformAPI.snapshot.authenticated)return;
         if(notificationPollBusy||notificationPending!==null||Date.now()-notificationLastRefresh<(focus?3000:15000)){scheduleNotificationPolling();return;}
         const lifecycle=notificationLifecycle,owner=accountPageOwner,version=notificationVersion,classVersion=classUnreadVersion;
@@ -672,12 +434,13 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         const referralPage=accountPages.referrals.page,referralRequest=accountPages.referrals.request;
         notificationPollBusy=true;
         try{
-            const [result,classResult,referralResult]=await Promise.all([PlatformAPI.request('notifications?page=1'),isInternal()?PlatformAPI.request('classes/unread').catch(()=>null):Promise.resolve(null),currentRoute==='profile'&&!accountPages.referrals.loading?PlatformAPI.request('referrals?page='+referralPage).catch(()=>null):Promise.resolve(null)]);
+            const familyProfile=Boolean(PlatformAPI.familyContext);
+            const [result,classResult,referralResult]=await Promise.all([familyProfile?Promise.resolve(null):PlatformAPI.request('notifications?page=1'),isInternal()?PlatformAPI.request('classes/unread').catch(()=>null):Promise.resolve(null),!familyProfile&&currentRoute==='profile'&&!accountPages.referrals.loading?PlatformAPI.request('referrals?page='+referralPage).catch(()=>null):Promise.resolve(null)]);
             if(!notificationPolling||lifecycle!==notificationLifecycle||owner!==accountPageOwner||version!==notificationVersion||notificationPending!==null)return;
-            if(result.rows.some(item=>entitlementNoticeKinds.has(item.kind)&&!knownEntitlementNotices.has(item.id)))entitlementRefreshPending=true;
-            notificationLastRefresh=Date.now();adoptNotificationSummary(result);
+            if(result?.rows.some(item=>entitlementNoticeKinds.has(item.kind)&&!knownEntitlementNotices.has(item.id)))entitlementRefreshPending=true;
+            notificationLastRefresh=Date.now();if(result)adoptNotificationSummary(result);
             if(classResult&&!classReadBusy&&classVersion===classUnreadVersion)adoptClassUnread(classResult.classroomUnread);
-            if(currentRoute==='profile'&&accountPages.notifications.page===1&&!document.querySelector('#modal')?.open)updateAccountSection('notifications');
+            if(result&&currentRoute==='profile'&&accountPages.notifications.page===1&&!document.querySelector('#modal')?.open)updateAccountSection('notifications');
             if(referralResult&&referralPage===accountPages.referrals.page&&referralRequest===accountPages.referrals.request&&!(currentRoute==='profile'&&document.querySelector('#modal')?.open)){
                 const changed=referralResult.total!==accountPages.referrals.total||JSON.stringify(referralResult.rows)!==JSON.stringify(accountPages.referrals.rows);
                 Object.assign(accountPages.referrals,{rows:referralResult.rows,total:referralResult.total});
@@ -692,6 +455,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         }catch{}finally{notificationPollBusy=false;scheduleNotificationPolling();}
     }
     function startNotificationPolling(){
+        if(!learnerBackgroundAllowed()){stopNotificationPolling();return;}
         if(!live||!PlatformAPI.snapshot.authenticated)return;
         notificationPolling=true;updateUnreadBadge();updateClassUnread();refreshNotificationSummary();scheduleNotificationPolling();
     }
@@ -701,55 +465,30 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         for(const label of document.querySelectorAll('.top-right > .tag,[data-account-membership]'))label.textContent=account.membership;
         for(const expiry of document.querySelectorAll('[data-vip-expiry]'))expiry.textContent=accountDate(account.vipExpiresAt);
     }
-    async function readNotification(control){
-        if(notificationPending!==null)return;
-        const identity=Number(control.dataset.notification),owner=accountPageOwner,lifecycle=notificationLifecycle;
-        const selected=accountPages.notifications.rows?.find(item=>item.id===identity);
-        notificationPending=identity;notificationVersion++;control.disabled=true;control.textContent='Đang mở…';
-        try{
-            const result=await PlatformAPI.request('notifications/'+identity+'/read',{});
-            if(owner!==accountPageOwner)return;
-            syncAccountPages(result);updateUnreadBadge();
-            const detail=result.notification||selected;
-            await loadAccountPage('notifications',accountPages.notifications.page,{quiet:true});
-            if(currentRoute!=='profile'||lifecycle!==notificationLifecycle||!detail)return;
-            const dialog=document.querySelector('#modal'),oldLabel=dialog.getAttribute('aria-labelledby');
-            host.showModal(`<article class="account-notification-detail"><p class="account-detail-kicker">Thông báo tài khoản</p><h2 class="modal-title" id="account-notification-title">${escape(notificationTitle(detail))}</h2><dl class="notification-detail-meta"><div><dt>Người gửi</dt><dd>${escape(notificationSender(detail))}</dd></div><div><dt>Ngày gửi</dt><dd>${escape(accountDate(detail.created_at))}</dd></div></dl><div class="notification-detail-body">${escape(detail.body||'')}</div><div class="actions"><button class="btn dark" type="button" id="close-notification-detail">Đóng thông báo</button></div></article>`);
-            dialog.setAttribute('aria-labelledby','account-notification-title');
-            document.querySelector('#close-notification-detail').onclick=()=>dialog.close();
-            dialog.addEventListener('close',()=>{if(oldLabel===null)dialog.removeAttribute('aria-labelledby');else dialog.setAttribute('aria-labelledby',oldLabel);const next=document.querySelector(`[data-notification="${identity}"]`)||document.querySelector('#account-notifications [data-account-heading]');next?.focus({preventScroll:true});},{once:true});
-            document.querySelector('#close-notification-detail').focus();
-        }catch(error){
-            accountPages.notifications.error='Chưa mở được thông báo. '+error.message;updateAccountSection('notifications');host.toast(error.message);
-        }finally{notificationPending=null;const next=document.querySelector(`[data-notification="${identity}"]`);if(next){next.disabled=false;next.textContent='Xem';}scheduleNotificationPolling();}
-    }
+    function readNotification(...args) { return feature('profile').readNotification(...args); }
 
-    function liveProfile() {
-        const account=PlatformAPI.snapshot.account;
-        const date=value=>value?new Date(value).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'}):'Chưa phát sinh';
-        const invitation=new URL('./?invite='+state.inviteCode,document.baseURI).href;
-        return `${intro('Tài khoản & quyền học','Thông tin được lưu tại máy chủ.',badge(account.membership,'sage').replace('<span','<span data-account-membership'))}${themeSettings()}<div class="grid2"><section class="card card-pad"><h2>${escape(name())}</h2><p>Tên đăng nhập: ${escape(account.login)} · Khối ${grade()}</p><label class="field"><span>Năm sinh đã đăng ký</span><input readonly value="${state.birthYear}" aria-readonly="true"></label><p>Năm sinh cố định sau đăng ký. Liên hệ hỗ trợ nếu cần điều chỉnh khối học.</p><p>VIP+ đến: ${escape(date(account.vipPlusExpiresAt))}</p><p>VIP đến: <span data-vip-expiry>${escape(date(account.vipExpiresAt))}</span></p><div class="actions">${button('Đổi tên hiển thị','rename')}${button('Đăng xuất','logout')}${button('Cập nhật thông báo','refresh-account')}</div></section><section class="card card-pad"><h2>Mời bạn học cùng</h2><p>Nhận một tháng lịch VIP khi tài khoản được mời nâng cấp VIP lần đầu. Thời hạn được cộng dồn; mỗi cặp chỉ nhận thưởng một lần.</p><label class="field"><span>Mã giới thiệu</span><input readonly value="${escape(state.inviteCode)}"></label><label class="field"><span>Liên kết giới thiệu</span><input readonly value="${escape(invitation)}"></label><div class="actions">${button('Sao chép mã','copy-invite','dark','copy')}${button('Sao chép liên kết','copy-invite-link')}</div>${state.invitedBy?'<p>Đăng ký qua mã '+escape(state.invitedBy)+'</p>':''}</section></div>${accountRecordsSection('notifications')}${accountRecordsSection('referrals')}`;
-    }
+    let personalNotices={owner:null,rows:null,total:0,unreadCount:0,error:'',pending:null};
+    function personalNoticeContext(...args) { return feature('profile').personalNoticeContext(...args); }
+    function personalRewardNotices(...args) { return feature('profile').personalRewardNotices(...args); }
+    function personalNotificationsPanel(...args) { return feature('profile').personalNotificationsPanel(...args); }
+    function updatePersonalNotices(...args) { return feature('profile').updatePersonalNotices(...args); }
+    function loadPersonalNotices(...args) { return feature('profile').loadPersonalNotices(...args); }
+    function readPersonalNotice(...args) { return feature('profile').readPersonalNotice(...args); }
+    function personalCount(...args) { return feature('profile').personalCount(...args); }
+    function personalContinue(...args) { return feature('profile').personalContinue(...args); }
+    function safeStudyHref(...args) { return feature('profile').safeStudyHref(...args); }
+    function continueStudy(...args) { return feature('profile').continueStudy(...args); }
+    function personalSummaryCard(...args) { return feature('profile').personalSummaryCard(...args); }
+    function personalInvitePanel(...args) { return feature('profile').personalInvitePanel(...args); }
+    function liveProfile(...args) { return feature('profile').liveProfile(...args); }
+    function openCompanionDialog(...args) { return feature('profile').openCompanionDialog(...args); }
 
     let rankScope='all';
-    function liveRank() {
-        return `${intro('Bảng xếp hạng','Cùng học, cùng tiến bộ trên 5BMath.')}<div class="toolbar rank-tools"><div class="tabs">${[['battle','Linh vật'],['activity','Chăm chỉ']].map(([type,title])=>`<button type="button" data-rank="${type}" class="${rankType===type?'selected':''}" aria-pressed="${rankType===type}">${title}</button>`).join('')}</div><div class="actions">${field('Phạm vi','rank-scope',[['all','Tất cả'],['grade','Lớp '+grade()],...(isInternal()?[['class','Lớp Zoom']]:[])],rankScope)}${field('Thời gian','rank-period',[['all','Tất cả'],['day','Hôm nay'],['week','Tuần này'],['month','Tháng này']],rankPeriod)}</div></div><div class="card leaderboard" id="live-rank" role="status">Đang tải bảng xếp hạng…</div>`;
-    }
+    function liveRank(...args) { return feature('arena').liveRank(...args); }
     const medal=n=>n&&n<=3?`<span class="medal medal-${n}" aria-label="Hạng ${n}">${n}</span>`:escape(n??'—');
-    async function loadRank() {
-        const container=document.querySelector('#live-rank');if(!container)return;
-        try{
-            const result=live?await PlatformAPI.request('leaderboard?'+new URLSearchParams({kind:rankType,period:rankPeriod,scope:rankScope})):{rows:[]};
-            if(!container.isConnected)return;
-            container.innerHTML=result.rows.length?`<table><thead><tr><th>Hạng</th>${rankType==='battle'?'<th>Linh vật</th>':''}<th>Học sinh</th><th>Lớp</th><th>${rankType==='activity'?'Giờ học':'Kinh nghiệm'}</th></tr></thead><tbody>${result.rows.map(row=>`<tr class="${row.mine?'mine':''}"><td>${medal(row.rank)}</td>${rankType==='battle'?'<td>'+art(row.mascot,'',false,row.xp??0)+'</td>':''}<td><strong>${escape(displayName(row.name))}</strong> ${rankType==='battle'?'<small>'+escape(petRank(row.level))+'</small>':''}</td><td>${escape(row.class)}</td><td><strong>${escape(row.value)}</strong>${rankType==='battle'?'<small>'+row.wins+' thắng / '+row.losses+' thua</small>':''}</td></tr>`).join('')}</tbody></table>`:'<p class="card-pad">Chưa có dữ liệu trong phạm vi này.</p>';
-        }catch(error){container.textContent=error.message;}
-    }
+    function loadRank(...args) { return feature('arena').loadRank(...args); }
     let classTab='sessions',classData=null,classFrom='',classTo='',classLoadTicket=0,classUnreadVersion=0,classReadBusy=0,classReadQueue=Promise.resolve();
-    function liveClassroom() {
-        if(!isInternal())return intro('Lớp Zoom','Lớp học dành cho tài khoản SVip.')+link('Đăng ký học Zoom','zoomRegistration');
-        const classes=PlatformAPI.snapshot.account.classes;
-        return `${intro('Lớp Zoom','Lịch học và kết quả của lớp em.')}${classes.length?field('Lớp đang học','class-select',classes.map(c=>[c.id,c.name]),query('class')||classes[0].id):''}<section class="card card-pad" id="class-info">${classes.length?'Đang tải lớp học…':'Chưa có lớp được gán. Liên hệ chăm sóc khách hàng để được xếp lớp.'}</section><div class="tabs class-tabs">${[['sessions','Buổi học'],['assignments','Bài tập'],['summary','Tổng kết'],['fees','Học phí']].map(([key,label])=>`<button type="button" data-class-tab="${key}" aria-pressed="${classTab===key}" class="${classTab===key?'selected':''}">${label}${['assignments','fees'].includes(key)?classUnreadBadge(0,key):''}</button>`).join('')}</div><p id="class-read-feedback" class="class-read-feedback" role="status" hidden></p><div id="class-body"></div>`;
-    }
+    function liveClassroom(...args) { return feature('classroom').liveClassroom(...args); }
 
     const member=()=>live?PlatformAPI.snapshot.account?.membership||'Free':'Free';
     const isInternal=()=>member()==='SVip';
@@ -770,7 +509,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     }
     const canUse=category=>isPaid()||quota(category).limit===null||quota(category).used<quota(category).limit;
     const arenaScopeLabel=()=> 'Đề Đấu trí do máy chủ cấp';
-    const arenaSourceNotice=()=>live&&(PlatformAPI.snapshot.arenaQuestionSource?.qaOnly||PlatformAPI.snapshot.arenaQuestionSource?.localTest)?'<p class="learning-notice" data-duel-test-notice role="status">'+(PlatformAPI.snapshot.arenaQuestionSource?.localTest?'Bản thử cục bộ · Bộ câu test riêng cho Đấu trí · Chưa duyệt học liệu. Chưa áp chính sách lượt chơi chung.':'Bản QA · Bộ câu test riêng cho Đấu trí · Chưa duyệt học liệu. Chính sách lượt chơi đang chờ chốt.')+'</p>':'';
+    const arenaSourceNotice=()=>live&&(PlatformAPI.snapshot.arenaQuestionSource?.qaOnly||PlatformAPI.snapshot.arenaQuestionSource?.localTest)?'<p class="learning-notice" data-duel-test-notice role="status">'+(PlatformAPI.snapshot.arenaQuestionSource?.localTest?'Bản thử cục bộ':'Bản QA')+' · Bộ câu test riêng cho Đấu trí · Chưa duyệt học liệu.</p>':'';
     function setArenaDiscipline(value,serverNow) {
         arenaDiscipline=value;
         const remaining=Number.isFinite(serverNow)?Math.max(0,(Number(value.availableAt)||0)-serverNow):Number.isFinite(value.remainingSeconds)?Math.max(0,value.remainingSeconds)*1000:Math.max(0,(Number(value.availableAt)||0)-arenaNow());
@@ -794,9 +533,13 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             panel.querySelector('#arena-rest-countdown').textContent=timeText(seconds);
         }
         document.querySelectorAll('[data-human-play]').forEach(control=>{
-            control.disabled=control.dataset.humanPending==='true'||seconds>0||(control.dataset.humanQuota==='true'&&!canUse('human'));
+            const admission=control.hasAttribute('data-game-admission');
+            const disabled=control.dataset.humanPending==='true'||seconds>0||(control.dataset.humanQuota==='true'&&!canUse('human'))||(admission&&(botStarting||roomStarting));
+            if(admission&&gameAllowance)gameAllowance.setDisabled(control,disabled);else control.disabled=disabled;
             if(seconds)control.setAttribute('aria-describedby','arena-discipline');else control.removeAttribute('aria-describedby');
         });
+        const bot=document.querySelector('[data-learning="start-bot"]');
+        if(bot){const disabled=botStarting||roomStarting||!canUse('bot');if(gameAllowance)gameAllowance.setDisabled(bot,disabled);else bot.disabled=disabled;}
     }
     function receiveArenaDiscipline(result) {
         if(result?.serverNow)serverOffset=result.serverNow-Date.now();
@@ -806,101 +549,47 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     function requireHumanPlay() {
         if(disciplineSeconds()>0)throw new Error('Em đang tạm nghỉ đấu với người. Có thể đấu lại sau '+timeText(disciplineSeconds())+'.');
     }
-    function openArenaPreflight(kind,settings={},trigger=document.activeElement) {
-        const human=true;
-        if(kind!=='create')throw new Error('Chỉ phòng mời bạn cần bước xác nhận này.');
-        if(human)requireHumanPlay();
-        if(!canUse(human?'human':'bot'))throw new Error('Em đã hết lượt hôm nay. Hãy vào Nâng cấp gói.');
-        if(arenaPreflight)return;
-        const dialog=document.querySelector('#modal'),scroll={x:scrollX,y:scrollY},oldLabel=dialog.getAttribute('aria-labelledby'),oldDescription=dialog.getAttribute('aria-describedby');
-        const context={dialog,trigger,kind,busy:false};
-        const label='tạo phòng';
-        const cleanup=(restoreFocus=true)=>{
-            if(arenaPreflight!==context)return;
-            arenaPreflight=null;dialog.classList.remove('arena-preflight-modal');document.body.classList.remove('arena-preflight-open');
-            dialog.removeEventListener('close',onClose);dialog.removeEventListener('cancel',onCancel);dialog.removeEventListener('keydown',trap);dialog.removeEventListener('click',blockBackdrop,true);
-            for(const [attribute,value]of [['aria-labelledby',oldLabel],['aria-describedby',oldDescription]]){if(value===null)dialog.removeAttribute(attribute);else dialog.setAttribute(attribute,value);}
-            document.querySelector('#close-modal').disabled=false;
-            if(restoreFocus&&trigger?.isConnected){trigger.focus({preventScroll:true});window.scrollTo({left:scroll.x,top:scroll.y,behavior:'instant'});}
-        };
-        const close=(restoreFocus=true)=>{if(dialog.open)dialog.close();cleanup(restoreFocus);};
-        const onClose=()=>cleanup();
-        const onCancel=event=>{if(context.busy)event.preventDefault();};
-        const blockBackdrop=event=>{if(context.busy&&event.target===dialog){event.preventDefault();event.stopImmediatePropagation();}};
-        const trap=event=>{
-            if(event.key!=='Tab')return;
-            const controls=[...dialog.querySelectorAll('button:not(:disabled),input:not(:disabled),a[href]')].filter(node=>node.getClientRects().length),index=controls.indexOf(document.activeElement);
-            if(event.shiftKey&&index<=0){event.preventDefault();controls.at(-1)?.focus();}
-            else if(!event.shiftKey&&index===controls.length-1){event.preventDefault();controls[0]?.focus();}
-        };
-        context.close=close;arenaPreflight=context;
-        dialog.classList.add('arena-preflight-modal');document.body.classList.add('arena-preflight-open');
-        host.showModal(`<section id="arena-preflight"><div class="arena-preflight-handle" aria-hidden="true"></div><p class="arena-preflight-kicker">Trước khi ${label}</p><div class="arena-preflight-icon">${icon('grid',28)}</div><h2 class="modal-title" id="arena-preflight-title">Sẵn sàng đấu trí?</h2><p id="arena-preflight-copy">Câu hỏi cho trận đấu do hệ thống chuẩn bị. Em chỉ cần sẵn sàng và chọn cách chơi.</p>${kind==='create'?'<fieldset class="arena-preflight-visibility"><legend>Ai có thể vào phòng?</legend><label><input type="radio" name="arena-visibility" value="private" checked><span>Bạn bè có mã</span></label><label><input type="radio" name="arena-visibility" value="public"><span>Tất cả</span></label></fieldset>':''}<p class="arena-preflight-context"><b>Khối ${grade()}</b> · Tối đa 20 câu<small>60 giây/câu</small></p><p id="arena-preflight-error" role="alert" hidden></p><button type="button" class="btn dark" id="arena-preflight-confirm" ${human?'data-human-play data-human-quota="true"':''}>Xác nhận & ${label} ${icon('arrow',19)}</button><button type="button" id="arena-preflight-back">Quay lại chọn cách chơi</button></section>`);
-        dialog.setAttribute('aria-labelledby','arena-preflight-title');dialog.setAttribute('aria-describedby','arena-preflight-copy');
-        dialog.addEventListener('close',onClose);dialog.addEventListener('cancel',onCancel);dialog.addEventListener('keydown',trap);dialog.addEventListener('click',blockBackdrop,true);
-        dialog.querySelector('#arena-preflight-back').onclick=()=>close();
-        dialog.querySelector('#arena-preflight-confirm').onclick=async event=>{
-            if(context.busy)return;
-            const confirm=event.currentTarget,errorNode=dialog.querySelector('#arena-preflight-error');
-            try{
-                if(human)requireHumanPlay();
-                if(!canUse(human?'human':'bot'))throw new Error('Em đã hết lượt hôm nay. Hãy vào Nâng cấp gói.');
-                context.busy=true;confirm.dataset.humanPending='true';
-                dialog.querySelectorAll('button,input').forEach(control=>control.disabled=true);errorNode.hidden=true;
-                await enterRoom('create',{...roomSettings(),public:dialog.querySelector('[name="arena-visibility"]:checked').value==='public'});
-                close(false);
-            }catch(error){if(window.GameSession?.conflict(error)){close(false);return;}if(arenaPreflight===context){errorNode.textContent=error.message;errorNode.hidden=false;}}
-            finally{context.busy=false;delete confirm.dataset.humanPending;if(arenaPreflight===context){dialog.querySelectorAll('button,input').forEach(control=>control.disabled=false);updateArenaDiscipline();}}
-        };
-        updateArenaDiscipline();dialog.querySelector(kind==='create'?'[name="arena-visibility"]':'#arena-preflight-confirm').focus();
+    function updateDuelAllowance() {
+        const message=document.querySelector('#arena-preflight-allowance');
+        if(message)message.textContent=duelAllowance?.errorMessage()||'';
     }
+    async function requireDuelAllowance() {
+        const options={owner:PlatformAPI.snapshot.account?.id,expectedFamilyContext:PlatformAPI.familyContext,expectedCsrf:PlatformAPI.snapshot.csrf};
+        if(!duelAllowance||!await duelAllowance.check())throw new Error(duelAllowance?.errorMessage()||'Chưa kiểm tra được lượt chơi. Em thử lại ở sảnh Đấu trí nhé.');
+        return options;
+    }
+    async function recoverDuelAdmission(error, sent) {
+        if(!live||!sent)return;
+        duelAllowance?.refresh();
+        if(error.name==='AbortError'||error.status===409||error.status===429)return;
+        try {
+            const claim=await window.GameSession.get();
+            if(claim)window.GameSession.show(claim,'Phòng của em đang mở. Bấm Tiếp tục để vào lại.');
+        } catch {}
+    }
+    function openArenaPreflight(...args) { return feature('arena').openArenaPreflight(...args); }
     const usagePanel=category=>{const q=quota(category);return `<p class="usage-note">${q.limit===null?'✦ Không giới hạn':q.used+' / '+q.limit+' lượt hôm nay'+(canUse(category)?'':' · Đã đạt giới hạn')}</p>${!canUse(category)?link('Nâng cấp gói','upgrade','outline','spark'):''}`;};
+    function duelProductUsage(category){
+        const q=quota(category);
+        if(q.limit===null)return '';
+        if(!live)return usagePanel(category);
+        return isPaid()?'':`<p class="usage-note">Hạn mức gói ${category==='bot'?'luyện Bot':'đấu với người'} · ${q.used} / ${q.limit} lượt hôm nay${canUse(category)?'':' · Đã đạt giới hạn'}</p>`;
+    }
     function consumeLocal(category) {
         if(!canUse(category))throw new Error('Em đã hết lượt hôm nay. Hãy vào Nâng cấp gói.');
         const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Ho_Chi_Minh'}).format(new Date());
         state.usage ||= {};state.usage[day+'-'+category]=(state.usage[day+'-'+category]||0)+1;save();
     }
-    function examOptions(scope,search='') {
-        const lessons=lessonList(),options=scope==='weekly'?[['','Tổng hợp đến hiện tại'],...Array.from({length:week()},(_,i)=>{
-            const list=lessons.filter(l=>l.week===i+1);return ['week-'+(i+1),'Tuần '+(i+1)+' : '+(list.map(l=>l.title).join(' · ')||'Đang biên soạn'),!list.length];
-        })]:[...new Map(lessons.map(l=>[l.topic,[l.topic,l.title.replace(/^Ôn tập: /,'')]])).values()];
-        return options.filter(([,label])=>!search||label.toLocaleLowerCase('vi').includes(search.toLocaleLowerCase('vi'))).map(([value,label,disabled])=>`<option value="${escape(value)}" ${disabled?'disabled':''}>${escape(label)}</option>`).join('');
-    }
-    function svipPlan(registration=false) {
-        const features=['🌱 Không giới hạn chức năng trên 5bmath.vn','👩‍🏫 Lớp sĩ số nhỏ, giáo viên sát sao','💬 Review từng học sinh sau mỗi buổi học','📝 Mini test mỗi buổi học','🏆 Big test mỗi tháng'];
-        return `<section class="card card-pad plan gold">${badge('👑 SVip','gold')}<h2>${registration?'Học Zoom online':'SVip / Học Zoom online'}</h2><strong class="plan-price">${registration?'Học phí: 100k/buổi':'100k/Buổi'}</strong><ul>${features.map(text=>`<li class="plan-highlight">${text}</li>`).join('')}</ul><p class="free-highlight"><mark>MIỄN PHÍ</mark> 1 buổi trao đổi 1-1 với giáo viên mỗi tháng</p>${registration?'<div class="actions"><a class="btn dark" href="dang-ky-kiem-tra-dau-vao/">Đăng ký kiểm tra đầu vào</a><a class="btn outline" href="https://zalo.me/0984763971" target="_blank" rel="noopener noreferrer">Đăng ký tư vấn · Zalo</a><a class="btn outline" href="https://www.facebook.com/5bmath" target="_blank" rel="noopener noreferrer">Đăng ký tư vấn · Facebook</a></div>':'<a class="btn dark" href="https://zalo.me/0984763971" target="_blank" rel="noopener noreferrer">Đăng ký tư vấn</a>'}</section>`;
-    }
-    function upgradeView() {
-        const plans=[
-            {name:'Free',price:'0đ',style:'bronze',copy:'Bắt đầu xây nền tảng',features:['Học liệu miễn phí và lượt luyện tập theo gói Free','Xem 3 video đầu của mỗi series','Ôn theo trường và câu chuyên sâu: chưa mở']},
-            {name:'VIP',price:'100.000đ',style:'silver',copy:'Luyện đều, hiểu chắc',features:['Quyền luyện tập và tải tài liệu của VIP','Xem trọn các series video khi được phát hành','Giải đề 10p · Câu phân loại · Mẹo làm bài','Ôn theo trường và câu chuyên sâu: dành cho VIP+']},
-            {name:'VIP+',price:'200.000đ',style:'gold vip-plus',copy:'Chinh phục mục tiêu cao',features:['Bao gồm quyền lợi VIP','Mở ôn luyện theo đề của trường · Khối 5','Mở câu siêu khó và câu phân loại học sinh','Mở nội dung thi học sinh giỏi']}
-        ];
-        return intro('Nâng cấp gói','Chọn hành trình học phù hợp với em.')+'<div class="plan-benefit-banner"><strong>✦ Học thêm mỗi ngày, tiến xa từng bước</strong><p>Free xem 3 video đầu mỗi series. VIP và VIP+ xem trọn series đã phát hành.</p></div><div class="grid3 plans subscription-plans">'+plans.map(p=>'<section class="card card-pad plan '+p.style+'">'+(p.name==='VIP+'?'<span class="plan-ribbon">TRỌN QUYỀN HỌC NÂNG CAO</span>':'')+badge(p.name,p.name==='Free'?'sage':'sand')+'<h2>'+p.name+'</h2><p>'+p.copy+'</p><p class="plan-price">'+p.price+(p.name==='Free'?'':'<small>/tháng</small>')+'</p><ul>'+p.features.map(f=>'<li>'+f+'</li>').join('')+'</ul>'+(member()===p.name?'<span class="tag sage">Gói hiện tại</span>'+(p.name==='Free'?'':'<a class="btn dark" href="'+href('payment',{plan:p.name})+'">Gia hạn '+p.name+'</a>'):p.name==='Free'?'<span class="tag">Miễn phí</span>':isInternal()?'<span class="tag sage">Đã có quyền qua lớp Zoom</span>':member()==='VIP+'&&p.name==='VIP'?'<span class="tag">Đã bao gồm trong VIP+</span>':'<a class="btn dark" href="'+href('payment',{plan:p.name})+'">'+(p.name==='VIP+'?'Chọn VIP+':'Chọn VIP')+' →</a>')+'</section>').join('')+'</div><section class="card card-pad premium-availability"><h2>Nội dung sẽ có gì?</h2><p>Các series, câu chuyên sâu và bộ đề chỉ mở khi nội dung tương ứng đã được biên tập và phát hành. Quyền gói không thay thế phí mua bộ đề riêng.</p><a class="btn outline" href="'+href('upgrade')+'#premium-library">Xem series và kho đề</a></section>'+premiumLibrary()+'<section class="card card-pad consultation"><h2>Học Zoom cùng giáo viên</h2><p>Lớp Zoom được tư vấn và đăng ký riêng.</p><a class="btn outline" href="'+href('zoomRegistration')+'">Đăng ký học Zoom</a></section>';
-    }
-    function premiumLibrary() {
-        return '<section id="premium-library" class="premium-library"><h2>Series video và kho đề</h2><p>Free xem 3 video đầu mỗi series; VIP và VIP+ xem toàn bộ video đã phát hành.</p><div data-premium-library><div class="grid3">'+['Giải đề 10p','Giải câu phân loại học sinh','Mẹo làm bài'].map(title=>'<article class="card card-pad"><h3>'+title+'</h3><p>Đang chuẩn bị video.</p></article>').join('')+'</div><section class="card card-pad"><h3>Bộ đề và câu chuyên sâu VIP+</h3><p>Danh mục đang chờ nội dung được phát hành.</p></section></div></section>';
-    }
-    async function loadPremiumLibrary() {
-        const target=document.querySelector('[data-premium-library]');if(!target||!live)return;
-        const owner=PlatformAPI.snapshot.account?.id;
-        const active=()=>target.isConnected&&owner===PlatformAPI.snapshot.account?.id;
-        try {
-            const data=await PlatformAPI.request('premium');if(!active())return;
-            target.innerHTML='<div class="grid3">'+data.series.map(series=>'<article class="card card-pad"><h3>'+escape(series.title)+'</h3>'+(series.videos.length?'<ol class="premium-videos">'+series.videos.map(video=>'<li><span>'+escape(video.title)+'</span>'+(!data.controls.videos_open?'<span class="tag">Tạm dừng xem</span>':video.accessible?'<button type="button" class="btn outline" data-premium-video="'+video.id+'">Xem video</button>':'<a class="btn outline" href="'+href('upgrade')+'">Mở với VIP</a>')+'</li>').join('')+'</ol>':'<p>Đang chuẩn bị video.</p>')+'</article>').join('')+'</div><div class="grid3 premium-tracks">'+data.tracks.map(track=>'<article class="card card-pad"><h3>'+escape(track.title)+'</h3><p>'+(!track.accessible?'Dành cho VIP+ · ':'')+(track.ready?'Đã có nội dung phát hành.':'Đang biên tập nội dung.')+'</p>'+data.sets.filter(set=>set.track===track.key&&set.grade===grade()).map(set=>'<p>'+escape(set.title)+'</p>'+(!data.controls.advanced_open?'<span class="tag">Tạm dừng cấp bài mới</span>':track.accessible?'<button class="btn dark" type="button" data-premium-set="'+escape(set.slug)+'">Bắt đầu luyện</button>':'<a class="btn outline" href="'+href('upgrade')+'">Mở với VIP+</a>')).join('')+'</article>').join('')+'</div><section class="card card-pad"><h3>Bộ đề luyện tập</h3>'+(data.examProducts.length?data.examProducts.map(product=>'<article><h4>'+escape(product.title)+'</h4><p>'+escape(product.description)+'</p><strong>'+content.format(product.price)+'đ</strong><p>Mua riêng cho mọi gói. Mỗi đơn mở một đề, nộp bài một lần.</p>'+(data.controls.sales_open?'<a class="btn dark" href="'+href('payment',{examProduct:product.slug})+'">Mua đề</a>':'<span class="tag">Tạm dừng mở bán</span>')+'</article>').join(''):'<p>Chưa có bộ đề mở bán. Giá và danh mục sẽ được cập nhật sau.</p>')+'</section>'+(data.purchases.length?'<section class="card card-pad"><h3>Đề em đã mua và đơn đang chờ</h3>'+data.purchases.map(order=>'<p>'+escape(order.exam_title)+' · '+escape(order.status==='paid'?'Đã thanh toán':order.status==='pending'?'Chờ thanh toán':'Đã hủy')+'</p><a class="btn outline" href="'+href('payment',{order:order.id})+'">Xem đơn / mở đề</a>').join('')+'</section>':'');
-            target.querySelectorAll('[data-premium-set]').forEach(button=>button.onclick=async()=>{
-                button.disabled=true;
-                try{const result=await PlatformAPI.request('premium/start',{slug:button.dataset.premiumSet,requestKey:uid()});if(!active())return;state.exams[result.exam.id]=result.exam;state.activeExam=result.exam.id;go('testing',{id:result.exam.id});}
-                catch(error){if(active())host.toast(error.message);button.disabled=false;}
-            });
-            target.querySelectorAll('[data-premium-video]').forEach(button=>button.onclick=async()=>{
-                button.disabled=true;
-                try{const result=await PlatformAPI.request('premium/videos/'+button.dataset.premiumVideo);if(!active())return;host.showModal('<h2 class="modal-title">'+escape(result.video.title)+'</h2><a class="btn dark" target="_blank" rel="noopener noreferrer" href="'+safeUrl(result.video.url)+'">Mở video ↗</a>');}
-                catch(error){if(active())host.showModal('<h2 class="modal-title">Chưa mở được video</h2><p>'+escape(error.message)+'</p>');}
-                finally{button.disabled=false;}
-            });
-        } catch(error){if(active()){const note=document.createElement('p');note.setAttribute('role','status');note.textContent='Chưa tải được danh mục. '+error.message;target.append(note);}}
-    }
+    function examOptions(...args) { return feature('practice').examOptions(...args); }
+    function svipPlan(...args) { return feature('commerce').svipPlan(...args); }
+    function upgradeView(...args) { return feature('commerce').upgradeView(...args); }
+
+    function planChildSummary(...args) { return feature('commerce').planChildSummary(...args); }
+
+    let unmountParentPlans=()=>{};
+    function mountParentPlans(...args) { return feature('commerce').mountParentPlans(...args); }
+    function premiumLibrary() { return ''; }
+    async function loadPremiumLibrary() {}
     const safeUrl=value=>/^https?:\/\//.test(value||'')?escape(value):'';
     const feeStatuses={charged:'Có học · tính phí',free:'Có học · miễn phí',absent:'Vắng',pending:'Chưa điểm danh'};
     const feeStatus=session=>Object.hasOwn(feeStatuses,session.status)?session.status:'pending';
@@ -923,228 +612,39 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             return `<div class="calendar-day ${statuses.length>1?'calendar-mixed':statuses.length?'calendar-'+statuses[0]:''}" data-fee-date="${date}" role="img" aria-label="${escape(label)}"><span class="calendar-day-number">${i+1}</span>${items.length?`<small class="calendar-session-count">${items.length} buổi</small><div class="calendar-status-markers" aria-hidden="true">${statuses.map(status=>`<i class="calendar-marker marker-${status}" data-fee-status="${status}">${counts[status]}</i>`).join('')}</div>`:''}</div>`;
         }).join('')}</div><ul class="fee-calendar-legend" aria-label="Chú thích điểm danh">${Object.entries(feeStatuses).map(([status,label])=>`<li><i class="calendar-marker marker-${status}" aria-hidden="true"></i><span>${label}</span></li>`).join('')}</ul><p class="fee-calendar-note">Ngày có nhiều buổi hiển thị đủ từng trạng thái; số trong ô màu là số buổi. Giờ Việt Nam.</p></section>`;
     };
-    function trendChart(months) {
-        if(!months.length)return '<p>Biểu đồ sẽ xuất hiện khi bài tập được chấm điểm.</p>';
-        const x=i=>55+i*(500/Math.max(1,months.length-1)),y=v=>215-v*18;
-        return `<figure class="trend-chart"><svg viewBox="0 0 620 270" role="img" aria-label="Điểm trung bình theo tháng"><path d="M40 25V215H590" fill="none" stroke="currentColor"/>${[0,5,10].map(v=>`<text x="10" y="${y(v)+5}">${v}</text><path d="M40 ${y(v)}H590" stroke="#e4e8d8"/>`).join('')}<polyline points="${months.map((m,i)=>x(i)+','+y(m.average)).join(' ')}" fill="none" stroke="var(--green)" stroke-width="4"/>${months.map((m,i)=>`<circle cx="${x(i)}" cy="${y(m.average)}" r="6" fill="var(--orange)"/><text x="${x(i)}" y="${y(m.average)-14}" text-anchor="middle">${m.average}</text><text x="${x(i)}" y="245" text-anchor="middle">${escape(m.month)}</text>`).join('')}</svg><figcaption>Điểm trung bình các bài đã chấm (thang 10)</figcaption></figure>`;
-    }
-    async function loadClass() {
-        const select=document.querySelector('#class-select'),info=document.querySelector('#class-info');
-        if(!live||!select||!info)return;
-        const identity=select.value,ticket=++classLoadTicket,owner=accountPageOwner;
-        if(String(classData?.class.id)!==identity){classData=null;const body=document.querySelector('#class-body');if(body)body.innerHTML='';}
-        updateClassUnread();
-        try{
-            const data=await PlatformAPI.request('classes/'+identity+'?'+new URLSearchParams({from:classFrom,to:classTo}));
-            if(!info.isConnected||ticket!==classLoadTicket||owner!==accountPageOwner)return;classData=data;
-            info.innerHTML=`<h2>${escape(data.class.name)}</h2><div class="grid2"><p>Học sinh: <strong>${escape(name())}</strong><br>Giáo viên: ${escape(data.class.teacher)}</p><p>Lịch học: ${escape(data.class.schedule||'Chờ cập nhật')}<br>Chương trình: ${escape(data.class.curriculum||'Chờ cập nhật')}</p></div>${safeUrl(data.class.meeting_ref)?`<a class="btn dark" href="${safeUrl(data.class.meeting_ref)}" target="_blank" rel="noopener noreferrer">Vào lớp Zoom</a>`:''}`;
-            renderClassBody();
-            return data;
-        }catch(e){if(info.isConnected&&ticket===classLoadTicket){info.textContent=e.message;classData=null;}}
-    }
-    async function readClassSection(data,section){
-        if(!data||!['assignments','fees'].includes(section))return;
-        const through=Number(data.readThrough?.[section])||0;
-        if(!through)return;
-        const owner=accountPageOwner,feedback=document.querySelector('#class-read-feedback');
-        classUnreadVersion++;classReadBusy++;
-        if(feedback)feedback.hidden=true;
-        const perform=async()=>{
-            if(owner!==accountPageOwner)return;
-            try{
-                const result=await PlatformAPI.request('classes/'+data.class.id+'/read',{section,through});
-                if(owner===accountPageOwner)adoptClassUnread(result.classroomUnread);
-            }catch(error){
-                if(owner===accountPageOwner&&feedback?.isConnected){feedback.textContent='Chưa đánh dấu đã đọc. Em có thể bấm lại mục này. '+error.message;feedback.hidden=false;}
-            }
-        };
-        const operation=classReadQueue.then(perform,perform);classReadQueue=operation;
-        try{await operation;}finally{classReadBusy--;classUnreadVersion++;}
-    }
+    function trendChart(...args) { return feature('classroom').trendChart(...args); }
+    function loadClass(...args) { return feature('classroom').loadClass(...args); }
+    function readClassSection(...args) { return feature('classroom').readClassSection(...args); }
     const classFileUrl=value=>/^\/api\/v1\/class-submissions\/\d+\/file$/.test(value||'')?escape(value):'';
     const submissionMarkup=submission=>submission&&classFileUrl(submission.url)?`<a href="${classFileUrl(submission.url)}" target="_blank" rel="noopener noreferrer">Xem bài đã nộp: ${escape(submission.filename)}</a><small>Nộp lúc ${escape(accountDate(submission.submitted_at))}</small>`:'<span>Em chưa nộp bài này.</span>';
-    function classAssignmentMarkup(a){
-        return `<article class="assignment-row class-assignment" data-assignment="${a.id}"><div class="class-assignment-heading"><div><h3>${escape(a.title)}</h3><small>${escape(a.kind)}</small>${safeUrl(a.document_url)?`<a href="${safeUrl(a.document_url)}" target="_blank" rel="noopener noreferrer">Mở đề bài</a>`:''}</div>${badge(a.score==null?'Chưa có điểm':a.score+'/10','sage')}<button class="btn outline" type="button" data-class-ranking="assignment" data-value="${a.id}">Bảng điểm</button></div><p class="class-personal-comment"><strong>Nhận xét bài làm:</strong> ${escape(a.comment||'Thầy cô chưa nhận xét bài này.')}</p><div class="class-submission-current">${submissionMarkup(a.submission)}</div><form data-class-submit="${a.id}" class="class-submission-form"><label class="field"><span>${a.submission?'Chọn tệp để nộp lại':'Chọn bài làm để nộp'}</span><input name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required aria-label="Bài làm ${escape(a.title)}"></label><p>Ảnh JPG, PNG, WebP hoặc PDF, tối đa 10 MB.${a.submission&&a.score!=null?' Nộp lại vẫn giữ điểm và nhận xét hiện tại để thầy cô xem lại.':''}</p><button class="btn dark" type="submit">${a.submission?'Nộp lại bài':'Nộp bài'}</button><p class="class-submit-status" role="status" hidden></p></form></article>`;
-    }
-    async function submitClassAssignment(form){
-        if(form.dataset.pending)return;
-        const data=classData,identity=Number(form.dataset.classSubmit),assignment=data?.sessions.flatMap(s=>s.assignments).find(a=>a.id===identity),owner=accountPageOwner;
-        if(!assignment)return;
-        const control=form.querySelector('button[type="submit"]'),input=form.querySelector('input[type="file"]'),status=form.querySelector('[role="status"]'),file=input.files[0];
-        status.hidden=false;
-        if(!file){status.textContent='Em hãy chọn bài làm trước khi nộp.';return;}
-        const mime=file.type||({'jpg':'image/jpeg','jpeg':'image/jpeg','png':'image/png','webp':'image/webp','pdf':'application/pdf'}[file.name.split('.').pop().toLowerCase()]);
-        if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(mime)||!file.size||file.size>10*1024*1024){status.textContent='Chọn ảnh JPG, PNG, WebP hoặc PDF từ 1 byte đến 10 MB.';return;}
-        form.dataset.pending='true';control.disabled=true;input.disabled=true;status.textContent='Đang gửi bài đến thầy cô…';
-        try{
-            const encoded=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(new Error('Chưa đọc được tệp. Em hãy chọn lại.'));reader.readAsDataURL(file);});
-            if(owner!==accountPageOwner||!form.isConnected)return;
-            const result=await PlatformAPI.request('classes/'+data.class.id+'/assignments/'+identity+'/submissions',{filename:file.name,mimeType:mime,data:encoded});
-            if(owner!==accountPageOwner||!form.isConnected)return;
-            assignment.submission=result.submission;
-            form.closest('[data-assignment]').querySelector('.class-submission-current').innerHTML=submissionMarkup(result.submission);
-            input.value='';control.textContent='Nộp lại bài';status.textContent='Đã gửi bài đến thầy cô.';
-        }catch(error){if(form.isConnected)status.textContent='Chưa gửi được bài. '+error.message;}
-        finally{delete form.dataset.pending;if(form.isConnected){control.disabled=false;input.disabled=false;}}
-    }
-    function renderClassBody() {
-        const body=document.querySelector('#class-body');if(!body||!classData)return;
-        const d=classData;
-        if(classTab==='sessions'||classTab==='assignments'){
-            body.innerHTML=`<form id="class-filter" class="actions"><label class="field"><span>Từ ngày</span><input name="from" type="date" value="${escape(classFrom)}"></label><label class="field"><span>Đến ngày</span><input name="to" type="date" value="${escape(classTo)}"></label><button class="btn dark" type="submit">Tìm kiếm</button></form><div class="solution-list">${d.sessions.map(s=>`<details class="card card-pad class-session"><summary><strong>${escape(s.title)}</strong><span>${new Date(s.starts_at).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'})}</span>${classTab==='assignments'?badge(s.complete?'Đã chấm đủ':'Chưa chấm đủ',s.complete?'sage':'peach'):''}</summary>${classTab==='sessions'?`<h3>Nhận xét dành cho em</h3><p class="class-personal-comment">${escape(s.personal_comment||'Thầy cô chưa có nhận xét riêng sau buổi học này.')}</p><p>Điểm danh: <strong>${{charged:'Có học · tính phí',free:'Có học · miễn phí',absent:'Vắng'}[s.attendance_status]||'Chưa điểm danh'}</strong></p><h3>Nội dung buổi học</h3><p class="class-personal-comment">${escape(s.teacher_comment||'Chưa có nội dung tổng kết chung.')}</p>${safeUrl(s.video_url)?`<video controls preload="none" src="${safeUrl(s.video_url)}" aria-label="Video bài giảng"></video><a href="${safeUrl(s.video_url)}" target="_blank" rel="noopener noreferrer">Mở video bài giảng</a>`:'<p>Video bài giảng chưa được cập nhật.</p>'}`:s.assignments.map(classAssignmentMarkup).join('')||'<p>Chưa giao bài tập cho buổi học này.</p>'}</details>`).join('')||'<p class="card card-pad">Chưa có buổi học trong khoảng ngày này.</p>'}</div>`;
-            body.querySelector('#class-filter').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget);classFrom=f.get('from');classTo=f.get('to');loadClass();};
-            body.querySelectorAll('[data-class-submit]').forEach(form=>form.onsubmit=event=>{event.preventDefault();submitClassAssignment(form);});
-            if(classTab==='assignments'&&grade()===5)body.insertAdjacentHTML('beforeend',homeworkPanel());
-        }else if(classTab==='summary')body.innerHTML=`<section class="card card-pad"><h2>Kết quả học tập theo tháng</h2>${trendChart(d.months)}</section><section class="card card-pad"><h2>Chu kỳ học · mỗi 2 tuần</h2>${d.cycles.map(c=>`<div class="list-row"><div><strong>${c.from} ~ ${c.to}</strong><small>Trung bình: ${c.average??'Chưa có điểm'}</small></div><button type="button" class="btn outline" data-class-ranking="cycle" data-value="${c.index}">Xếp hạng</button></div>`).join('')||'<p>Chưa có chu kỳ học.</p>'}</section>`;
-        else body.innerHTML=`<section class="card card-pad"><h2>Học phí theo tháng</h2><div class="table-scroll"><table><thead><tr><th>Tháng</th><th>Số buổi tính phí</th><th>Học phí</th><th>Trạng thái</th></tr></thead><tbody>${d.fees.map(f=>`<tr><td><button type="button" class="btn outline" data-fee="${f.id}">${escape(f.month)}</button><small class="tuition-source-label">${f.source==='calculated'?'Theo điểm danh đã lưu':'Nhập thủ công'}</small></td><td>${f.charged_count??f.count}<small>${f.source==='calculated'?'Đơn giá: '+content.format(f.session_fee)+'đ/buổi':'Điểm danh hiện tại'}</small></td><td><strong>${content.format(f.amount)}đ</strong></td><td>${badge(feePaidLabel(f),f.paid_at||f.amount===0?'sage':'peach')}</td></tr>`).join('')}</tbody></table></div>${d.fees.length?'':'<p>Chưa có học phí được cập nhật.</p>'}</section>`;
-    }
-    async function showClassRanking(kind,value) {
-        const result=await PlatformAPI.request('classes/'+classData.class.id+'/ranking?'+new URLSearchParams({[kind]:value}));
-        host.showModal(`<h2 class="modal-title">${kind==='cycle'?'Xếp hạng chu kỳ':'Bảng điểm bài tập'}</h2><div class="table-scroll"><table><thead><tr><th>Hạng</th><th>Học sinh</th><th>Điểm</th></tr></thead><tbody>${result.rows.map(r=>`<tr class="${r.mine?'mine':''}"><td>${medal(r.rank)}</td><td>${escape(displayName(r.name))}</td><td>${r.value??'Chưa chấm'}</td></tr>`).join('')}</tbody></table></div>`);
-    }
-    async function showFee(id) {
-        stopPaymentWatch();
-        const f=classData.fees.find(f=>f.id===Number(id));if(!f)return;
-        const calculated=f.source==='calculated',sessions=[...(f.sessions||[])].sort((a,b)=>String(feeSessionTime(a)).localeCompare(String(feeSessionTime(b)))||a.id-b.id),charged=f.charged_count??f.count??0;
-        const source=calculated?'Tính theo điểm danh đã lưu':'Học phí nhập thủ công';
-        const formula=calculated?`<div class="tuition-formula" aria-label="Đơn giá đã lưu nhân số buổi tính phí"><span><b>${content.format(f.session_fee)}đ</b><small>Đơn giá / buổi</small></span><i aria-hidden="true">×</i><span><b>${charged} buổi</b><small>Có học · tính phí</small></span></div>`:'<p class="tuition-manual-note">Số tiền do thầy cô cập nhật. Điểm danh bên dưới là thông tin hiện tại để tham khảo.</p>';
-        host.showModal(`<article class="tuition-detail" data-fee-detail="${f.id}"><p class="tuition-kicker">${source}</p><h2 class="modal-title" id="fee-detail-title">Học phí tháng ${escape(f.month)}</h2><section class="tuition-bill-summary" aria-label="Thông tin học phí">${formula}<div class="tuition-total"><span>Tổng học phí</span><strong data-fee-amount>${content.format(f.amount)}đ</strong>${badge(feePaidLabel(f),f.paid_at||f.amount===0?'sage':'peach')}</div></section>${calculated?`<p class="tuition-snapshot-note">Bảng kê đã lưu${f.calculated_at?' lúc '+escape(accountDate(f.calculated_at)):''}. Đơn giá và điểm danh dưới đây thuộc lần lập học phí này.</p>`:''}${calendarHtml(f.month,sessions)}<section class="tuition-session-section" aria-labelledby="fee-session-heading"><h3 id="fee-session-heading">Chi tiết từng buổi${calculated?' đã lưu':''}</h3><ol class="tuition-session-list">${sessions.map(session=>`<li data-fee-session="${session.id}"><div><time datetime="${escape(feeSessionTime(session)||session.date||'')}">${escape(feeSessionTime(session)?accountDate(feeSessionTime(session)):session.date||'Chưa có thời gian')}</time><strong>${escape(session.title)}</strong></div><span class="tuition-attendance attendance-${feeStatus(session)}">${feeStatuses[feeStatus(session)]}</span></li>`).join('')||'<li>Chưa có buổi học trong tháng này.</li>'}</ol></section><div id="fee-payment" class="tuition-payment" aria-live="polite">${f.amount===0?'<p>Tháng này không phát sinh học phí. Em không cần tạo giao dịch thanh toán.</p>':f.paid_at?'<p>Học phí đã được thầy cô ghi nhận thanh toán.</p>':'<p>Đang chuẩn bị thông tin thanh toán…</p>'}</div><div class="actions tuition-close"><button class="btn outline" type="button" id="close-fee-detail">Đóng chi tiết</button></div></article>`);
-        const dialog=document.querySelector('#modal'),article=document.querySelector('[data-fee-detail]'),oldLabel=dialog.getAttribute('aria-labelledby');
-        dialog.setAttribute('aria-labelledby','fee-detail-title');dialog.scrollTop=0;
-        const trap=event=>{
-            if(event.key!=='Tab')return;
-            const controls=[...dialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(node=>node.getClientRects().length),index=controls.indexOf(document.activeElement);
-            if(!controls.length)return;
-            if(event.shiftKey&&index<=0){event.preventDefault();controls.at(-1).focus();}
-            else if(!event.shiftKey&&(index<0||index===controls.length-1)){event.preventDefault();controls[0].focus();}
-        };
-        dialog.addEventListener('keydown',trap);
-        document.querySelector('#close-fee-detail').onclick=()=>dialog.close();
-        dialog.addEventListener('close',()=>{if(paymentWatch?.target.closest('[data-fee-detail]')===article)stopPaymentWatch();dialog.removeEventListener('keydown',trap);if(oldLabel===null)dialog.removeAttribute('aria-labelledby');else dialog.setAttribute('aria-labelledby',oldLabel);document.querySelector(`[data-fee="${f.id}"]`)?.focus({preventScroll:true});},{once:true});
-        if(!f.paid_at&&f.amount>0){
-            await startPaymentView(article.querySelector('#fee-payment'),{feeId:f.id},{dialog,classId:classData.class.id});
-        }
-    }
-    function paymentMarkup(o) {
-        const paid=o.status==='paid',cancelled=o.status==='cancelled',pending=o.status==='pending';
-        const label=paid?'Đã hoàn thành':cancelled?'Đã hủy':'Chờ xác nhận thanh toán';
-        const status=paid?(o.fee_id?'Học phí đã được ghi nhận thanh toán.':'Thanh toán thành công. Quyền học đã được ghi nhận cho tài khoản của em.'):cancelled?'Đơn này đã hủy. Em hãy liên hệ 5BMath để kiểm tra trước khi chuyển tiền.':o.automationEnabled?'Trang sẽ tự cập nhật khi giao dịch chuyển khoản được xác nhận.':'Quyền học được cập nhật sau khi 5BMath xác nhận khoản tiền đã nhận.';
-        return `<div class="payment-order" data-payment-order="${Number(o.id)}" data-payment-status="${escape(o.status)}"><div class="payment-heading"><h3>${o.purchase_type==='exam'?escape(o.exam_title):o.fee_id?'Thanh toán học phí':'Nâng cấp '+escape(o.subscription_plan||'VIP')+' · '+Number(o.vip_months||1)+' tháng'}</h3>${badge(label,paid?'sage':'peach')}</div><dl class="payment-details"><div><dt>Số tiền</dt><dd><strong>${content.format(o.amount)}đ</strong></dd></div><div><dt>Mã thanh toán</dt><dd><strong>${escape(o.reference)}</strong></dd></div>${o.bankAccount?`<div><dt>Tài khoản nhận</dt><dd>${escape(o.bank)} · ${escape(o.bankAccount)}<br>${escape(o.bankName)}</dd></div>`:''}</dl>${pending?(o.qrUrl?`<img class="payment-qr" src="${escape(o.qrUrl)}" alt="QR chuyển khoản ${escape(o.reference)}" width="320" height="420"><p class="payment-transfer-note">Giữ nguyên số tiền và mã thanh toán khi chuyển khoản.</p>`:'<p class="learning-notice">Thông tin ngân hàng đang chờ cấu hình. Liên hệ 5BMath để được hướng dẫn thanh toán.</p>'):''}<p class="payment-confirmation ${paid?'is-paid':''}" role="status">${escape(status)}${paid&&o.paid_at?' Xác nhận lúc '+escape(accountDate(o.paid_at))+'.':''}</p><p class="payment-feedback" data-payment-feedback role="status" hidden></p><div class="actions payment-actions">${pending?'<button class="btn dark" type="button" data-payment-retry>Kiểm tra thanh toán</button>':''}<a class="btn outline" href="https://zalo.me/0984763971" target="_blank" rel="noopener noreferrer">Liên hệ Zalo</a>${paid&&o.purchase_type==='exam'?'<button class="btn dark" type="button" data-open-purchased-exam>Mở đề đã mua</button>':''}${paid&&!o.fee_id?link('Xem tài khoản','profile','outline'):''}</div></div>`;
-    }
+    function classAssignmentMarkup(...args) { return feature('classroom').classAssignmentMarkup(...args); }
+    function submitClassAssignment(...args) { return feature('classroom').submitClassAssignment(...args); }
+    function renderClassBody(...args) { return feature('classroom').renderClassBody(...args); }
+    function showClassRanking(...args) { return feature('classroom').showClassRanking(...args); }
+    function showFee(...args) { return feature('classroom').showFee(...args); }
+    function paymentMarkup(...args) { return feature('commerce').paymentMarkup(...args); }
+    function checkoutStyles(...args) { return feature('commerce').checkoutStyles(...args); }
+    function checkoutEvidenceMarkup(...args) { return feature('commerce').checkoutEvidenceMarkup(...args); }
+    function checkoutSummaryMarkup(...args) { return feature('commerce').checkoutSummaryMarkup(...args); }
+    function showCheckout(...args) { return feature('commerce').showCheckout(...args); }
+    function loadPaymentHistory(...args) { return feature('commerce').loadPaymentHistory(...args); }
     function stopPaymentWatch(){
         paymentGeneration++;
         if(paymentWatch){clearTimeout(paymentWatch.timer);paymentWatch.controller.abort();}
         paymentWatch=null;
     }
     function paymentViewActive(context){
-        return paymentWatch===context&&context.generation===paymentGeneration&&context.owner===accountPageOwner&&PlatformAPI.snapshot.authenticated&&PlatformAPI.snapshot.account?.id===context.owner&&PlatformAPI.snapshot.csrf===context.csrf&&context.target.isConnected&&(context.dialog?currentRoute==='classroom'&&context.dialog.open:currentRoute==='payment');
+        const family=PlatformAPI.familyState;
+        return paymentWatch===context&&context.generation===paymentGeneration&&context.owner===accountPageOwner&&PlatformAPI.snapshot.authenticated&&PlatformAPI.snapshot.account?.id===context.owner&&PlatformAPI.snapshot.csrf===context.csrf&&context.target.isConnected&&(context.dialog?currentRoute==='classroom'&&context.dialog.open:currentRoute==='payment')&&(!context.beneficiaryId||(family?.scope==='parent_full'&&family.activeProfile?.type==='parent'&&family.context===context.familyContext&&String(family.selectedChildId)===context.beneficiaryId));
     }
     function paymentAvailable(context){return paymentViewActive(context)&&!document.hidden&&navigator.onLine!==false;}
-    function schedulePaymentCheck(context){
-        clearTimeout(context.timer);context.timer=null;
-        if(paymentAvailable(context)&&context.order?.status==='pending')context.timer=setTimeout(()=>checkPayment(context),Math.min(30000,5000*Math.max(1,context.failures)));
-    }
-    function paymentFeedback(context,message,error=false){
-        if(!paymentViewActive(context))return;
-        const feedback=context.target.querySelector('[data-payment-feedback]');
-        if(feedback){feedback.textContent=message;feedback.hidden=!message;feedback.classList.toggle('is-error',error);}
-    }
-    function renderPaymentOrder(context,order){
-        if(!paymentViewActive(context)||Number(order.account_id)!==Number(context.owner))return false;
-        if(!['pending','paid','cancelled'].includes(order.status))throw new Error('Trạng thái đơn chưa hợp lệ. Em hãy thử lại.');
-        context.order=order;
-        if(!context.dialog&&typeof location!=='undefined'&&typeof history!=='undefined'){
-            const address=new URL(location.href);
-            if(address.searchParams.get('order')!==String(order.id)){address.searchParams.set('order',String(order.id));history.replaceState(null,'',address);}
-            context.resumeOrderId=Number(order.id);
-        }
-        const markup=paymentMarkup(order);
-        if(markup!==context.markup){
-            const focused=context.target.querySelector('[data-payment-retry]')===document.activeElement;
-            context.target.innerHTML=markup;context.markup=markup;
-            if(focused)context.target.querySelector('[data-payment-retry]')?.focus({preventScroll:true});
-        }
-        const retry=context.target.querySelector('[data-payment-retry]');
-        if(retry)retry.onclick=()=>checkPayment(context,true);
-        const open=context.target.querySelector('[data-open-purchased-exam]');
-        if(open)open.onclick=async()=>{if(!paymentViewActive(context))return;open.disabled=true;try{const result=await PlatformAPI.request('premium/purchases/'+context.order.id+'/start',{});if(!paymentViewActive(context))return;state.exams[result.exam.id]=result.exam;state.activeExam=result.exam.id;go('testing',{id:result.exam.id});}catch(error){if(paymentViewActive(context))paymentFeedback(context,error.message,true);open.disabled=false;}};
-        return true;
-    }
-    async function syncPaidPayment(context){
-        if(context.synced||!paymentAvailable(context))return;
-        const snapshot=await PlatformAPI.request('session',undefined,{signal:context.controller.signal,owner:context.owner});
-        if(!paymentViewActive(context))return;
-        applySnapshot(snapshot);entitlementRefreshPending=false;updateMembershipViews();updateUnreadBadge();updateClassUnread();
-        if(context.order.fee_id){
-            const targetClass=Number(context.classId),selectedClass=Number(document.querySelector('#class-select')?.value);
-            if(classData&&Number(classData.class.id)===targetClass){
-                const fee=classData.fees.find(item=>Number(item.id)===Number(context.order.fee_id));
-                if(fee){fee.paid_at=context.order.paid_at;const label=context.target.closest('[data-fee-detail]')?.querySelector('.tuition-total .tag');if(label){label.textContent='Đã hoàn thành';label.classList.remove('peach');label.classList.add('sage');}}
-            }
-            if(selectedClass===targetClass){
-                const position={x:scrollX,y:scrollY},dialogScroll=context.dialog?.scrollTop;
-                await loadClass();
-                if(!paymentViewActive(context))return;
-                window.scrollTo({left:position.x,top:position.y,behavior:'instant'});
-                if(context.dialog)context.dialog.scrollTop=dialogScroll;
-            }
-        }
-        if(paymentViewActive(context)){context.synced=true;paymentFeedback(context,'');context.target.querySelector('[data-payment-retry]')?.remove();}
-    }
-    async function checkPayment(context,manual=false){
-        if(!paymentAvailable(context)||context.busy||!context.order)return;
-        if(context.order.status==='cancelled'||context.order.status==='paid'&&context.synced)return;
-        clearTimeout(context.timer);context.busy=true;context.lastCheck=Date.now();
-        const retry=context.target.querySelector('[data-payment-retry]');if(retry)retry.disabled=true;
-        try{
-            if(manual)paymentFeedback(context,'Đang kiểm tra khoản thanh toán…');
-            if(context.order.status==='pending'){
-                const result=await PlatformAPI.request('payments/'+context.order.id,undefined,{signal:context.controller.signal,owner:context.owner});
-                if(!renderPaymentOrder(context,result.order))return;
-            }
-            if(context.order.status==='paid')await syncPaidPayment(context);
-            context.failures=0;
-            if(paymentViewActive(context)&&context.order.status==='pending')paymentFeedback(context,manual?'Chưa có xác nhận thanh toán. Trang vẫn đang tự kiểm tra.':'');
-        }catch(error){
-            if(error.name!=='AbortError'&&paymentViewActive(context)){
-                if([401,403,404].includes(error.status)){
-                    context.target.innerHTML='<p class="payment-feedback is-error" role="alert">Chưa thể đọc đơn thanh toán của tài khoản này. Em hãy đăng nhập lại hoặc liên hệ 5BMath để kiểm tra.</p>';
-                    stopPaymentWatch();return;
-                }
-                context.failures++;
-                paymentFeedback(context,context.order.status==='paid'?'Thanh toán đã thành công; chưa cập nhật được quyền học. Em hãy bấm Cập nhật tài khoản để thử lại.':'Chưa kiểm tra được thanh toán. Trang sẽ thử lại. '+error.message,true);
-                if(context.order.status==='paid'){
-                    const actions=context.target.querySelector('.payment-actions');
-                    if(!actions.querySelector('[data-payment-retry]'))actions.insertAdjacentHTML('afterbegin','<button class="btn dark" type="button" data-payment-retry>Cập nhật tài khoản</button>');
-                    actions.querySelector('[data-payment-retry]').onclick=()=>checkPayment(context,true);
-                }
-            }
-        }finally{
-            context.busy=false;
-            if(paymentViewActive(context)){const control=context.target.querySelector('[data-payment-retry]');if(control)control.disabled=false;if(context.resumeRequested){context.resumeRequested=false;resumePaymentCheck();}else schedulePaymentCheck(context);}
-        }
-    }
-    async function createPayment(context){
-        if(!paymentAvailable(context)||context.busy)return;
-        context.busy=true;context.target.innerHTML='<p role="status">Đang chuẩn bị thông tin thanh toán…</p>';
-        try{
-            const result=await PlatformAPI.request(context.resumeOrderId?'payments/'+context.resumeOrderId:'payments',context.resumeOrderId?undefined:context.body,{signal:context.controller.signal,owner:context.owner});
-            if(!renderPaymentOrder(context,result.order))return;
-        }catch(error){
-            if(paymentViewActive(context)&&error.name!=='AbortError'){
-                context.target.innerHTML=`<p class="payment-feedback is-error" role="alert">Chưa tải được thông tin thanh toán. ${escape(error.message)}</p><div class="actions payment-actions"><button class="btn outline" type="button" data-payment-retry>Thử lại</button>${context.resumeOrderId&&error.status===404?link('Tạo đơn mua VIP','payment','outline'):''}</div>`;
-                context.target.querySelector('[data-payment-retry]').onclick=()=>createPayment(context);
-            }
-        }finally{context.busy=false;if(paymentViewActive(context)){if(context.resumeRequested){context.resumeRequested=false;resumePaymentCheck();}else if(context.order?.status==='paid')checkPayment(context);else schedulePaymentCheck(context);}}
-    }
-    async function startPaymentView(target,body,options={}){
-        stopPaymentWatch();
-        if(!target||!PlatformAPI.snapshot.authenticated)return;
-        const context={target,body,...options,owner:accountPageOwner,csrf:PlatformAPI.snapshot.csrf,generation:paymentGeneration,controller:new AbortController(),timer:null,busy:false,order:null,markup:'',failures:0,synced:false,lastCheck:0};
-        paymentWatch=context;
-        if(!paymentAvailable(context)){target.innerHTML='<p class="payment-feedback" role="status">Kết nối mạng để tải thông tin thanh toán.</p>';return;}
-        await createPayment(context);
-    }
+    function schedulePaymentCheck(...args) { return feature('commerce').schedulePaymentCheck(...args); }
+    function paymentFeedback(...args) { return feature('commerce').paymentFeedback(...args); }
+    function renderPaymentOrder(...args) { return feature('commerce').renderPaymentOrder(...args); }
+    function syncPaidPayment(...args) { return feature('commerce').syncPaidPayment(...args); }
+    function checkPayment(...args) { return feature('commerce').checkPayment(...args); }
+    function createPayment(...args) { return feature('commerce').createPayment(...args); }
+    function startPaymentView(...args) { return feature('commerce').startPaymentView(...args); }
     function pausePaymentCheck(){
         if(!paymentWatch)return;
         clearTimeout(paymentWatch.timer);paymentWatch.timer=null;paymentWatch.controller.abort();paymentWatch.controller=new AbortController();
@@ -1152,26 +652,14 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     function resumePaymentCheck(){
         const context=paymentWatch;if(!context||!paymentAvailable(context))return;
         if(context.busy){context.resumeRequested=true;return;}
-        if(!context.order){createPayment(context);return;}
+        if(!context.order){if(context.resumeOrderId)createPayment(context);else showCheckout(context);return;}
         if(Date.now()-context.lastCheck>1500)checkPayment(context);else schedulePaymentCheck(context);
     }
-    async function loadPayment() {
-        const container=document.querySelector('#payment-content');if(!container)return;
-        if(!live){container.textContent='Đăng nhập trên máy chủ để thanh toán theo tài khoản.';return;}
-        const identity=query('order');
-        if(identity!==null&&!/^[1-9][0-9]{0,14}$/.test(identity)){container.innerHTML='<p class="payment-feedback is-error" role="alert">Mã đơn thanh toán không hợp lệ.</p>'+link('Tạo đơn mua VIP','payment','outline');return;}
-        const plan=query('plan')||'VIP';
-        if(!['VIP','VIP+'].includes(plan)){container.textContent='Gói đăng ký không hợp lệ.';return;}
-        await startPaymentView(container,query('examProduct')?{examProduct:query('examProduct')}:{plan},{resumeOrderId:identity===null?null:Number(identity)});
-    }
+    function loadPayment(...args) { return feature('commerce').loadPayment(...args); }
 
-    function initials() {
-        return name().trim().split(/\s+/).slice(-2).map(part => part[0]).join('').toLocaleUpperCase('vi');
-    }
+    function initials(...args) { return feature('profile').initials(...args); }
 
-    function getExam() {
-        return state.exams[query('id') || state.activeExam];
-    }
+    function getExam(...args) { return feature('practice').getExam(...args); }
 
     function timeText(seconds) {
         const value = Math.max(0,Math.ceil(seconds));
@@ -1182,72 +670,14 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         return timeText((deadline - Date.now()) / 1000);
     }
 
-    function battleTime(battle) {
-        const duration=battle.defenseUntil&&!battle.resolved?3:content.battleSeconds(battle.grade,battle.questions[battle.index].difficulty);
-        const now=battle.mode==='bot'?Date.now():arenaNow();
-        const remaining=Math.min(duration,Math.max(0,Math.ceil(((battle.defenseUntil&&!battle.resolved?battle.defenseUntil:battle.deadline)-now)/1000)));
-        return {duration,remaining,percent:remaining/duration*100};
-    }
+    function battleTime(...args) { return feature('arena').battleTime(...args); }
 
-    function updateBattleTimer(battle) {
-        const time=battleTime(battle),label=timeText(time.remaining);
-        const timer=document.querySelector('#learning-battle-timer');
-        if(timer)timer.textContent=label;
-        const meter=document.querySelector('#learning-battle-time-meter');
-        if(meter){
-            meter.setAttribute('aria-valuemax',time.duration);
-            meter.setAttribute('aria-valuenow',time.remaining);
-            meter.setAttribute('aria-valuetext',label+' còn lại');
-            meter.firstElementChild.style.setProperty('--value',time.percent+'%');
-        }
-    }
+    function updateBattleTimer(...args) { return feature('arena').updateBattleTimer(...args); }
 
-    function updateBattleRound(battle) {
-        const panel=document.querySelector('.battle-round-status');
-        const question=document.querySelector('.battle-question-content');
-        if(!panel||!question)return;
-        const now=battle.mode==='bot'?Date.now():arenaNow();
-        const expired=now>=battle.deadline;
-        // The fallback also supports bot rounds saved before roundOutcome existed.
-        let outcome=battle.roundOutcome;
-        if(!outcome||outcome==='waiting'){
-            outcome=battle.answer!==null
-                ? battle.mode==='bot'
-                    ? isCorrect(battle.questions[battle.index],battle.answer)?'correct':'wrong'
-                    : battle.feedback?.includes('chưa đúng')?'wrong':'correct'
-                : battle.resolved&&battle.feedback?.includes('trả lời đúng')?'opponent'
-                : expired?'timeout':'waiting';
-        }
-        const defending=Boolean(battle.defenseUntil&&!battle.resolved);
-        const correctDefenseWait=defending&&outcome==='correct'&&battle.answer!==null;
-        const shown=(!defending||correctDefenseWait)&&outcome!=='waiting';
-        if(panel.hidden===shown)panel.hidden=!shown;
-        question.classList.toggle('round-hidden',shown);
-        if(question.inert!==shown)question.inert=shown;
-        if(question.getAttribute('aria-hidden')!==String(shown))question.setAttribute('aria-hidden',String(shown));
-        if(!shown)return;
-        if(panel.dataset.outcome!==outcome)panel.dataset.outcome=outcome;
-        const titles={correct:'Em trả lời đúng!',wrong:'Em trả lời sai',opponent:'Bạn trả lời nhanh hơn',timeout:'Hết giờ!'};
-        const symbols={correct:'check',wrong:'flag',opponent:'zap',timeout:'clock'};
-        const setText=(selector,text)=>{const node=panel.querySelector(selector);if(node.textContent!==text)node.textContent=text;};
-        setText('#battle-round-title',battle.resolved&&battle.damage===10&&!battle.attacking?'Đỡ đòn thành công!':titles[outcome]);
-        const symbol=panel.querySelector('.battle-round-symbol');
-        if(symbol.dataset.symbol!==symbols[outcome]){symbol.innerHTML=icon(symbols[outcome],28);symbol.dataset.symbol=symbols[outcome];}
-        let detail=outcome==='correct'?battle.feedback||'Em trả lời đúng.':outcome==='opponent'?'Bạn trả lời đúng trước. Em bị trừ 20 máu.':'Chưa có đáp án đúng. Hai bên giữ nguyên máu.';
-        if(outcome==='wrong')detail=!battle.resolved?'Em hãy chờ bạn trả lời hoặc hết thời gian câu này.':battle.roundReason==='correct'?'Bạn trả lời đúng. Em bị trừ 20 máu.':'Câu này chưa có đáp án đúng. Hai bên giữ nguyên máu.';
-        if(outcome==='timeout'&&!battle.resolved)detail='Đang nhận kết quả câu này…';
-        setText('#battle-round-detail',battle.resolved&&battle.feedback?battle.feedback:detail);
-        const final=battle.hp===0||battle.opponentHp===0||battle.index>=battle.questions.length-1;
-        setText('#battle-round-next',correctDefenseWait?'Thời gian phòng thủ của đối thủ còn':final?'Hãy xem kết quả trận đấu':'Hãy chuẩn bị cho câu '+(battle.index+2));
-        const roundUntil=correctDefenseWait?battle.defenseUntil:battle.nextAt;
-        const seconds=Math.max(0,Math.ceil(((roundUntil||now)-now)/1000));
-        const countdown=panel.querySelector('.battle-round-countdown'),hideCount=(!battle.resolved&&!correctDefenseWait)||seconds===0;
-        if(countdown.hidden!==hideCount)countdown.hidden=hideCount;
-        setText('#next-round-count',String(seconds));
-        setText('#battle-round-wait',correctDefenseWait?'Đáp án đã được gửi. Đang chờ đối thủ phòng thủ.':battle.resolved?(seconds===0?'Đang chuyển…':''):expired?'Đang đồng bộ câu tiếp theo…':'Câu này còn '+timeText(((battle.defenseUntil&&!battle.resolved?battle.defenseUntil:battle.deadline)-now)/1000));
-    }
+    function updateBattleRound(...args) { return feature('arena').updateBattleRound(...args); }
 
     function resumeArena() {
+        if(!learnerBackgroundAllowed())return;
         if(document.hidden||!currentRoute||!host.progress?.name||live&&!PlatformAPI.snapshot.authenticated)return;
         if(sessionStorage.getItem('5bmath-room'))pollRoom();
         else if(currentRoute==='battle'&&currentBattle?.mode==='bot'){
@@ -1255,55 +685,11 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         }
     }
 
-    function emoteSeconds(battle) {
-        const now=battle.mode==='bot'?Date.now():arenaNow();
-        const until=Math.max(battle.emoteAvailableAt||0,emoteLock.id===battle.id?emoteLock.until:0);
-        return Math.max(0,Math.ceil((until-now)/1000));
-    }
+    function emoteSeconds(...args) { return feature('arena').emoteSeconds(...args); }
 
-    function updateEmoteControls(battle) {
-        if(battle.mode==='bot'&&battle.myEmote!=null&&Date.now()>=(battle.myEmoteUntil||0)){
-            battle.myEmote=null;persistBot();
-        }
-        if(battle.mode==='bot'){
-            const bubble=document.querySelector('#my-emote'),text=emotes[battle.myEmote]?.join(' ')||'';
-            if(bubble&&bubble.textContent!==text)bubble.textContent=text;
-        }
-        const seconds=emoteSeconds(battle),pending=emoteLock.id===battle.id&&emoteLock.pending;
-        battle.emoteUsed=seconds>0;
-        document.querySelectorAll('[data-emote]').forEach(control=>{const disabled=seconds>0||pending;if(control.disabled!==disabled)control.disabled=disabled;});
-        const bar=document.querySelector('.emote-bar'),disabled=seconds>0||pending;
-        if(bar){
-            bar.classList.toggle('is-cooling',disabled);
-            if(bar.getAttribute('aria-disabled')!==String(disabled))bar.setAttribute('aria-disabled',String(disabled));
-        }
-    }
+    function updateEmoteControls(...args) { return feature('arena').updateEmoteControls(...args); }
 
-    async function sendEmote(index) {
-        const battle=currentBattle;
-        if(!battle||emoteSeconds(battle)>0||emoteLock.id===battle.id&&emoteLock.pending)return;
-        const now=battle.mode==='bot'?Date.now():arenaNow();
-        emoteLock={id:battle.id,until:now+5000,pending:true};
-        updateEmoteControls(battle);
-        try{
-            if(battle.mode==='bot'){
-                battle.emoteAvailableAt=now+5000;battle.myEmoteUntil=now+4000;battle.myEmote=index;
-                persistBot();updateBattleVisuals();
-            }else{
-                const result=await arenaRequest('emote',{emote:index});
-                if(result.battle?.id===battle.id){
-                    if(emoteLock.id===battle.id)emoteLock.until=result.battle.emoteAvailableAt||0;
-                    if(currentBattle?.id===battle.id){
-                        currentBattle.emoteAvailableAt=result.battle.emoteAvailableAt;
-                        currentBattle.myEmote=result.battle.myEmote;
-                        updateBattleVisuals();
-                    }
-                }
-                await pollRoom();
-            }
-        }catch(error){if(emoteLock.id===battle.id)emoteLock.until=0;throw error;}
-        finally{if(emoteLock.id===battle.id)emoteLock.pending=false;if(currentBattle?.id===battle.id)updateEmoteControls(currentBattle);}
-    }
+    function sendEmote(...args) { return feature('arena').sendEmote(...args); }
 
     function isCorrect(question, answer) {
         if(typeof question.correct==='boolean')return question.correct;
@@ -1316,36 +702,9 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         return `<div class="typed-answer"><label for="${battle?'battle-answer':'exam-answer'}">Đáp án của em</label><input id="${battle?'battle-answer':'exam-answer'}" name="${battle?'battle-answer':'learning-answer'}" type="text" inputmode="${kind==='number'?'decimal':'text'}" maxlength="500" autocomplete="off" autocapitalize="off" spellcheck="false" value="${escape(value)}" aria-describedby="${battle?'battle-answer-help':'exam-answer-help'}"><small id="${battle?'battle-answer-help':'exam-answer-help'}">${kind==='ordered'||kind==='unordered'?'Ngăn cách các kết quả bằng dấu ;':'Nhập số, phân số (ví dụ 3/4) hoặc dấu theo yêu cầu. Dùng dấu phẩy hoặc chấm cho phần thập phân.'}</small>${battle?'<button class="btn dark" type="submit">Gửi đáp án</button>':'<span id="answer-save-status" role="status"></span>'}</div>`;
     }
     const examDrafts=new Map();let draftTimer=null,draftSaving=null;
-    function rememberExamAnswer(input) {
-        const exam=getExam();if(!exam||exam.submittedAt)return;
-        const position=Number(input.dataset.position),qid=input.dataset.questionId;
-        exam.answers[qid]=input.value;
-        if(!live){save();updateExamProgress(exam);return;}
-        examDrafts.set(exam.id+':'+position,{id:exam.id,position,answer:input.value,owner:PlatformAPI.snapshot.account?.id});
-        updateExamProgress(exam);
-        const status=document.querySelector('#answer-save-status');if(status)status.textContent='Đang lưu…';
-        clearTimeout(draftTimer);draftTimer=setTimeout(()=>flushExamDrafts().catch(e=>host.toast(e.message)),250);
-    }
-    function updateExamProgress(exam) {
-        const done=q=>Boolean(String(exam.answers[q.id]??'').trim());
-        const progress=document.querySelector('#learning-answered');if(progress)progress.textContent=exam.questions.filter(done).length+' / '+exam.questions.length+' câu đã trả lời';
-        document.querySelectorAll('[data-question]').forEach(nav=>{const i=Number(nav.dataset.question),answered=done(exam.questions[i]);nav.classList.toggle('done',answered);nav.setAttribute('aria-label','Câu '+(i+1)+(answered?' · Đã trả lời':' · Chưa trả lời'));});
-    }
-    async function flushExamDrafts() {
-        clearTimeout(draftTimer);
-        if(draftSaving){await draftSaving;if(examDrafts.size)return flushExamDrafts();return;}
-        draftSaving=(async()=>{
-            while(examDrafts.size){
-                const [key,item]=examDrafts.entries().next().value;
-                if(item.owner!==PlatformAPI.snapshot.account?.id){examDrafts.delete(key);continue;}
-                try{await PlatformAPI.request('exams/'+item.id+'/answers',{position:item.position,answer:item.answer});}
-                catch(error){const status=document.querySelector('#answer-save-status');if(status)status.textContent='Chưa lưu được. Hãy thử lại trước khi rời bài.';throw error;}
-                if(examDrafts.get(key)===item)examDrafts.delete(key);
-            }
-            const status=document.querySelector('#answer-save-status');if(status)status.textContent='Đã lưu';
-        })();
-        try{await draftSaving;}finally{draftSaving=null;}
-    }
+    function rememberExamAnswer(...args) { return feature('practice').rememberExamAnswer(...args); }
+    function updateExamProgress(...args) { return feature('practice').updateExamProgress(...args); }
+    function flushExamDrafts(...args) { return feature('practice').flushExamDrafts(...args); }
 
     function go(route, parameters = {}) {
         location.assign(href(route,parameters));
@@ -1355,68 +714,16 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         host.redraw();
     }
 
-    async function createExam({topic = '', count = 10, difficulty = 0, maxWeek, week:exactWeek, category, school} = {}) {
-        if(live){
-            const {exam}=await PlatformAPI.request('exams',{topic,count,difficulty,maxWeek,week:exactWeek,category:category||(topic||maxWeek!==undefined?'content':'combined'),school,requestKey:uid()});
-            state.exams[exam.id]=exam;state.activeExam=exam.id;
-            go('testing',{id:exam.id});return;
-        }
-        consumeLocal(category||(topic||maxWeek!==undefined?'content':'combined'));
-        maxWeek = maxWeek ?? 35;
-        const previous = Object.values(state.exams).at(-1);
-        const questions = content.generate({grade:grade(),topic,count,difficulty,maxWeek},previous?.questions.map(question => question.id));
-        const id = uid();
-        const startedAt = Date.now();
-        const exam = {
-            id, code:'5B-' + id.replaceAll('-','').slice(0,8).toUpperCase(),
-            title: topic ? 'Ôn luyện · ' + questions[0].topicTitle : 'Thi thử tổng hợp',
-            grade:grade(), questions, answers:{}, index:0, startedAt,
-            expiresAt:startedAt + (count === 3 ? 10 : 30) * 60000,
-        };
-        state.exams[id] = exam;
-        state.activeExam = id;
-        save();
-        go('testing',{id});
-    }
+    function practiceCreateButton(...args) { return feature('practice').practiceCreateButton(...args); }
+    function loadPurchasedPractice(...args) { return feature('practice').loadPurchasedPractice(...args); }
+    function openCreatedExam(...args) { return feature('practice').openCreatedExam(...args); }
+    function quotePurchasedExam(...args) { return feature('practice').quotePurchasedExam(...args); }
+    function createExam(...args) { return feature('practice').createExam(...args); }
 
     let submitting = false,battleSending=false;
-    async function finishExam(exam) {
-        try{await flushExamDrafts();}catch(error){host.toast(error.message);return;}
-        if(live){
-            if(submitting)return;
-            submitting=true;
-            try {
-                const result=await PlatformAPI.request('exams/'+exam.id+'/submit',{});
-                state.exams[exam.id]=result.exam;
-                go('results',{id:exam.id});
-            }catch(error){host.toast(error.message);}finally{submitting=false;}
-            return;
-        }
-        load();
-        const saved = state.exams[exam.id];
-        if (!saved || saved.submittedAt) {
-            if (saved) go('results',{id:saved.id});
-            return;
-        }
-        saved.correct = saved.questions.filter(question => isCorrect(question,saved.answers[question.id])).length;
-        saved.score = Math.round(saved.correct / saved.questions.length * 100) / 10;
-        saved.duration = Math.floor((Math.min(Date.now(),saved.expiresAt) - saved.startedAt) / 1000);
-        saved.submittedAt = new Date().toISOString();
-        save();
-        go('results',{id:saved.id});
-    }
+    function finishExam(...args) { return feature('practice').finishExam(...args); }
 
-    function requestSubmit() {
-        const exam = getExam();
-        if (!exam || exam.submittedAt) return;
-        const missing = exam.questions.filter(question => !exam.answers[question.id]).length;
-        host.showModal(`<h2 class="modal-title">Nộp bài thi thử?</h2><p>${missing ? 'Em còn ' + missing + ' câu chưa trả lời. Câu trống được tính 0 điểm.' : 'Em đã trả lời toàn bộ câu hỏi.'}</p><div class="actions"><button class="btn outline" id="learning-continue" type="button">Làm tiếp</button><button class="btn dark" id="learning-confirm-submit" type="button">Nộp bài</button></div>`);
-        document.querySelector('#learning-continue').onclick = () => document.querySelector('#modal').close();
-        document.querySelector('#learning-confirm-submit').onclick = () => {
-            document.querySelector('#modal').close();
-            finishExam(exam);
-        };
-    }
+    function requestSubmit(...args) { return feature('practice').requestSubmit(...args); }
 
     async function copyText(text) {
         try {
@@ -1429,6 +736,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     }
 
     function recordActivity() {
+        if(!learnerBackgroundAllowed()){activityStarted=null;return;}
         if(live){
             if(host.progress?.name && !document.hidden)PlatformAPI.request('heartbeat',{}).catch(()=>{});
             activityStarted = document.hidden ? null : Date.now();
@@ -1446,575 +754,62 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         save();
     }
 
-    function buildBotBattle(questions,level=1,id=uid(),classGrade=grade()) {
-        const battle={id,mode:'bot',grade:classGrade,questions,index:0,hp:100,opponentHp:100,opponent:'Bot',botLevel:level,readyAt:Date.now()+5000,answer:null,resolved:false,correct:0,feedback:'',review:[]};
-        setBotRoundTiming(battle,battle.readyAt);return battle;
-    }
-    function backupLegacyBot(){const raw=sessionStorage.getItem('5bmath-bot-battle');if(!raw)return;try{const saved=JSON.parse(raw);if(!saved.gameClaimId)sessionStorage.setItem('5bmath-legacy-bot-backup:'+(PlatformAPI.snapshot.account?.id||'offline'),raw);}catch{}}
-    async function startBot(trigger) {
-        if(botStarting)return;botStarting=true;if(trigger?.isConnected)trigger.disabled=true;
-        try{
-            const scope='all';let result=null;
-            if(live)result=await window.GameSession.admit('duel-bot',{scope},requestKey=>PlatformAPI.request('bot/start',{requestKey,scope}));
-            const questions=live?result.questions:content.generate({grade:grade(),difficulty:0,count:20,maxWeek:35});
-            if(live&&!result.gameClaim?.claimId)throw new Error('Máy chủ chưa xác nhận phòng luyện Bot; chưa thể bắt đầu.');
-            if(!live){consumeLocal('bot');for(let index=0;index<6;index++)questions[index]=content.problem(grade(),questions[index].topic,index,1);}
-            backupLegacyBot();currentBattle=buildBotBattle(questions,live?Number(result.botRules?.level??1):1,live?result.gameClaim.claimId:uid(),live?(result.gameClaim.botBattle?.grade||grade()):grade());
-            if(live)currentBattle.gameClaimId=result.gameClaim.claimId;
-            sessionStorage.removeItem('5bmath-room');sessionStorage.setItem('5bmath-bot-battle',JSON.stringify(currentBattle));
-            if(live){const claim=await window.GameSession.saveBot(result.gameClaim,currentBattle);window.GameSession.accept(claim);currentBattle={...currentBattle,...claim.botBattle,gameClaimId:claim.claimId,gameClaimRevision:claim.checkpointRevision};sessionStorage.setItem('5bmath-bot-battle',JSON.stringify(currentBattle));}
-            go('battle',live?{bot:currentBattle.gameClaimId}:{});
-        }catch(error){window.GameSession?.conflict(error);if(live&&currentBattle?.gameClaimId)window.GameSession?.show(window.GameSession.current,error.message);throw error;}
-        finally{botStarting=false;if(trigger?.isConnected)trigger.disabled=false;}
-    }
-    function ensureBotLease(){
-        if(!live){botLeaseReady=true;return Promise.resolve(true);}
-        const battle=currentBattle,epoch=botLeaseEpoch;
-        if(!battle||battle.mode!=='bot')return Promise.resolve(false);
-        if(botValidation?.epoch===epoch)return botValidation.promise;
-        const prior=botValidation?.promise||Promise.resolve(),validation={epoch,promise:null};botLeaseReady=false;document.querySelector('#battle-answer-form')?.querySelectorAll('input,button').forEach(control=>control.disabled=true);
-        validation.promise=(async()=>{
-            await prior.catch(()=>{});if(epoch!==botLeaseEpoch||currentBattle!==battle)return false;
-            try{
-                const claim=await window.GameSession.validateBot(battle);if(!claim||epoch!==botLeaseEpoch||currentBattle!==battle)return false;
-                const initial={...buildBotBattle(claim.botBattle.questions,1,claim.claimId,claim.botBattle.grade),...battle,questions:claim.botBattle.questions,gameClaimId:claim.claimId,botLevel:1};
-                const saved=await window.GameSession.saveBot(claim,initial);if(epoch!==botLeaseEpoch||currentBattle!==battle)return false;
-                window.GameSession.accept(saved);currentBattle={...initial,...saved.botBattle,gameClaimId:saved.claimId,gameClaimRevision:saved.checkpointRevision};sessionStorage.setItem('5bmath-bot-battle',JSON.stringify(currentBattle));botLeaseReady=true;
-                window.GameSession.watchBot(saved,{state:()=>currentBattle,onClaim:(next,info)=>{if(epoch===botLeaseEpoch&&info.checkpoint&&currentBattle?.gameClaimId===next.claimId){currentBattle.gameClaimRevision=next.checkpointRevision;sessionStorage.setItem('5bmath-bot-battle',JSON.stringify(currentBattle));}},onLost:(next,error)=>{if(epoch!==botLeaseEpoch)return;botLeaseReady=false;window.GameSession.unwatch();window.GameSession.show(next,error?.message||'Phiên luyện đã tạm dừng. Tiếp tục trận để đồng bộ.');updateBattleVisuals();}});
-                if(!document.querySelector('#battle-answer-form'))refresh();else updateBattleVisuals();return true;
-            }catch(error){if(epoch===botLeaseEpoch){botLeaseReady=false;window.GameSession?.conflict(error);window.GameSession?.show(error.details?.gameClaim||window.GameSession.current,'Chưa xác nhận được phòng luyện. '+error.message);updateBattleVisuals();}return false;}
-            finally{if(botValidation===validation)botValidation=null;}
-        })();botValidation=validation;return validation.promise;
-    }
+    function buildBotBattle(...args) { return feature('arena').buildBotBattle(...args); }
+    function backupLegacyBot(...args) { return feature('arena').backupLegacyBot(...args); }
+    function startBot(...args) { return feature('arena').startBot(...args); }
+    function ensureBotLease(...args) { return feature('arena').ensureBotLease(...args); }
 
-    function setBotRoundTiming(battle,startedAt) {
-        battle.botForcedCorrect=false;battle.forcedReason=null;
-        const duration=content.battleSeconds(battle.grade,battle.questions[battle.index].difficulty)*1000;
-        battle.deadline=startedAt+duration;
-        battle.botAnswered=false;battle.defenseUntil=null;battle.attacking=false;battle.damage=null;battle.draftAnswer='';
-        // Leave one polling interval before expiry so a scheduled bot answer
-        // is processed while the question is still open.
-        battle.botAt=startedAt+duration*0.7+Math.random()*(duration*0.3-1000);
-    }
+    function setBotRoundTiming(...args) { return feature('arena').setBotRoundTiming(...args); }
 
-    function persistBot() {
-        sessionStorage.setItem('5bmath-bot-battle',JSON.stringify(currentBattle));
-        if(live&&botLeaseReady&&currentBattle?.gameClaimId)window.GameSession?.changedBot(currentBattle);
-    }
+    function persistBot(...args) { return feature('arena').persistBot(...args); }
 
-    function settleBotAttack(battle,defended,now) {
-        if(battle.resolved)return;
-        const damage=defended?10:20;
-        const attacker=battle.attacking?'me':'opponent';
-        if(battle.attacking)battle.opponentHp=Math.max(0,battle.opponentHp-damage);
-        else battle.hp=Math.max(0,battle.hp-damage);
-        battle.damage=damage;
-        recordBotAttack(battle,attacker);
-        Object.assign(battle.lastAttack,{damage,defended});
-        battle.resolved=true;battle.roundReason='correct';battle.nextAt=now+3000;
-        battle.feedback=battle.attacking
-            ?(defended?'Bot đỡ đòn! ':'')+'Em gây '+damage+' sát thương.'
-            :(defended?'Đỡ đòn! ':'Trúng đòn! ')+'Em mất '+damage+' máu.';
-        if(battle.answer===null)battle.roundOutcome='opponent';
-        persistBot();updateBattleVisuals();
-    }
-    function beginBotAttack(battle,attacking,now) {
-        battle.attacking=attacking;battle.defenseUntil=now+3000;
-        const defenderAnswered=attacking?battle.botAnswered:battle.answer!==null;
-        if(defenderAnswered){settleBotAttack(battle,false,now);return;}
-        battle.feedback=attacking?'Em trả lời đúng! Chờ đối thủ phòng thủ.':'Đối thủ chuẩn bị tấn công! Trả lời đúng để giảm sát thương.';
-    }
-    function answerBot(answer) {
-        const battle=currentBattle,index=battle?.index;
-        if(live&&(!botLeaseReady||document.hidden))return;
-        tickBot();
-        if(!battle||battle!==currentBattle||battle.index!==index||battle.resolved||battle.answer!==null||Date.now()>=(battle.defenseUntil||battle.deadline)||Date.now()<(battle.readyAt||0))return;
-        battle.answer=answer;
-        const correct=isCorrect(battle.questions[battle.index],answer);
-        if(correct)battle.correct++;
-        battle.roundOutcome=correct?'correct':'wrong';
-        if(!correct){
-            // Explicit BOT-only forced round outcome; no second bot submission.
-            battle.botAnswered=true;battle.botForcedCorrect=true;
-            battle.forcedReason='human_wrong_bots_correct';
-            beginBotAttack(battle,false,Date.now());
-            battle.roundReason='human_wrong_bots_correct';
-            battle.feedback='Em trả lời sai: BOT được tính đúng và chốt câu ngay.';
-            ArenaAudio.effect('wrong');
-        }else if(battle.defenseUntil)settleBotAttack(battle,true,Date.now());
-        else beginBotAttack(battle,true,Date.now());
-        persistBot();updateBattleVisuals();
-    }
-    function tickBot() {
-        const battle=currentBattle;if(!battle||battle.mode!=='bot'||live&&(!botLeaseReady||document.hidden))return;
-        const now=Date.now();if(now<(battle.readyAt||0))return;
-        if(battle.resolved){if(now>=battle.nextAt)nextBot();return;}
-        const limit=battle.defenseUntil||battle.deadline;
-        if(!battle.botAnswered&&now>=battle.botAt&&battle.botAt<limit){
-            battle.botAnswered=true;
-            const correct=battle.questions[battle.index].difficulty<=battle.botLevel;
-            if(battle.defenseUntil)settleBotAttack(battle,correct,battle.botAt);
-            else if(correct)beginBotAttack(battle,false,battle.botAt);
-            else if(battle.answer!==null){battle.resolved=true;battle.roundReason='both_wrong';battle.feedback='Hai bên chưa trả lời đúng. Giữ nguyên máu.';battle.nextAt=now+3000;}
-        }
-        if(!battle.resolved){
-            if(battle.defenseUntil){if(now>=battle.defenseUntil)settleBotAttack(battle,false,battle.defenseUntil);}
-            else if(now>=battle.deadline){battle.resolved=true;battle.feedback='Hết thời gian câu này. Hai bên giữ nguyên máu.';battle.roundOutcome=battle.answer!==null?'wrong':'timeout';battle.roundReason='timeout';battle.nextAt=now+3000;}
-        }
-        persistBot();updateBattleVisuals();
-    }
+    function settleBotAttack(...args) { return feature('arena').settleBotAttack(...args); }
+    function beginBotAttack(...args) { return feature('arena').beginBotAttack(...args); }
+    function answerBot(...args) { return feature('arena').answerBot(...args); }
+    function tickBot(...args) { return feature('arena').tickBot(...args); }
 
-    function nextBot() {
-        const battle = currentBattle;
-        if (!battle?.resolved||live&&(!botLeaseReady||document.hidden)) return;
-        if(battle.review.length===battle.index)battle.review.push({...battle.questions[battle.index],myAnswer:battle.answer,correct:isCorrect(battle.questions[battle.index],battle.answer)});
-        if (battle.hp === 0 || battle.opponentHp === 0 || battle.index === battle.questions.length - 1) {
-            const outcome = battle.hp === 0 ? 'lose' : battle.opponentHp === 0 ? 'win' : 'draw';
-            finishBattle({...battle,outcome,rounds:battle.index + 1,points:0});
-            return;
-        }
-        battle.index++;
-        setTimeout(()=>ArenaAudio.effect('next'),100);
-        battle.answer = null;
-        battle.resolved = false;
-        battle.feedback = '';battle.nextAt=null;
-        battle.roundOutcome='waiting';battle.roundReason=null;
-        setBotRoundTiming(battle,Date.now());
-        persistBot();
-        refresh();
-    }
+    function nextBot(...args) { return feature('arena').nextBot(...args); }
 
     const promotionOwner=()=>live?String(PlatformAPI.snapshot.account?.id||''):('offline:'+name());
     function queuePromotion(result,before,after){if(result.mode==='bot'||result.completed===false||result.outcome!=='win'||after<=before||Math.min(14,Math.floor(after/20))<=Math.min(14,Math.floor(before/20)))return;const owner=promotionOwner(),seen='5bmath-promotion-seen:'+owner+':'+result.id;if(sessionStorage.getItem(seen))return;sessionStorage.setItem('5bmath-promotion',JSON.stringify({id:result.id,owner,pet:state.mascot,before,after}));}
     function showPromotion(){let p;try{p=JSON.parse(sessionStorage.getItem('5bmath-promotion')||'null')}catch{return}if(!p||currentRoute!=='battleResult'||p.id!==query('id')||p.owner!==promotionOwner())return;const seen='5bmath-promotion-seen:'+p.owner+':'+p.id;if(sessionStorage.getItem(seen))return;sessionStorage.setItem(seen,'1');sessionStorage.removeItem('5bmath-promotion');setMobileMenu(false,false);host.showModal(`<section class="rank-promotion" role="status">${celebrationMarkup({seed:'promotion:'+p.id})}<span class="eyebrow">Một bước trưởng thành mới</span><h2 class="modal-title">Chúc mừng thăng hạng!</h2><p>${escape(mascotAvatars[p.pet]?.[0]||petName())} đã cùng em tiến bộ.</p><div class="promotion-evolution" data-from-form="${mascotVisuals.formFor(p.before)}" data-to-form="${mascotVisuals.formFor(p.after)}"><div class="promotion-old">${art(p.pet,'Trước khi thăng hạng',false,p.before)}</div><div class="promotion-spark" aria-hidden="true">✦ ✧ ✦</div><div class="promotion-new">${art(p.pet,'Sau khi thăng hạng',false,p.after)}</div></div><p class="promotion-ranks"><span>${mascotVisuals.rankFor(p.before)}</span><b aria-hidden="true">→</b><strong>${mascotVisuals.rankFor(p.after)}</strong></p><p>${content.format(p.before)} → ${content.format(p.after)} kinh nghiệm</p><button type="button" class="btn dark" id="promotion-close">Tiếp tục hành trình</button></section>`);const modal=document.getElementById('modal'),fx=mountCelebration(modal.querySelector('.rank-promotion'));modal.addEventListener('close',()=>{fx?.destroy();celebrationControllers.delete(fx);},{once:true});document.getElementById('promotion-close').onclick=()=>modal.close();}
-    function challengeOpponent(result){const s=result.opponentStats||{},code=Object.hasOwn(mascotAvatars,s.mascot)?s.mascot:'sprout',xp=Math.max(0,Number(s.xp)||0);return `<div class="challenge-opponent">${art(code,mascotAvatars[code][0],false,xp)}<div><h3>${escape(mascotAvatars[code][0])}</h3><p>${mascotVisuals.rankFor(xp)} · ${content.format(xp)} XP</p><dl><div><dt>Khối</dt><dd>${Number(result.opponentGrade)||grade()}</dd></div><div><dt>Máu khi vào trận</dt><dd>100 HP</dd></div><div><dt>Thắng / Thua</dt><dd>${Math.max(0,Number(s.wins)||0)} / ${Math.max(0,Number(s.losses)||0)}</dd></div></dl></div></div>`;}
+    function challengeOpponent(...args) { return feature('arena').challengeOpponent(...args); }
 
-    function finishBattle(result) {
-        const visualUntil=browser?mascotVisuals.pendingUntil():0;if(result.outcome!=='left'&&currentRoute==='battle'&&Date.now()<visualUntil){if(!catFinishTimer)catFinishTimer=setTimeout(()=>{catFinishTimer=null;if(currentBattle?.id===result.id)finishBattle(result);},visualUntil-Date.now()+30);return;}
+    function finishBattle(...args) { return feature('arena').finishBattle(...args); }
 
-        const horsePending=browser?window.HorseAnimation?.pendingUntil?.()||0:0;
-        if(result.outcome!=='left'&&currentRoute==='battle'&&Date.now()<horsePending){
-            if(!catFinishTimer)catFinishTimer=setTimeout(()=>{catFinishTimer=null;if(currentBattle?.id===result.id&&currentRoute==='battle')finishBattle(result);},Math.max(40,horsePending-Date.now()+40));
-            return;
-        }
-        if(result.outcome!=='left'&&currentRoute==='battle'&&Date.now()<octopusFinaleUntil){
-            if(!octopusFinishTimer)octopusFinishTimer=setTimeout(()=>{octopusFinishTimer=null;if(currentBattle?.id===result.id&&currentRoute==='battle')finishBattle(result);},octopusFinaleUntil-Date.now()+40);
-            return;
-        }
-        // Visual completion only; authoritative damage, score and deadlines stay unchanged.
-        if(result.outcome!=='left'&&currentRoute==='battle'&&Date.now()<owlFinaleUntil){
-            if(!owlFinishTimer)owlFinishTimer=setTimeout(()=>{owlFinishTimer=null;if(currentBattle?.id===result.id&&currentRoute==='battle')finishBattle(result);},owlFinaleUntil-Date.now()+30);
-            return;
-        }
-        // Let an already resolved visual finish; server HP/score/deadlines stay authoritative.
-        if(result.outcome!=='left'&&currentRoute==='battle'&&Date.now()<catFinaleUntil){
-            if(!catFinishTimer)catFinishTimer=setTimeout(()=>{catFinishTimer=null;if(currentBattle?.id===result.id&&currentRoute==='battle')finishBattle(result);},catFinaleUntil-Date.now()+40);
-            return;
-        }
-        if(live&&result.mode==='bot'&&result.gameClaimId&&!result.gameClaimReleased){
-            botLeaseReady=false;window.GameSession?.unwatch();
-            if(botReleasePending===result.gameClaimId)return;botReleasePending=result.gameClaimId;
-            window.GameSession.releaseBot({...currentBattle,...result},result.outcome==='left'?'leave':'finish').then(()=>{finishBattle({...result,gameClaimReleased:true});}).catch(error=>{window.GameSession?.show(error.details?.gameClaim||window.GameSession.current,'Chưa thể đóng phòng luyện. '+error.message);}).finally(()=>{botReleasePending=null;});return;
-        }
-        if(result.mode==='bot'&&!result.gameClaimId)backupLegacyBot();
-        load();
-        if(Number.isFinite(result.xpBefore)&&Number.isFinite(result.xpAfter))queuePromotion(result,result.xpBefore,result.xpAfter);
-        if (!state.battles[result.id]) {
-            state.battles[result.id] = {
-                id:result.id, mode:result.mode, grade:result.grade, outcome:result.outcome,
-                correct:result.correct, rounds:result.rounds, points:result.points,
-                completed:result.completed,reason:result.reason,penalty:result.penalty,quotaRefunded:result.quotaRefunded,
-                review:result.review || [], date:new Date().toISOString(),
-            };
-            const xpBefore=Number.isFinite(result.xpBefore)?result.xpBefore:state.points;const xpAfter=Number.isFinite(result.xpAfter)?result.xpAfter:Math.max(0,state.points+result.points);queuePromotion(result,xpBefore,xpAfter);state.points=xpAfter;
-            save();
-        }
-        sessionStorage.removeItem('5bmath-bot-battle');
-        sessionStorage.removeItem('5bmath-room');
-        if(document.querySelector('#modal .arena-leave-confirm'))document.querySelector('#modal').close();
-        currentBattle = null;
-        sessionStorage.setItem('5bmath-last-battle',JSON.stringify(state.battles[result.id]||result));
-        go('battleResult',{id:result.id});
-    }
+    function arenaRequest(...args) { return feature('arena').arenaRequest(...args); }
 
-    async function arenaRequest(action, values = {}) {
-        const session = JSON.parse(sessionStorage.getItem('5bmath-room') || 'null') || {};
-        if(live){
-            try{const send=requestKey=>PlatformAPI.request('arena',{action,...session,...values,...(requestKey?{requestKey}:{})});const result=['quick','create','join'].includes(action)?await window.GameSession.admit('duel-'+action,values,send):await send();if(Object.hasOwn(result,'gameClaim'))window.GameSession?.accept(result.gameClaim);receiveArenaDiscipline(result);return result;}
-            catch(error){
-                window.GameSession?.conflict(error);
-                if(error.details?.arenaDiscipline)receiveArenaDiscipline(error.details);
-                else if(error.status===429)try{applySnapshot(await PlatformAPI.refresh());updateArenaDiscipline();}catch{}
-                throw error;
-            }
-        }
-        const response = await fetch('/api/arena',{
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({action,...session,...values}), signal:AbortSignal.timeout(8000),
-        });
-        const result = await response.json().catch(() => ({}));
-        receiveArenaDiscipline(result);
-        if (!response.ok) throw new Error(result.error || 'Máy chủ đấu trí chưa sẵn sàng. Em có thể luyện với bot.');
-        return result;
-    }
+    function roomSettings(...args) { return feature('arena').roomSettings(...args); }
 
-    function roomSettings() {
-        const difficulty = 0;
-        const scope = arenaScope;
-        return {name:name(),grade:grade(),difficulty,scope,mascot:state.mascot};
-    }
+    function enterRoom(...args) { return feature('arena').enterRoom(...args); }
 
-    async function enterRoom(action, values = {},trigger) {
-        if(roomStarting)return;roomStarting=true;if(trigger?.isConnected){trigger.disabled=true;trigger.dataset.humanPending='true';}
-        try{requireHumanPlay();const result=await arenaRequest(action,{...roomSettings(),...values});
-            if(!result.code||!result.token)throw new Error('Máy chủ chưa trả về phòng đấu hợp lệ.');
-            sessionStorage.setItem('5bmath-room',JSON.stringify({code:result.code,token:result.token}));
-            go('room',{code:result.code});
-        }finally{roomStarting=false;if(trigger?.isConnected){delete trigger.dataset.humanPending;trigger.disabled=false;}updateArenaDiscipline();}
-    }
+    function openRoomLink(...args) { return feature('arena').openRoomLink(...args); }
 
     let polling=false,publicRefresh=0,serverOffset=0,lastCount=null;
     const arenaNow=()=>Date.now()+serverOffset;
-    function overlay(html) {
-        if(html)setMobileMenu(false,false);
-        let node=document.querySelector('#arena-overlay');
-        if(!html){node?.remove();return;}
-        if(!node){node=document.createElement('div');node.id='arena-overlay';node.className='arena-overlay';document.body.append(node);}
-        node.innerHTML=html;
-        node.querySelector('[data-cancel-challenge]')?.addEventListener('click',()=>actions['leave-room']().catch(e=>host.toast(e.message)));
-        node.querySelector('[data-accept-challenge]')?.addEventListener('click',async e=>{const control=e.currentTarget;control.dataset.humanPending='true';control.disabled=true;try{requireHumanPlay();await arenaRequest('accept');await pollRoom();}catch(error){host.toast(error.message);}finally{if(control.isConnected){delete control.dataset.humanPending;control.disabled=false;}updateArenaDiscipline();}});
-        updateArenaDiscipline();
-    }
-    function countdown(until,clock=arenaNow()) {
-        const seconds=Math.max(0,Math.ceil((until-clock)/1000));
-        if(seconds===lastCount&&document.querySelector('.prepare-count'))return;
-        if(seconds!==lastCount){lastCount=seconds;if(typeof ArenaAudio!=='undefined')ArenaAudio.effect(seconds?'count':'go');}
-        if(currentRoute==='room'){overlay('');const node=document.querySelector('#learning-room-content');if(node)node.innerHTML=`<section class="game-ready-inline" role="status"><h2>Đã đủ hai bạn</h2><strong>${seconds||'BẮT ĐẦU!'}</strong><p>Trận tự bắt đầu sau thời gian chuẩn bị.</p></section>`;return;}
-        overlay(`<div class="prepare-count" role="status"><strong>${seconds||'BẮT ĐẦU!'}</strong><span>Sẵn sàng cùng linh vật!</span></div>`);
-    }
-    function ownPublicRoomCodes(){
-        const values=new Set();try{const saved=JSON.parse(sessionStorage.getItem('5bmath-game-claim')||'null');if(saved?.owner===PlatformAPI.snapshot.account?.id){const claim=window.GameSession?.current||saved.claim;if(claim?.game==='duel'&&claim.playMode==='human'){for(const value of [claim.code,claim.credentials?.code])if(value)values.add(String(value).toUpperCase());}}}catch{}return values;
-    }
-    async function loadPublicRooms() {
-        const target=document.querySelector('#public-rooms');if(!target||document.querySelector('#arena-panel-quick')?.hidden)return;
-        try{
-            const result=await arenaRequest('list');if(!target.isConnected)return;
-            const owned=ownPublicRoomCodes(),listed=result.rooms.filter(r=>r.mine!==true&&!owned.has(String(r.code).toUpperCase()));
-            target.innerHTML=listed.length?listed.map(r=>`<article class="public-room">${art(r.mascot||'sprout','',false,r.xp??0)}<div><strong>${escape(displayName(r.name))}</strong><p>${arenaScopeLabel(r.scope)} · Lớp ${r.grade}</p><small>${petRank(r.level||1)} · ${r.xp??0} XP · ${r.wins||0} thắng / ${r.losses||0} thua</small></div><button type="button" class="btn dark" data-human-play data-human-quota="true" data-challenge="${r.code}">Thách Đấu</button></article>`).join(''):'<p>Chưa có phòng phù hợp. Bấm Tìm đối thủ để mở phòng công khai.</p>';
-            updateArenaDiscipline();
-        }catch(e){target.textContent=e.message;}
-    }
-    function inlineChallenge(result) {
-        overlay('');document.querySelector('#waiting-popup')?.remove();
-        if(currentRoute!=='room'){roomPopup(result.code||'');return;}
-        const node=document.querySelector('#learning-room-content');if(!node)return;
-        const seconds=Math.max(0,Math.ceil((result.challengeUntil-arenaNow())/1000));
-        if(!node.querySelector('.challenge-inline')){
-            node.innerHTML=`<section class="challenge-inline" aria-label="Lời mời đấu với bạn"><h2>${result.host?'Bạn đã vào phòng':'Đang chờ bạn xác nhận'}</h2>${challengeOpponent(result)}<p class="challenge-time" role="timer">${seconds}s</p><div class="actions">${result.host?'<button class="btn dark" type="button" data-human-play data-accept-challenge>Chấp nhận lời mời</button>':''}<button class="btn outline" type="button" data-cancel-challenge>Rời phòng</button></div></section>`;
-            node.querySelector('[data-accept-challenge]')?.addEventListener('click',async event=>{const button=event.currentTarget;button.disabled=true;try{requireHumanPlay();await arenaRequest('accept');await pollRoom();}catch(error){window.GameSession?.conflict(error);host.toast(error.message);}finally{if(button.isConnected)button.disabled=false;}});
-            node.querySelector('[data-cancel-challenge]')?.addEventListener('click',()=>actions['leave-room']().catch(error=>host.toast(error.message)));
-        }else node.querySelector('.challenge-time').textContent=seconds+'s';
-    }
-    function roomPopup(code) {
-        let node=document.querySelector('#waiting-popup');
-        if(!node){node=document.createElement('aside');node.id='waiting-popup';node.className='waiting-popup';document.body.append(node);}
-        node.innerHTML=`${art(state.mascot)}<a href="${href('room')}">Đang chờ bạn vào phòng <strong>${escape(code)}</strong></a><button type="button" aria-label="Đóng và rời phòng">×</button>`;
-        node.querySelector('button').onclick=()=>actions['leave-room']().catch(e=>host.toast(e.message));
-    }
-    async function pollRoom() {
-        if(polling||!sessionStorage.getItem('5bmath-room'))return;polling=true;
-        try{
-            const result=await arenaRequest('state');serverOffset=(result.serverNow||Date.now())-Date.now();
-            if(result.status==='cancelled'){
-                overlay('');sessionStorage.removeItem('5bmath-room');document.querySelector('#waiting-popup')?.remove();host.toast('Phòng đã hủy hoặc hết thời gian chờ.');go('arena');
-            }else if(result.status==='finished'){
-                if(currentBattle&&Number.isFinite(result.result.hp)&&currentRoute==='battle'){
-                    currentBattle.hp=result.result.hp;currentBattle.opponentHp=result.result.opponentHp;
-                    currentBattle.lastAttack=result.result.lastAttack;
-                    updateBattleVisuals();
-                }
-                overlay('');finishBattle(result.result);
-            }else if(result.status==='challenged'){
-                inlineChallenge(result);
-            }else if(result.status==='preparing'){
-                document.querySelector('#waiting-popup')?.remove();countdown(result.readyAt);
-            }else if(result.status==='playing'){
-                overlay('');document.querySelector('#waiting-popup')?.remove();
-                const changed=!currentBattle||result.battle.index!==currentBattle.index;
-                const refreshHp=changed&&currentRoute==='battle'&&currentBattle?.id===result.battle.id?visualHp?.slice():null;
-                if(!changed&&currentBattle?.draftAnswer!==undefined)result.battle.draftAnswer=currentBattle.draftAnswer;
-                currentBattle=result.battle;
-                if(currentRoute!=='battle')go('battle');else if(changed){refresh();setTimeout(()=>ArenaAudio.effect('next'),100);}else updateBattleVisuals();
-                if(refreshHp&&currentRoute==='battle'){visualHp=refreshHp;updateBattleVisuals();}
-            }else {
-                overlay('');
-                if(currentRoute==='room'){
-                    document.querySelector('#waiting-popup')?.remove();
-                    const status=document.querySelector('#learning-room-status'),container=document.querySelector('#learning-room-content');
-                    if(status)status.textContent=`${result.public?'Phòng công khai':'Phòng bạn bè'} · Tự đóng sau ${timeText((result.expiresAt-arenaNow())/1000)}`;
-                    if(container&&(!container.children.length||container.querySelector('.challenge-inline,.game-ready-inline')))container.innerHTML=`<div class="room-code"><small>Mã phòng</small><strong>${escape(result.code)}</strong><div class="actions">${button('Sao chép mã','copy-room','outline','copy')}${button('Sao chép liên kết','copy-room-link','outline','copy')}</div></div><p>${result.players.map(value=>escape(displayName(value))).join(' · ')} · ${result.players.length}/2 người · Đang chờ đối thủ</p>`;
-                }else roomPopup(result.code);
-            }
-        }catch(e){host.toast(e.message);if(/hết hạn|không thuộc|không hợp lệ/.test(e.message)){sessionStorage.removeItem('5bmath-room');overlay('');document.querySelector('#waiting-popup')?.remove();currentBattle=null;if(currentRoute==='battle'||currentRoute==='room')go('arena');}}
-        finally{polling=false;}
-    }
+    function overlay(...args) { return feature('arena').overlay(...args); }
+    function countdown(...args) { return feature('arena').countdown(...args); }
+    function ownPublicRoomCodes(...args) { return feature('arena').ownPublicRoomCodes(...args); }
+    function loadPublicRooms(...args) { return feature('arena').loadPublicRooms(...args); }
+    function inlineChallenge(...args) { return feature('arena').inlineChallenge(...args); }
+    function roomPopup(...args) { return feature('arena').roomPopup(...args); }
+    function pollRoom(...args) { return feature('arena').pollRoom(...args); }
     let visualHp=null,catFinaleUntil=0,catFinishTimer=null;
     let owlFinaleUntil=0,owlFinishTimer=null;
     const attackSpells=[['rock','Đá rơi'],['vine','Dây leo trói'],['lightning','Sét đánh']];
     const activeHitSpells=new Set(),shownHitSpells=new Set(),hitSpellImages=[];
     let hitSpellBattle=null;
-    function recordBotAttack(battle,attacker) {
-        battle.lastAttack={id:battle.id+':'+battle.index,spell:attackSpells[Math.floor(Math.random()*attackSpells.length)][0],index:battle.index,attacker};
-    }
-    function attackSpell(attacker) {
-        const battle=currentBattle,event=battle?.lastAttack,side=attacker==='#fighter-me'?'me':'opponent';
-        const chosen=event?.attacker===side&&attackSpells.find(([key])=>key===event.spell);
-        // Compatibility for a bot session saved before lastAttack existed.
-        return chosen||attackSpells[artSeed((battle?.id||'')+':'+(battle?.index||0))%attackSpells.length];
-    }
+    function recordBotAttack(...args) { return feature('arena').recordBotAttack(...args); }
+    function attackSpell(...args) { return feature('arena').attackSpell(...args); }
     function clearHitSpells() {
         for(const effect of activeHitSpells){effect.timers.forEach(clearTimeout);effect.node?.remove();}
         activeHitSpells.clear();
     }
-    function aimUltimateBeam(stage,source,victim) {
-        const beam=stage?.querySelector('.energy-beam');
-        const actor=source?.querySelector('.battle-pet'),target=victim?.querySelector('.battle-pet');
-        if(!beam||!actor||!target)return;
-        const box=stage.getBoundingClientRect(),scaleX=box.width/stage.offsetWidth,scaleY=box.height/stage.offsetHeight;
-        const point=node=>{const r=node.getBoundingClientRect();return {
-            x:(r.left-box.left+r.width/2)/scaleX-stage.clientLeft,
-            y:(r.top-box.top+r.height*.55)/scaleY-stage.clientTop};};
-        const from=point(actor),to=point(target),dx=to.x-from.x,dy=to.y-from.y;
-        beam.style.cssText=`left:${from.x}px;top:${from.y-beam.offsetHeight/2}px;width:${Math.hypot(dx,dy)}px;transform:rotate(${Math.atan2(dy,dx)}rad);transform-origin:left center`;
-    }
-    function playHitSpell(target,attacker,spell,final) {
-        const battle=currentBattle,stage=document.querySelector('#battle-stage');
-        if(!battle||!stage||final)return;
-        if(hitSpellBattle!==battle.id){shownHitSpells.clear();hitSpellBattle=battle.id;}
-        const side=attacker==='#fighter-me'?'me':'opponent';
-        const eventId=battle.lastAttack?.attacker===side?battle.lastAttack.id:battle.id+':'+battle.index+':'+side;
-        if(shownHitSpells.has(eventId))return;
-        shownHitSpells.add(eventId);
-        stage.dataset.randomSpells='true';
-        const effect={node:null,timers:[]};activeHitSpells.add(effect);
-        const show=()=>{
-            const body=document.querySelector(target+' .battle-pet');
-            if(!stage.isConnected||!body||currentBattle?.id!==battle.id){activeHitSpells.delete(effect);return;}
-            const arena=stage.getBoundingClientRect(),pet=body.getBoundingClientRect();
-            const width=stage.clientWidth,height=stage.clientHeight,padding=6;
-            const scaleX=arena.width/stage.offsetWidth,scaleY=arena.height/stage.offsetHeight;
-            const x=(pet.left-arena.left+pet.width/2)/scaleX-stage.clientLeft;
-            const y=(pet.top-arena.top+pet.height*.55)/scaleY-stage.clientTop;
-            // The rock and lightning land below the centre of their atlas cell.
-            // Fit around the impact point instead of shifting the whole spell at an edge.
-            const anchorY={rock:.78,vine:.55,lightning:.84}[spell[0]]??.5;
-            const size=Math.max(1,Math.min(pet.width/scaleX*1.55,pet.height/scaleY*1.55,
-                (x-padding)*2,(width-padding-x)*2,(y-padding)/anchorY,(height-padding-y)/(1-anchorY)));
-            const left=x-size/2,top=y-size*anchorY;
-            const node=document.createElement('span');effect.node=node;
-            node.className='random-hit-spell';node.dataset.spell=spell[0];node.dataset.attackId=eventId;node.setAttribute('aria-hidden','true');
-            node.style.cssText=`left:${left}px;top:${top}px;width:${size}px;height:${size}px;--hit-duration:1500ms`;
-            stage.append(node);
-            effect.timers.push(setTimeout(()=>{node.remove();activeHitSpells.delete(effect);},1500));
-        };
-        show();
-    }
-    function animateHit(target,attacker,final,spell) {
-        if(window.ArenaCrabAnimation?.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
-            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(final&&document.querySelector(target)?.querySelector('.battle-pet.octopus'))octopusFinaleUntil=Date.now()+4100;
-        if(final){const pet=document.querySelector(target)?.querySelector('.battle-pet.ca-map');if(pet){window.SharkAnimation?.markDefeated(pet);catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);}}
-        const mamSource=document.querySelector(attacker),mamVictim=document.querySelector(target);
-        const mamSourcePet=mamSource?.querySelector('.battle-pet.sprout');
-        if(mamSourcePet&&window.MamSachAnimation){
-            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-            const mamVictimPet=mamVictim?.querySelector('.battle-pet'),label=document.querySelector('#spell-announcement');
-            if(label)label.textContent='';
-            if(mamVictim)mamVictim.dataset.spell='mam-sach';
-            const impact=()=>{
-                if(!mamVictim?.isConnected||!mamVictimPet)return;
-                mamVictimPet.dataset.mood=final?'lose':'hit';mamVictim.classList.add('taking-hit');
-                if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(mamVictimPet,final?'lose':'hit');
-            };
-            mamSource.classList.add('attacking');window.MamSachAnimation.hit({source:mamSource,victim:mamVictim,final});
-            if(final)setTimeout(impact,1750);else impact();
-            ArenaAudio.effect(final?'beam':spell[0]);
-            setTimeout(()=>{
-                mamSource?.classList.remove('attacking');mamVictim?.classList.remove('taking-hit');
-                if(mamSourcePet.isConnected)mamSourcePet.dataset.mood=final?'win':'idle';
-                if(mamVictimPet?.isConnected){mamVictimPet.dataset.mood=final?'lose':'idle';if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(mamVictimPet,final?'lose':'idle');}
-                if(label?.isConnected&&label.dataset.mamSach==='true')label.textContent='';
-            },final?3000:1100);
-            return;
-        }
-        const owlSource=document.querySelector(attacker),owlVictim=document.querySelector(target);
-        if(typeof OwlAnimation!=='undefined'&&OwlAnimation.hit({source:owlSource,victim:owlVictim,final})){
-            if(final)owlFinaleUntil=Date.now()+3100;
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(window.HorseAnimation?.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
-            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(typeof ArenaStarfish!=='undefined' && ArenaStarfish.animate(target,attacker,final)){
-            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(window.ArenaDolphin?.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
-            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(browser&&window.SharkAnimation?.animate(target,attacker,final)){
-            if(final)catFinaleUntil=Date.now()+3100;
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(window.ButterflyAnimation?.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
-            if(final)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(typeof TigerAnimation!=='undefined' && TigerAnimation.hit({source:document.querySelector(attacker),victim:document.querySelector(target),final})){
-            if(final&&TigerAnimation.remaining()>0)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(typeof ArenaVoi!=='undefined' && ArenaVoi.animate(target,attacker,final)){
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        if(typeof ArenaLion!=='undefined' && ArenaLion.animate(target,attacker,final)){
-            if(final)catFinaleUntil=Date.now()+3100;
-            ArenaAudio.effect(final?'beam':spell[0]);return;
-        }
-        const stage=document.querySelector('#battle-stage'),victim=document.querySelector(target),source=document.querySelector(attacker);
-        const sourcePet=source?.querySelector('.battle-pet'),victimPet=victim?.querySelector('.battle-pet');
-        if(sourcePet?.classList.contains('fox')&&window.FoxAnimation){
-            if(final)catFinaleUntil=Date.now()+3100;
-            if(victim)victim.dataset.spell='fox';
-            const impact=()=>{if(!victim?.isConnected||!victimPet)return;victimPet.dataset.mood=final?'lose':'hit';victim.classList.add('taking-hit');};
-            const show=()=>{
-                if(!stage?.isConnected||!sourcePet.isConnected)return;
-                if(final)catFinaleUntil=Date.now()+3100;
-                if(final)setTimeout(impact,1750);else impact();
-                source.classList.add('attacking');window.FoxAnimation.hit({source,victim,final});
-                const label=document.querySelector('#spell-announcement');if(label)label.textContent='';
-                ArenaAudio.effect(final?'beam':spell[0]);
-                setTimeout(()=>{victim?.classList.remove('taking-hit');source?.classList.remove('attacking');if(victimPet?.isConnected&&!final)victimPet.dataset.mood='idle';if(sourcePet.isConnected)window.FoxAnimation.play(sourcePet,final?'win':'idle');},final?3000:1100);
-            };
-            // Start the impact and result delay with the decoded images on a cold load.
-            window.FoxAnimation.ready().then(show).catch(()=>{
-                if(!sourcePet.isConnected)return;
-                sourcePet.dataset.mood='attack';impact();
-                setTimeout(()=>{victim?.classList.remove('taking-hit');if(victimPet?.isConnected&&!final)victimPet.dataset.mood='idle';if(sourcePet.isConnected)sourcePet.dataset.mood='idle';},1100);
-            });
-            return;
-        }
-        if(sourcePet?.classList.contains('eagle')&&window.EagleAnimation){
-            if(final)catFinaleUntil=Date.now()+3100;
-            if(victim)victim.dataset.spell='eagle';
-            const impact=()=>{if(!victim?.isConnected)return;victimPet.dataset.mood=final?'lose':'hit';victim.classList.add('taking-hit');};
-            if(final)setTimeout(impact,1750);else impact();
-            source.classList.add('attacking');window.EagleAnimation.hit({source,victim,final});
-            const label=document.querySelector('#spell-announcement');if(label)label.textContent='';
-            ArenaAudio.effect(final?'beam':spell[0]);
-            setTimeout(()=>{victim?.classList.remove('taking-hit');source?.classList.remove('attacking');if(sourcePet.isConnected)window.EagleAnimation.play(sourcePet,final?'win':'idle');},final?3000:1100);
-            return;
-        }
-        if(sourcePet?.classList.contains('octopus')&&typeof OctopusAnimation!=='undefined'){
-            if(final)octopusFinaleUntil=Math.max(octopusFinaleUntil,Date.now()+3100);
-            sourcePet.dataset.mood=final?'ultimate':'attack';source?.classList.add('attacking');
-            const label=document.querySelector('#spell-announcement');if(label)label.textContent=final?'':'✦ Sóng tay Bạch tuộc';
-            const impact=()=>{if(!victim?.isConnected||!victimPet)return;victim.dataset.spell='ink';victimPet.dataset.mood=final?'lose':'hit';victim.classList.add('taking-hit');};
-            if(final)setTimeout(impact,1750);else impact();
-            ArenaAudio.effect(final?'beam':spell[0]);
-            setTimeout(()=>{
-                source?.classList.remove('attacking');victim?.classList.remove('taking-hit');
-                if(sourcePet.isConnected)sourcePet.dataset.mood='idle';
-                if(victimPet?.isConnected&&!final)victimPet.dataset.mood='idle';
-                if(label?.isConnected)label.textContent='';
-            },final?3000:1200);
-            return;
-        }
-        const rabbitUltimate=final&&sourcePet?.classList.contains('rabbit')&&typeof RabbitAnimation!=='undefined';
-        if(rabbitUltimate)catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);
-        const bearUltimate=final&&sourcePet?.classList.contains('gau')&&typeof BearAnimation!=='undefined';
-        if(bearUltimate){catFinaleUntil=Math.max(catFinaleUntil,Date.now()+3100);stage?.classList.add('bear-ultimate');setTimeout(()=>stage?.classList.remove('bear-ultimate'),3000);}
-        const playBear=(pet,mode,onFinish)=>{const canvas=pet?.querySelector('canvas[data-bear]');if(canvas&&typeof BearAnimation!=='undefined')BearAnimation.play(canvas,mode,{onFinish});};
-        const beeAttack=sourcePet?.classList.contains('bee')&&Boolean(window.ArenaBeeAnimation);
-        const beeUltimate=final&&beeAttack;
-        if(beeUltimate)catFinaleUntil=Date.now()+3100;
-        const catAttack=sourcePet?.classList.contains('cat')&&Boolean(window.ArenaCatAnimation);
-        const catUltimate=final&&catAttack;
-        const sparrowAttack=sourcePet?.classList.contains('sparrow')&&Boolean(window.ArenaSparrowAnimation);
-        const sparrowUltimate=final&&sparrowAttack;
-        if(sparrowUltimate)catFinaleUntil=Date.now()+3100;
-        if(catUltimate)catFinaleUntil=Date.now()+3100;
-        victim?.classList.remove('taking-hit');source?.classList.remove('attacking');if(victim)void victim.offsetWidth;
-        const hit=()=>{if(!victim?.isConnected||!victimPet)return;victim.dataset.spell=beeAttack?'bee':catAttack?'cat':rabbitUltimate?'moon':bearUltimate?'bear':spell[0];victimPet.dataset.mood=final&&!victimPet.classList.contains('gau')?'lose':'hit';victim.classList.add('taking-hit');playBear(victimPet,'hit',()=>{if(final&&victimPet.isConnected){victimPet.dataset.mood='lose';playBear(victimPet,'defeat');}});};
-        if(beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate)setTimeout(hit,1750);else hit();
-        if(sourcePet)sourcePet.dataset.mood=beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate?'ultimate':'attack';
-        if(sparrowUltimate)window.ArenaSparrowAnimation.ultimate({source,victim});
-        if(beeAttack)window.ArenaBeeAnimation.hit({source,victim,final,animateVictim:false});
-        window.ArenaCatAnimation?.hit({source,victim,final});
-        source?.classList.add('attacking');
-        if(typeof RabbitAnimation!=='undefined')RabbitAnimation.play(sourcePet,rabbitUltimate?'ultimate':'attack');
-        playBear(sourcePet,bearUltimate?'ultimate':'attack');
-        const announcement=document.querySelector('#spell-announcement');
-        if(announcement)announcement.textContent=beeAttack||rabbitUltimate||catAttack||bearUltimate||sparrowAttack?'':final?'✦ Chiêu cuối':'✦ '+spell[1];
-        if(final){if(!beeUltimate&&!rabbitUltimate&&!catUltimate&&!bearUltimate&&!sparrowUltimate){aimUltimateBeam(stage,source,victim);stage?.classList.add(attacker==='#fighter-me'?'ultimate-right':'ultimate-left');}ArenaAudio.effect('beam');}else ArenaAudio.effect(spell[0]);
-        setTimeout(()=>{
-            victim?.classList.remove('taking-hit');source?.classList.remove('attacking');
-            for(const node of [victim,source])if(node?.isConnected){const pet=node.querySelector('.battle-pet');const mood=final&&node===victim?'lose':'idle';pet.dataset.mood=mood;if(pet!==victimPet&&typeof RabbitAnimation!=='undefined')RabbitAnimation.play(pet,mood);const bearMode=final?(node===victim?'defeat':'win'):'idle';playBear(pet,bearMode);if(pet?.classList.contains('gau'))pet.dataset.mood=bearMode==='defeat'?'lose':bearMode;}
-            if(announcement?.isConnected)announcement.textContent='';
-        },beeUltimate||rabbitUltimate||catUltimate||bearUltimate||sparrowUltimate?3000:1600);
-    }
-    function dispatchBattleHit(target,attacker,final) {
-        if(mascotVisuals.hit(target,attacker,final)){ArenaAudio.effect(final?'beam':'hit');return;}
-
-        const spell=attackSpell(attacker);
-        const stage=document.querySelector('#battle-stage');
-        // Suppress legacy default spells inside mascot reactions as well.
-        if(stage)stage.dataset.randomSpells='true';
-        if(final)clearHitSpells();
-        else playHitSpell(target,attacker,spell,false);
-        if(final&&[target,attacker].some(selector=>document.querySelector(selector)?.querySelector('.battle-pet.cu-meo')))owlFinaleUntil=Math.max(owlFinaleUntil,Date.now()+3100);
-        window.HorseAnimation?.notifyVictim(target,attacker,final);
-        if(typeof RabbitAnimation!=='undefined')RabbitAnimation.notifyVictim(target,attacker,final);
-        if(typeof ArenaVoi!=='undefined')ArenaVoi.notifyVictim(target,attacker,final);
-        animateHit(target,attacker,final,spell);
-    }
-    function updateBattleVisuals() {
-        const b=currentBattle;if(!b||currentRoute!=='battle')return;
-        const current=[b.hp,b.opponentHp],before=visualHp;
-        for(const [id,delta]of [['#fighter-me',before?before[0]-b.hp:0],['#fighter-opponent',before?before[1]-b.opponentHp:0]]){const el=document.querySelector(id+' .damage');if(el&&delta>0)el.textContent='−'+delta+' ♥';}
-        if(before){if(b.hp<before[0])dispatchBattleHit('#fighter-me','#fighter-opponent',b.hp===0);if(b.opponentHp<before[1])dispatchBattleHit('#fighter-opponent','#fighter-me',b.opponentHp===0);}
-        visualHp=current;
-        for(const [id,hp]of [['#fighter-me',b.hp],['#fighter-opponent',b.opponentHp]]){
-            const node=document.querySelector(id);if(!node)continue;
-            node.querySelector('.split b:last-child').textContent=hp+' / 100 ♥';
-            const m=node.querySelector('.meter');m.setAttribute('aria-valuenow',hp);m.querySelector('span').style.setProperty('--value',hp+'%');
-        }
-        const now=b.mode==='bot'?Date.now():arenaNow();
-        const closed=b.answer!==null||b.resolved||now>=(b.defenseUntil||b.deadline)||now<(b.readyAt||0)||battleSending||(live&&b.mode==='bot'&&(!botLeaseReady||document.hidden));
-        document.querySelectorAll('#battle-answer-form input,#battle-answer-form button').forEach(el=>el.disabled=closed);
-        const defense=document.querySelector('#battle-defense-status');
-        if(defense){
-            defense.hidden=!b.defenseUntil||b.resolved;
-            const seconds=Math.max(0,Math.ceil(((b.defenseUntil||now)-now)/1000));
-            const text=(b.attacking?'Em trả lời đúng! Chờ đối thủ phòng thủ: ':'Đối thủ chuẩn bị tấn công! Trả lời đúng để giảm sát thương: ')+seconds;
-            if(defense.textContent!==text)defense.textContent=text;
-        }
-        for(const [id,blocked]of [['#fighter-me',!b.attacking],['#fighter-opponent',b.attacking]]){
-            // The answer window offers a chance to block; only a confirmed correct reply earns a shield.
-            const defended=Boolean(blocked&&b.resolved&&b.damage===10&&b.lastAttack?.defended===true);
-            const node=document.querySelector(id);if(node)node.classList.toggle('defending',defended);mascotVisuals.defend(id,defended);
-        }
-        updateBattleRound(b);
-        const feedback=document.querySelector('#learning-battle-feedback');if(feedback){feedback.textContent=b.feedback||(b.questions[b.index]?.responseMode==='choice'?'Chọn đáp án để gửi ngay.':'Em hãy nhập đáp án rồi bấm Gửi.');feedback.classList.toggle('wrong',Boolean(b.feedback?.includes('chưa đúng')));}
-        for(const [id,value]of [['#my-emote',b.myEmote],['#opponent-emote',b.opponentEmote]]){
-            const node=document.querySelector(id);if(node)node.textContent=value===null||value===undefined?'':emotes[value].join(' ');
-        }
-        updateEmoteControls(b);
-    }
+    function aimUltimateBeam(...args) { return feature('arena').aimUltimateBeam(...args); }
+    function playHitSpell(...args) { return feature('arena').playHitSpell(...args); }
+    function animateHit(...args) { return feature('arena').animateHit(...args); }
+    function dispatchBattleHit(...args) { return feature('arena').dispatchBattleHit(...args); }
+    function updateBattleVisuals(...args) { return feature('arena').updateBattleVisuals(...args); }
 
     const mobileNavigation=()=>browser&&matchMedia('(max-width:860px), (max-width:1100px) and (max-height:500px)').matches;
     function setMobileMenu(open,restoreFocus=true) {
@@ -2031,6 +826,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         else {drawer.removeAttribute('role');drawer.removeAttribute('aria-modal');if(restoreFocus&&mobileNavigation())toggle.focus();}
     }
     function mountNavigation() {
+        if(browser&&live&&PlatformAPI.familyContext)document.querySelectorAll('[data-family-profile-menu]').forEach(node=>window.FamilyProfiles?.mount?.(node));
         setMobileMenu(false,false);
         const toggle=document.querySelector('#learning-menu-toggle');if(!toggle)return;
         toggle.onclick=()=>setMobileMenu(toggle.getAttribute('aria-expanded')!=='true');
@@ -2038,18 +834,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         document.querySelector('#learning-menu-backdrop').onclick=()=>setMobileMenu(false);
         document.querySelector('#learning-navigation').onclick=event=>{if(event.target.closest('a'))setMobileMenu(false,false);};
     }
-    function setArenaMode(mode) {
-        if(!['quick','friends','bot'].includes(mode))return;
-        arenaMode=mode;try{sessionStorage.setItem('5bmath-arena-mode',mode);}catch{}
-        document.querySelectorAll('[data-arena-mode]').forEach(button=>{
-            const selected=button.dataset.arenaMode===mode;
-            button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;button.classList.toggle('selected',selected);
-        });
-        for(const key of ['quick','friends','bot']){const panel=document.querySelector('#arena-panel-'+key);if(panel)panel.hidden=key!==mode;}
-        const usage=document.querySelector('#arena-mode-usage');if(usage)usage.innerHTML=usagePanel(mode==='bot'?'bot':'human');
-        updateArenaDiscipline();
-        if(mode==='quick')loadPublicRooms();
-    }
+    function setArenaMode(...args) { return feature('arena').setArenaMode(...args); }
     function bindArenaModes() {
         const tabs=document.querySelector('.arena-modes');if(!tabs)return;
         tabs.onkeydown=event=>{
@@ -2062,152 +847,131 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     }
 
     function render(route) {
+        if(route==='mascot')route='profile';
         currentRoute = route;
         const title = routes[route][1];
         const selected = sections[route] || route;
         let body;
         const featureKey={weekly:'learning_open',topics:'learning_open',lesson:'learning_open',advanced:'learning_open',
             exams:'practice_open',arena:'arena_open',rank:'leaderboard_open'}[route];
-        if(live && featureKey && PlatformAPI.snapshot.features?.[featureKey]===false) body=intro(title,'Chức năng đang được tạm dừng. Em có thể chọn hoạt động khác.')+link('Về tổng quan','dashboard');
+        const parentPlans=browser&&live&&route==='upgrade'&&PlatformAPI.familyState?.activeProfile?.type==='parent'&&window.ParentPlanPicker;
+        if(parentPlans)body=intro('Gói học','Chọn gói và kỳ đăng ký cho con.')+(window.FamilyCart?.planEntry()||'')+ParentPlanPicker.render()+'<div data-parent-plan-details hidden></div>';
+        else if(live && featureKey && PlatformAPI.snapshot.features?.[featureKey]===false) body=intro(title,'Chức năng đang được tạm dừng. Em có thể chọn hoạt động khác.')+link('Về tổng quan','dashboard');
         else if (browser && !host.progress?.name && !['zoomRegistration','classroom'].includes(route)) body = accountGate();
         else if(browser && live && groupGames?.handles(route)) body=groupGames.shell(route);
+        else if(browser&&live&&window.StudyLibrary?.handles(route))body=StudyLibrary.render(route);
         else if(browser && live && typeof LocalPilot!=='undefined' && LocalPilot.handles(route)) body=LocalPilot.shell();
         else if(browser && live && typeof LocalPilot!=='undefined' && LocalPilot.requested(route)) body=LocalPilot.enabled()?LocalPilot.shell():intro('Kho thí điểm chưa bật','Bài làm thí điểm dùng kho riêng. Em có thể trở về luyện tập chính.')+link('Về luyện tập','exams');
         else if(route==='lookup')body=(browser?window.PracticeExport:require('./practice-export.js')).lookupShell();
-        else body = route === 'advanced' ? views.lesson(true) : views[route]();
+        else body = (route === 'advanced' ? views.lesson(true) : views[route]());
 
-        return `<div id="learning-app"><button type="button" class="learning-menu-backdrop" id="learning-menu-backdrop" tabindex="-1" aria-label="Đóng menu" hidden></button><aside class="sidebar" id="learning-navigation" aria-label="Menu Góc học tập"><div class="learning-drawer-head"><strong>Góc Học Tập</strong><button type="button" id="learning-menu-close" aria-label="Đóng menu">×</button></div><a class="app-logo" href="${browser && location.protocol === 'file:' ? '#home' : './'}"><img src="5bmath-logo.svg" alt="5BMath Gieo Mầm Toán" width="628" height="168"></a><nav class="navigation" aria-label="Góc Học Tập">${navigation.filter(([id])=>id==='classroom'?isInternal():id==='zoomRegistration'?!isInternal():true).map(([id,label,symbol]) => `<a href="${href(id)}" ${id==='profile'?'data-account-nav aria-label="Tài khoản'+(unreadNotificationCount()?', '+unreadNotificationCount()+' thông báo chưa đọc':'')+'"':''} ${id==='classroom'?'data-classroom-nav aria-label="Lớp Zoom"':''} ${selected === id ? 'aria-current="page"' : ''}>${icon(symbol,19)}<span>${label}</span>${id==='profile'?unreadBadge():id==='classroom'?classUnreadBadge(classUnreadCount(classroomUnread().total)):''}</a>`).join('')}</nav><a class="sidebar-pet" href="${href('mascot')}">${art(state.mascot)}<div><b>${escape(petName())}</b><small>${content.format(state.points)} kinh nghiệm</small></div>${icon('chevron',15)}</a></aside>
-        <div class="app-main"><header class="topbar"><button type="button" class="learning-menu-toggle" id="learning-menu-toggle" aria-label="Mở menu học tập" aria-expanded="false" aria-controls="learning-navigation"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><a class="mobile-logo" href="${browser && location.protocol === 'file:' ? '#home' : './'}"><img src="5bmath-logo.svg" alt="5BMath Gieo Mầm Toán" width="628" height="168"></a><span class="top-title">Góc Học Tập ${icon('chevron',14)} <b>${title}</b></span><div class="top-right">${isInternal()?'<span class="svip-badge">👑 SVip</span>':badge(member(),'sage')}<a class="profile" href="${href('profile')}">${avatar()}<span><b>${escape(name())}</b><small>Khối ${grade()}</small></span>${icon('down',14)}</a></div></header><div class="content">${selected==='arena'?`<div class="game-audio-bar" role="group" aria-label="Nhạc nền Trò chơi">${audioButton()}</div><div id="game-claim-status"></div>`:''}${body}</div></div></div>`;
+        const studyRoutes=['weekly','topics','lesson','advanced','exams','testing','results','lookup'];
+        const studyNav=studyRoutes.includes(route)?`<nav class="student-study-tabs" aria-label="Học & Luyện">${[['weekly','Bài giảng'],['exams','Luyện tập']].map(([key,label])=>`<a href="${href(key)}" ${(['exams','testing','results','lookup'].includes(route)?key==='exams':key==='weekly')?'aria-current="page"':''}>${label}</a>`).join('')}</nav>`:'';
+        const zoomFree=['zoomRegistration','classroom'].includes(route)&&!isPaid();
+        if(zoomFree)body=intro('Cá nhân','Xem thông tin hồ sơ và Bạn Đồng Hành của em.')+link('Về Cá nhân','profile','outline');
+        return `<div id="learning-app" class="student-shell-content"><div class="app-main"><div class="content">${studyNav}${body}</div></div></div>`;
     }
 
+    let companionChanging=false;
+    function companionRemaining(...args) { return feature('profile').companionRemaining(...args); }
+    function chooseCompanion(...args) { return feature('profile').chooseCompanion(...args); }
+
     const actions = {
-        async complete() {
-            const lesson = selectedLesson();
-            if(live){await mutate('lessons/'+lesson.id+'/complete');refresh();return;}
-            if (!state.completed[lesson.id]) {
-                state.completed[lesson.id] = {date:new Date().toISOString(),grade:grade()};
-                if (grade() === 5 && ['decimal','percent'].includes(lesson.topic) && !host.progress.completed.includes(lesson.topic)) {
-                    host.progress.completed.push(lesson.topic);
-                    host.saveProgress();
-                }
-                save();
-            }
-            refresh();
-        },
-        practice:() => createExam({topic:selectedLesson().topic,count:3}),
-        video:() => host.showModal('<h2 class="modal-title">Video bài giảng</h2>'+lessonVideo(selectedLesson())),
-        'create-exam':() => createExam({difficulty:Number(document.querySelector('#exam-difficulty').value)}),
-        'create-topic':()=>{const value=document.querySelector('#exam-topic').value;return createExam(document.querySelector('#exam-scope').value==='weekly'?{maxWeek:week(),week:value?Number(value.replace('week-','')):undefined,category:'content'}:{topic:value,category:'content'});},
-        'create-school':()=>createExam({category:'school',school:document.querySelector('#exam-school').value}),
-        previous() { const exam = getExam(); exam.index = Math.max(0,exam.index - 1); save(); refresh(); },
-        next() { const exam = getExam(); exam.index = Math.min(exam.questions.length - 1,exam.index + 1); save(); refresh(); },
-        'submit-exam':requestSubmit,
-        'start-bot':trigger=>startBot(trigger),
-        'next-battle':() => currentBattle.mode === 'bot' ? nextBot() : arenaRequest('next',{index:currentBattle.index}).then(pollRoom),
-        'create-room':trigger=>openArenaPreflight('create',{},trigger),
-        'minimize-room':()=>{sessionStorage.setItem('5bmath-room-mini','1');go('arena');},
-        'download-material':async()=>{if(!live){host.toast('Tài liệu cần tài khoản VIP trên máy chủ.');return;}const r=await PlatformAPI.request('materials');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.text],{type:'text/plain;charset=utf-8'}));a.download='5bmath-phieu-luyen-tap.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000);},
-        'quick-match':trigger=>enterRoom('quick',{},trigger),
-        'copy-room':() => copyText(JSON.parse(sessionStorage.getItem('5bmath-room')).code),
-        'copy-room-link':() => copyText(new URL(href('room',{code:JSON.parse(sessionStorage.getItem('5bmath-room')).code}),document.baseURI).href),
-        async 'leave-room'() {
-            if (sessionStorage.getItem('5bmath-room')) await arenaRequest('leave');
-            sessionStorage.removeItem('5bmath-room');
-            overlay('');document.querySelector('#waiting-popup')?.remove();go('arena');
-        },
-        async 'leave-battle'() {
-            if(!currentBattle)return;
-            if (currentBattle.mode === 'bot') {
-                finishBattle({...currentBattle,outcome:'left',rounds:currentBattle.index,points:0});
-            } else {
-                if(currentBattle.hp<=0||currentBattle.opponentHp<=0||currentBattle.resolved&&currentBattle.index>=currentBattle.questions.length-1){await pollRoom();return;}
-                const battleId=currentBattle.id;
-                host.showModal('<div class="arena-leave-confirm"><h2 class="modal-title">Em muốn rời trận?</h2><p class="modal-copy">Rời trận bây giờ sẽ tính là thua và trừ 1 kinh nghiệm. Đối thủ không nhận kinh nghiệm từ trận bỏ dở. Trận này không cộng vào số trận thắng/thua.</p><p class="modal-copy">Bỏ trận nhiều lần sẽ phải tạm nghỉ đấu với người.</p><div class="actions"><button type="button" class="btn dark" id="arena-continue-playing">Tiếp tục chơi</button><button type="button" class="btn outline" id="arena-confirm-leave">Rời trận</button></div></div>');
-                document.querySelector('#arena-continue-playing').onclick=()=>document.querySelector('#modal').close();
-                document.querySelector('#arena-confirm-leave').onclick=async event=>{
-                    const control=event.currentTarget;control.disabled=true;
-                    try{if(currentBattle?.id===battleId){const result=await arenaRequest('leave');document.querySelector('#modal').close();if(result.status==='finished')finishBattle(result.result);else await pollRoom();}}
-                    catch(error){host.toast(error.message);}
-                    finally{if(control.isConnected)control.disabled=false;}
-                };
-                const dialog=document.querySelector('#modal'),trap=event=>{
-                    if(event.key!=='Tab')return;
-                    const controls=[...dialog.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled)')].filter(node=>node.getClientRects().length),index=controls.indexOf(document.activeElement);
-                    if(event.shiftKey&&index<=0){event.preventDefault();controls.at(-1)?.focus();}
-                    else if(!event.shiftKey&&index===controls.length-1){event.preventDefault();controls[0]?.focus();}
-                };
-                dialog.addEventListener('keydown',trap);dialog.addEventListener('close',()=>dialog.removeEventListener('keydown',trap),{once:true});
-                document.querySelector('#arena-continue-playing').focus();
-            }
-        },
-        'choose-sparrow':async () => { if(live)await mutate('mascot',{mascot:'sparrow'});else {state.mascot = 'sparrow';save();}refresh(); },
-        'choose-butterfly':async () => { if(live)await mutate('mascot',{mascot:'butterfly'});else {state.mascot = 'butterfly';save();}refresh(); },
-        'choose-dolphin':async () => { if(live)await mutate('mascot',{mascot:'dolphin'});else {state.mascot = 'dolphin';save();}refresh(); },
-        'choose-cu-meo':async () => { if(live)await mutate('mascot',{mascot:'cu-meo'});else {state.mascot = 'cu-meo';save();}refresh(); },
-        'choose-sprout':async () => { if(live)await mutate('mascot',{mascot:'sprout'});else {state.mascot = 'sprout';save();}refresh(); },
-        'choose-voi':async () => { if(live)await mutate('mascot',{mascot:'voi'});else {state.mascot = 'voi';save();}refresh(); },
-        'choose-lion':async () => { if(live)await mutate('mascot',{mascot:'lion'});else {state.mascot = 'lion';save();}refresh(); },
-        'choose-starfish':async () => { if(live)await mutate('mascot',{mascot:'starfish'});else {state.mascot = 'starfish';save();}refresh(); },
-        'choose-fox':async () => { if(live)await mutate('mascot',{mascot:'fox'});else {state.mascot = 'fox';save();}refresh(); },
-        'choose-tiger':async () => { if(live)await mutate('mascot',{mascot:'tiger'});else {state.mascot = 'tiger';save();}refresh(); },
-        'choose-eagle':async () => { if(live)await mutate('mascot',{mascot:'eagle'});else {state.mascot = 'eagle';save();}refresh(); },
-        'choose-ca-map':async () => { if(live)await mutate('mascot',{mascot:'ca-map'});else {state.mascot = 'ca-map';save();}refresh(); },
-        'choose-bee':async () => { if(live)await mutate('mascot',{mascot:'bee'});else {state.mascot = 'bee';save();}refresh(); },
-        'choose-octopus':async () => { if(live)await mutate('mascot',{mascot:'octopus'});else {state.mascot = 'octopus';save();}refresh(); },
-        'choose-rabbit':async () => { if(live)await mutate('mascot',{mascot:'rabbit'});else {state.mascot = 'rabbit';save();}refresh(); },
-        'choose-crab':async () => { if(live)await mutate('mascot',{mascot:'crab'});else {state.mascot = 'crab';save();}refresh(); },
-        'choose-gau':async () => { if(live)await mutate('mascot',{mascot:'gau'});else {state.mascot = 'gau';save();}refresh(); },
-        'choose-cat':async () => { if(live)await mutate('mascot',{mascot:'cat'});else {state.mascot = 'cat';save();}refresh(); },
-        'choose-dog':async () => { if(live)await mutate('mascot',{mascot:'dog'});else {state.mascot = 'dog';save();}refresh(); },
-        'choose-horse':async () => { if(live)await mutate('mascot',{mascot:'horse'});else {state.mascot = 'horse';save();}refresh(); },
-        'refresh-account':async () => {applySnapshot(await PlatformAPI.refresh());refresh();},
-        'review-upgrade':async () => {await mutate('dev/upgrade',{requestKey:uid()});refresh();host.toast('Đã mô phỏng nâng cấp VIP để kiểm tra luồng giới thiệu.');},
-        'copy-invite':() => copyText(state.inviteCode),
-        'copy-invite-link':() => copyText(new URL('./?invite=' + state.inviteCode,document.baseURI).href),
-        'class-preview':() => document.querySelector('#live-class')?.click() || host.showModal('<h2 class="modal-title">Buổi học mẫu 45 phút</h2><ol><li>5 phút khởi động.</li><li>10 phút giải thích bằng ví dụ.</li><li>15 phút học sinh tự làm.</li><li>10 phút chữa bài.</li><li>5 phút củng cố.</li></ol><p>Lịch học và phòng Zoom đang chờ thiết lập.</p>'),
-        rename() {
-            host.showModal(`<h2 class="modal-title">Đổi biệt danh</h2><form id="learning-name-form"><label class="field"><span>Biệt danh của em</span><input name="name" value="${escape(name())}" minlength="2" maxlength="40" autocomplete="nickname" aria-describedby="nickname-help nickname-error" required></label><p class="modal-copy" id="nickname-help">${escape(nicknames.help)}</p><p id="nickname-error" role="alert"></p><button class="btn dark" type="submit">Lưu tên</button></form>`);
-            const nameInput = document.querySelector('#learning-name-form [name=name]');
-            nameInput.oninput = () => {nameInput.removeAttribute('aria-invalid');document.querySelector('#nickname-error').textContent='';};
-            document.querySelector('#learning-name-form').onsubmit = async event => {
-                event.preventDefault();
-                const error = nicknames.error(nameInput.value);
-                if (error) {document.querySelector('#nickname-error').textContent=error;nameInput.setAttribute('aria-invalid','true');nameInput.focus();return;}
-                const value = nicknames.normalize(nameInput.value);
-                if(live){
-                    try{await mutate('profile',{name:value});document.querySelector('#modal').close();refresh();}
-                    catch(error){document.querySelector('#nickname-error').textContent=error.message;}
-                    return;
-                }
-                host.progress.name = value;
-                host.saveProgress();
-                document.querySelector('#modal').close();
-                refresh();
-            };
-        },
-        async logout() { if(live){await PlatformAPI.logout();sessionStorage.removeItem('5bmath-room');sessionStorage.removeItem('5bmath-bot-battle');}host.progress.name = ''; host.saveProgress(); location.assign(new URL(location.protocol==='file:'?'index.html#home':'./',document.baseURI)); },
+"retake-exam"(...args){return feature('practice').actions["retake-exam"](...args);},
+"continue-study"(...args){return feature('profile').actions["continue-study"](...args);},
+"open-companion"(...args){return feature('profile').actions["open-companion"](...args);},
+"copy-personal-code"(...args){return feature('profile').actions["copy-personal-code"](...args);},
+"complete"(...args){return feature('study').actions["complete"](...args);},
+"practice"(...args){return feature('study').actions["practice"](...args);},
+"video"(...args){return feature('study').actions["video"](...args);},
+"create-exam"(...args){return feature('practice').actions["create-exam"](...args);},
+"create-topic"(...args){return feature('practice').actions["create-topic"](...args);},
+"create-school"(...args){return feature('practice').actions["create-school"](...args);},
+"previous"(...args){return feature('practice').actions["previous"](...args);},
+"next"(...args){return feature('practice').actions["next"](...args);},
+"submit-exam"(...args){return feature('practice').actions["submit-exam"](...args);},
+"start-bot"(...args){return feature('arena').actions["start-bot"](...args);},
+"next-battle"(...args){return feature('arena').actions["next-battle"](...args);},
+"create-room"(...args){return feature('arena').actions["create-room"](...args);},
+"minimize-room"(...args){return feature('arena').actions["minimize-room"](...args);},
+"download-material"(...args){return feature('study').actions["download-material"](...args);},
+"quick-match"(...args){return feature('arena').actions["quick-match"](...args);},
+"copy-room"(...args){return feature('arena').actions["copy-room"](...args);},
+"copy-room-link"(...args){return feature('arena').actions["copy-room-link"](...args);},
+"leave-room"(...args){return feature('arena').actions["leave-room"](...args);},
+"leave-battle"(...args){return feature('arena').actions["leave-battle"](...args);},
+"choose-sparrow"(...args){return feature('profile').actions["choose-sparrow"](...args);},
+"choose-butterfly"(...args){return feature('profile').actions["choose-butterfly"](...args);},
+"choose-dolphin"(...args){return feature('profile').actions["choose-dolphin"](...args);},
+"choose-cu-meo"(...args){return feature('profile').actions["choose-cu-meo"](...args);},
+"choose-sprout"(...args){return feature('profile').actions["choose-sprout"](...args);},
+"choose-voi"(...args){return feature('profile').actions["choose-voi"](...args);},
+"choose-lion"(...args){return feature('profile').actions["choose-lion"](...args);},
+"choose-starfish"(...args){return feature('profile').actions["choose-starfish"](...args);},
+"choose-fox"(...args){return feature('profile').actions["choose-fox"](...args);},
+"choose-tiger"(...args){return feature('profile').actions["choose-tiger"](...args);},
+"choose-eagle"(...args){return feature('profile').actions["choose-eagle"](...args);},
+"choose-ca-map"(...args){return feature('profile').actions["choose-ca-map"](...args);},
+"choose-bee"(...args){return feature('profile').actions["choose-bee"](...args);},
+"choose-octopus"(...args){return feature('profile').actions["choose-octopus"](...args);},
+"choose-rabbit"(...args){return feature('profile').actions["choose-rabbit"](...args);},
+"choose-crab"(...args){return feature('profile').actions["choose-crab"](...args);},
+"choose-gau"(...args){return feature('profile').actions["choose-gau"](...args);},
+"choose-cat"(...args){return feature('profile').actions["choose-cat"](...args);},
+"choose-dog"(...args){return feature('profile').actions["choose-dog"](...args);},
+"choose-horse"(...args){return feature('profile').actions["choose-horse"](...args);},
+"refresh-account"(...args){return feature('profile').actions["refresh-account"](...args);},
+"review-upgrade"(...args){return feature('commerce').actions["review-upgrade"](...args);},
+"copy-invite"(...args){return feature('profile').actions["copy-invite"](...args);},
+"copy-invite-link"(...args){return feature('profile').actions["copy-invite-link"](...args);},
+"class-preview"(...args){return feature('classroom').actions["class-preview"](...args);},
+"rename"(...args){return feature('profile').actions["rename"](...args);},
+async logout() { if(live){await PlatformAPI.logout();sessionStorage.removeItem('5bmath-room');sessionStorage.removeItem('5bmath-bot-battle');}host.progress.name = ''; host.saveProgress(); location.assign(new URL(location.protocol==='file:'?'index.html#home':'./',document.baseURI)); }
     };
 
     function mount(route) {
-        if(typeof ArenaAudio!=='undefined')ArenaAudio.setActive((sections[route]||route)==='arena');
-        if(browser&&live){if((sections[route]||route)==='arena')window.GameSession?.mount();else window.GameSession?.unmount();}
+        if(route==='mascot')route='profile';
+        if(!learnerBackgroundAllowed()){
+            if(browser)window.GameSession?.unmountGlobal();clearInterval(interval);activityStarted=null;stopNotificationPolling();stopPaymentWatch();
+            if(route==='upgrade'&&browser&&window.ParentPlanPicker&&window.FamilyCart)mountParentPlans();
+            if(route==='payment')loadPayment();
+            mountNavigation();return;
+        }
+        if(['zoomRegistration','classroom'].includes(route)&&!isPaid()){mountNavigation();return;}
+        if(typeof ArenaAudio!=='undefined')ArenaAudio.setActive(['arena','rank'].includes(sections[route]||route));
+        if(browser&&live)window.GameSession?.mountGlobal();
+        if(browser&&live&&route==='arena')window.GameSession?.syncInline?.();
+        document.querySelectorAll('[data-games-audio-slot]').forEach(slot=>{slot.innerHTML=audioButton();});
         if(browser && live && groupGames?.handles(route) && host.progress?.name){stopPaymentWatch();clearInterval(interval);groupGames.mount(route,snapshot=>{applySnapshot(snapshot);const pet=document.querySelector('.sidebar-pet');if(pet)pet.innerHTML=art(state.mascot)+'<div><b>'+escape(petName())+'</b><small>'+content.format(state.points)+' kinh nghiệm</small></div>'+icon('chevron',15);const profile=document.querySelector('.profile .mascot-avatar');if(profile)profile.outerHTML=avatar();});mountNavigation();return;}
+        if(browser&&live&&window.StudyLibrary?.handles(route)&&host.progress?.name){stopPaymentWatch();clearInterval(interval);StudyLibrary.mount(route).catch(error=>host.toast(error.message));mountNavigation();return;}
         if(browser && live && typeof LocalPilot!=='undefined' && host.progress?.name && LocalPilot.handles(route)){stopPaymentWatch();clearInterval(interval);LocalPilot.mount(route);mountNavigation();return;}
         stopPaymentWatch();
         clearInterval(interval);
         if (!host.progress?.name){mountNavigation();return;}
+        const openingRoomLink=route==='room'&&query('code')&&!sessionStorage.getItem('5bmath-room');
+        if(live&&(document.querySelector('[data-game-allowance="duel"]')||openingRoomLink)){
+            duelAllowance?.unmount();
+            duelAllowance=gameAllowance?.mount('duel',document.querySelector('#learning-app'),updateDuelAllowance);
+        }
+        if(['lesson','advanced'].includes(route)&&selectedLesson()){
+            const lesson=selectedLesson();
+            stopLessonStudy=lessonStudy.mount(document.querySelector('[data-lesson-study]'),{
+                videoLesson:live&&lesson.video?.provider==='bunny'?{provider:'main',lessonKey:lesson.id,revision:lesson.revision,title:lesson.title}:null,
+                onComplete:async()=>{if(live){await mutate('lessons/'+lesson.id+'/complete');return {completed:true};}await actions.complete();return {completed:true};}
+            });
+        }
         if(route==='profile') {
             if(typeof ThemeManager !== 'undefined') ThemeManager.mountSettings();
-            if(live){loadAccountPage('notifications');loadAccountPage('referrals');}
+            if(live)loadPersonalNotices();
         }
         startNotificationPolling();
         if(route==='rank')loadRank();
         if(route==='classroom')loadClass();
+        if(route==='exams'&&live)loadPurchasedPractice();
         if(route==='payment')loadPayment();
-        if(['upgrade','weekly','topics','exams'].includes(route)){if(!document.querySelector('#premium-library'))document.querySelector('.content')?.insertAdjacentHTML('beforeend',premiumLibrary());loadPremiumLibrary();}
         if(route==='arena')loadPublicRooms();
             if(route==='battleResult'){ArenaAudio.setActive(true);const victory=document.querySelector('.victory');setTimeout(()=>ArenaAudio.effect(victory?'win':'lose'),100);const resultNode=document.querySelector('.battle-result'),fx=mountCelebration(resultNode);setTimeout(()=>{fx?.destroy();celebrationControllers.delete(fx);resultNode?.querySelector('[data-garden-confetti]')?.remove();},3000);}
-        ArenaAudio.setActive((sections[route]||route)==='arena');
+        ArenaAudio.setActive(['arena','rank'].includes(sections[route]||route));
         if(live && !document.hidden)PlatformAPI.request('heartbeat',{}).catch(()=>{});
         if (!document.hidden) activityStarted = Date.now();
         if (['lesson','advanced'].includes(route) && selectedLesson()) {
@@ -2234,6 +998,8 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             if(typeof ArenaLion!=='undefined')ArenaLion.mount();
             if(browser)window.ArenaBeeAnimation?.sync();
         }
+        if(route==='testing'&&browser)window.PracticeLayout?.mount();
+        document.querySelectorAll('[data-solution-toggle]').forEach(button=>button.onclick=()=>{const panel=document.getElementById(button.dataset.solutionToggle);if(!panel)return;panel.hidden=!panel.hidden;button.setAttribute('aria-expanded',String(!panel.hidden));button.textContent=panel.hidden?'Xem lời giải':'Ẩn lời giải';});
         mascotVisuals.mount(document);
         if(route==='battleResult')setTimeout(showPromotion,150);
         mountNavigation();
@@ -2265,10 +1031,11 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             const mode=event.target.closest('[data-arena-mode]');
             const notification = event.target.closest('[data-notification]');
             const accountPage=event.target.closest('[data-account-page]');
+            let actionLocked=false;
             try {
                 if(examDrafts.size)await flushExamDrafts();
                 if(mode){setArenaMode(mode.dataset.arenaMode);}
-                else if(challenge){if(challenge.disabled)return;challenge.dataset.humanPending='true';challenge.disabled=true;try{await enterRoom('join',{code:challenge.dataset.challenge});}finally{delete challenge.dataset.humanPending;updateArenaDiscipline();}}
+                else if(challenge){if(challenge.disabled)return;await enterRoom('join',{code:challenge.dataset.challenge});}
                 else if(classButton){
                     const section=classButton.dataset.classTab;
                     classTab=section;document.querySelectorAll('[data-class-tab]').forEach(b=>{b.classList.toggle('selected',b===classButton);b.setAttribute('aria-pressed',String(b===classButton));});
@@ -2294,12 +1061,13 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
                 else if (action && actions[action.dataset.learning]) {
                     if(action.disabled)return;
                     if(action.hasAttribute('data-human-play'))action.dataset.humanPending='true';
-                    action.disabled = true;
+                    actionLocked=true;
+                    if(gameAllowance&&action.hasAttribute('data-game-admission'))gameAllowance.setDisabled(action,true);else action.disabled=true;
                     if(action.dataset.botLevel!==undefined)document.querySelector('#bot-level').value=action.dataset.botLevel;
                     await actions[action.dataset.learning](action);
                 }
             } catch (error) { host.toast(error.message); }
-            finally { if (action?.isConnected) {delete action.dataset.humanPending;action.disabled = false;}updateArenaDiscipline(); }
+            finally { if(actionLocked&&action.isConnected){delete action.dataset.humanPending;if(!action.hasAttribute('data-game-admission'))action.disabled=false;}updateArenaDiscipline(); }
         };
         if(currentRoute==='testing'){const exam=getExam();if(exam&&!exam.submittedAt)PracticeScratchpad.mount('main:'+exam.id+':'+((exam.index||0)+1));}
         const examInput=document.querySelector('#exam-answer');
@@ -2329,7 +1097,7 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
                     const controls=[...document.querySelectorAll('[name=learning-answer], [data-learning=submit-exam], [data-learning=next], [data-learning=previous], [data-question]')];
                     controls.forEach(control=>control.disabled=true);
                     try{
-                        const result=await PlatformAPI.request('exams/'+exam.id+'/answers',{position:exam.index+1,answer:target.value});
+                        const result=await PlatformAPI.request('exams/'+exam.id+'/answers',{position:exam.index+1,answer:target.value,revision:exam.revision??0});
                         state.exams[exam.id]={...result.exam,index:exam.index};refresh();
                     }catch(error){host.toast('Chưa lưu được câu trả lời: '+error.message);refresh();}
                     return;
@@ -2361,11 +1129,8 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             event.preventDefault();
             const button = join.querySelector('button');
             if(button.disabled)return;
-            button.dataset.humanPending='true';
-            button.disabled = true;
             try { const raw=document.querySelector('#learning-room-code').value.trim();let code=raw;try{code=new URL(raw).searchParams.get('code')||'';}catch{}if(!/^[a-z0-9]{6}$/i.test(code))throw new Error('Nhập mã gồm 6 ký tự hoặc liên kết phòng hợp lệ.');await enterRoom('join',{code:code.toUpperCase()}); }
             catch (error) { host.toast(error.message); }
-            finally { delete button.dataset.humanPending;button.disabled = false;updateArenaDiscipline(); }
         };
         const birthForm = document.querySelector('#learning-birth-form');
         if (birthForm) birthForm.onsubmit = event => {
@@ -2374,8 +1139,9 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
             catch (error) { host.toast(error.message); }
         };
         if(sessionStorage.getItem('5bmath-room'))pollRoom();
-        else if(route==='room'&&query('code'))enterRoom('join',{code:query('code').toUpperCase()}).catch(e=>host.toast(e.message));
+        else if(openingRoomLink)openRoomLink(query('code').toUpperCase());
         interval = setInterval(() => {
+            if(!learnerBackgroundAllowed()){clearInterval(interval);activityStarted=null;stopNotificationPolling();return;}
             updateArenaDiscipline();
             if (route === 'testing') {
                 const exam = getExam();
@@ -2400,9 +1166,15 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
     }
 
     function unmount() {
+        stopLessonStudy();stopLessonStudy=()=>{};
+        unmountParentPlans();unmountParentPlans=()=>{};
+        if(browser)window.ParentPlanPicker?.unmount();
+        if(browser)window.StudyLibrary?.unmount();
+        if(browser)window.PracticeLayout?.unmount();
         PracticeScratchpad.unmount();
-        botLeaseEpoch++;botLeaseReady=false;if(browser)window.GameSession?.unmount();for(const effect of celebrationControllers)effect.destroy();celebrationControllers.clear();
+        botLeaseEpoch++;botLeaseReady=false;if(browser)window.GameSession?.unwatch();for(const effect of celebrationControllers)effect.destroy();celebrationControllers.clear();
         groupGames?.unmount();
+        duelAllowance?.unmount();duelAllowance=null;
         if(browser && typeof LocalPilot!=='undefined')LocalPilot.unmount();
         mascotVisuals.destroy();
         if(browser && typeof ThemeManager !== 'undefined') ThemeManager.unmountSettings();
@@ -2433,7 +1205,192 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         activityStarted = null;
     }
 
-    if (browser) {
+
+    const featureInstances=new Map();
+    const featureContext={get questionFrame(){return questionFrame;},get PracticeScratchpad(){return PracticeScratchpad;},
+get accountDate(){return accountDate;},
+get accountPageOwner(){return accountPageOwner;},set accountPageOwner(value){accountPageOwner=value;},
+get accountPages(){return accountPages;},
+get actions(){return actions;},
+get activeHitSpells(){return activeHitSpells;},
+get adoptClassUnread(){return adoptClassUnread;},
+get adoptNotificationSummary(){return adoptNotificationSummary;},
+get answerInput(){return answerInput;},
+get applySnapshot(){return applySnapshot;},
+get arenaLobby(){return arenaLobby;},
+get arenaMode(){return arenaMode;},set arenaMode(value){arenaMode=value;},
+get arenaNow(){return arenaNow;},
+get arenaPreflight(){return arenaPreflight;},set arenaPreflight(value){arenaPreflight=value;},
+get arenaScope(){return arenaScope;},set arenaScope(value){arenaScope=value;},
+get arenaScopeLabel(){return arenaScopeLabel;},
+get art(){return art;},
+get artSeed(){return artSeed;},
+get attackSpells(){return attackSpells;},
+get back(){return back;},
+get badge(){return badge;},
+get bankNotice(){return bankNotice;},
+get battlePet(){return battlePet;},
+get battleScenery(){return battleScenery;},
+get battleSending(){return battleSending;},set battleSending(value){battleSending=value;},
+get botLeaseEpoch(){return botLeaseEpoch;},set botLeaseEpoch(value){botLeaseEpoch=value;},
+get botLeaseReady(){return botLeaseReady;},set botLeaseReady(value){botLeaseReady=value;},
+get botReleasePending(){return botReleasePending;},set botReleasePending(value){botReleasePending=value;},
+get botStarting(){return botStarting;},set botStarting(value){botStarting=value;},
+get botValidation(){return botValidation;},set botValidation(value){botValidation=value;},
+get browser(){return browser;},
+get button(){return button;},
+get calendarHtml(){return calendarHtml;},
+get canPlayHuman(){return canPlayHuman;},
+get canUse(){return canUse;},
+get catFinaleUntil(){return catFinaleUntil;},set catFinaleUntil(value){catFinaleUntil=value;},
+get catFinishTimer(){return catFinishTimer;},set catFinishTimer(value){catFinishTimer=value;},
+get celebrationMarkup(){return celebrationMarkup;},
+get classData(){return classData;},set classData(value){classData=value;},
+get classFrom(){return classFrom;},set classFrom(value){classFrom=value;},
+get classLoadTicket(){return classLoadTicket;},set classLoadTicket(value){classLoadTicket=value;},
+get classReadBusy(){return classReadBusy;},set classReadBusy(value){classReadBusy=value;},
+get classReadQueue(){return classReadQueue;},set classReadQueue(value){classReadQueue=value;},
+get classTab(){return classTab;},set classTab(value){classTab=value;},
+get classTo(){return classTo;},set classTo(value){classTo=value;},
+get classUnreadBadge(){return classUnreadBadge;},
+get classUnreadVersion(){return classUnreadVersion;},set classUnreadVersion(value){classUnreadVersion=value;},
+get clearHitSpells(){return clearHitSpells;},
+get companionChanging(){return companionChanging;},set companionChanging(value){companionChanging=value;},
+get consumeLocal(){return consumeLocal;},
+get content(){return content;},
+get copyText(){return copyText;},
+get createExam(){return createExam;},
+get currentBattle(){return currentBattle;},set currentBattle(value){currentBattle=value;},
+get currentRoute(){return currentRoute;},set currentRoute(value){currentRoute=value;},
+get disciplinePanel(){return disciplinePanel;},
+get displayName(){return displayName;},
+get draftSaving(){return draftSaving;},set draftSaving(value){draftSaving=value;},
+get draftTimer(){return draftTimer;},set draftTimer(value){draftTimer=value;},
+get duelAllowance(){return duelAllowance;},set duelAllowance(value){duelAllowance=value;},
+get duelProductUsage(){return duelProductUsage;},
+get emoteLock(){return emoteLock;},set emoteLock(value){emoteLock=value;},
+get emotes(){return emotes;},
+get entitlementRefreshPending(){return entitlementRefreshPending;},set entitlementRefreshPending(value){entitlementRefreshPending=value;},
+get escape(){return escape;},
+get evolutionBoxes(){return evolutionBoxes;},
+get evolutionRows(){return evolutionRows;},
+get examDrafts(){return examDrafts;},
+get feePaidLabel(){return feePaidLabel;},
+get feeSessionTime(){return feeSessionTime;},
+get feeStatus(){return feeStatus;},
+get feeStatuses(){return feeStatuses;},
+get field(){return field;},
+get gameAllowance(){return gameAllowance;},
+get gameRulesView(){return gameRulesView;},
+get gardenActivityArt(){return gardenActivityArt;},
+get go(){return go;},
+get grade(){return grade;},
+get groupGames(){return groupGames;},
+get heading(){return heading;},
+get hitSpellBattle(){return hitSpellBattle;},set hitSpellBattle(value){hitSpellBattle=value;},
+get homeworkPanel(){return homeworkPanel;},
+get host(){return host;},set host(value){host=value;},
+get href(){return href;},
+get icon(){return icon;},
+get intro(){return intro;},
+get isCorrect(){return isCorrect;},
+get isInternal(){return isInternal;},
+get isPaid(){return isPaid;},
+get lastCount(){return lastCount;},set lastCount(value){lastCount=value;},
+get learnerBackgroundAllowed(){return learnerBackgroundAllowed;},
+get lessonList(){return lessonList;},
+get lessonRange(){return lessonRange;},set lessonRange(value){lessonRange=value;},
+get lessonRow(){return lessonRow;},
+get lessonStudy(){return lessonStudy;},
+get level(){return level;},
+get link(){return link;},
+get live(){return live;},
+get load(){return load;},
+get loadClass(){return loadClass;},
+get mascotAvatars(){return mascotAvatars;},
+get mascotVisuals(){return mascotVisuals;},
+get medal(){return medal;},
+get member(){return member;},
+get meter(){return meter;},
+get mutate(){return mutate;},
+get name(){return name;},
+get nicknames(){return nicknames;},
+get notice(){return notice;},
+get notificationLifecycle(){return notificationLifecycle;},set notificationLifecycle(value){notificationLifecycle=value;},
+get notificationPending(){return notificationPending;},set notificationPending(value){notificationPending=value;},
+get notificationSender(){return notificationSender;},
+get notificationTitle(){return notificationTitle;},
+get notificationVersion(){return notificationVersion;},set notificationVersion(value){notificationVersion=value;},
+get octopusFinaleUntil(){return octopusFinaleUntil;},set octopusFinaleUntil(value){octopusFinaleUntil=value;},
+get octopusFinishTimer(){return octopusFinishTimer;},set octopusFinishTimer(value){octopusFinishTimer=value;},
+get owlFinaleUntil(){return owlFinaleUntil;},set owlFinaleUntil(value){owlFinaleUntil=value;},
+get owlFinishTimer(){return owlFinishTimer;},set owlFinishTimer(value){owlFinishTimer=value;},
+get paymentAvailable(){return paymentAvailable;},
+get paymentGeneration(){return paymentGeneration;},set paymentGeneration(value){paymentGeneration=value;},
+get paymentViewActive(){return paymentViewActive;},
+get paymentWatch(){return paymentWatch;},set paymentWatch(value){paymentWatch=value;},
+get personalNotices(){return personalNotices;},set personalNotices(value){personalNotices=value;},
+get petName(){return petName;},
+get petRank(){return petRank;},
+get polling(){return polling;},set polling(value){polling=value;},
+get query(){return query;},
+get queuePromotion(){return queuePromotion;},
+get rankPercent(){return rankPercent;},
+get rankPeriod(){return rankPeriod;},set rankPeriod(value){rankPeriod=value;},
+get rankProgress(){return rankProgress;},
+get rankScope(){return rankScope;},set rankScope(value){rankScope=value;},
+get rankType(){return rankType;},set rankType(value){rankType=value;},
+get receiveArenaDiscipline(){return receiveArenaDiscipline;},
+get recoverDuelAdmission(){return recoverDuelAdmission;},
+get refresh(){return refresh;},
+get requireDuelAllowance(){return requireDuelAllowance;},
+get requireHumanPlay(){return requireHumanPlay;},
+get resumePaymentCheck(){return resumePaymentCheck;},
+get rich(){return rich;},
+get roomStarting(){return roomStarting;},set roomStarting(value){roomStarting=value;},
+get safeUrl(){return safeUrl;},
+get save(){return save;},
+get scheduleNotificationPolling(){return scheduleNotificationPolling;},
+get selectedLesson(){return selectedLesson;},
+get serverOffset(){return serverOffset;},set serverOffset(value){serverOffset=value;},
+get setMobileMenu(){return setMobileMenu;},
+get shownHitSpells(){return shownHitSpells;},
+get solutionView(){return solutionView;},
+get startPaymentView(){return startPaymentView;},
+get stat(){return stat;},
+get state(){return state;},set state(value){state=value;},
+get stopPaymentWatch(){return stopPaymentWatch;},
+get studySolution(){return studySolution;},
+get submissionMarkup(){return submissionMarkup;},
+get submittedExams(){return submittedExams;},
+get submitting(){return submitting;},set submitting(value){submitting=value;},
+get syncAccountPages(){return syncAccountPages;},
+get tabs(){return tabs;},
+get themeSettings(){return themeSettings;},
+get tile(){return tile;},
+get timeLeft(){return timeLeft;},
+get timeText(){return timeText;},
+get topicSearch(){return topicSearch;},set topicSearch(value){topicSearch=value;},
+get uid(){return uid;},
+get unmountParentPlans(){return unmountParentPlans;},set unmountParentPlans(value){unmountParentPlans=value;},
+get unreadNotificationCount(){return unreadNotificationCount;},
+get updateAccountSection(){return updateAccountSection;},
+get updateArenaDiscipline(){return updateArenaDiscipline;},
+get updateClassUnread(){return updateClassUnread;},
+get updateDuelAllowance(){return updateDuelAllowance;},
+get updateMembershipViews(){return updateMembershipViews;},
+get updateUnreadBadge(){return updateUnreadBadge;},
+get usagePanel(){return usagePanel;},
+get views(){return views;},
+get visualHp(){return visualHp;},set visualHp(value){visualHp=value;},
+get week(){return week;}};
+    function feature(name){
+        if(featureInstances.has(name))return featureInstances.get(name);
+        const factory=browser?window.LearningFeatures?.[name]:require('./learning-modules/'+name+'.js');
+        if(!factory)throw new Error('Chưa tải được phần học tập. Em hãy mở lại trang.');
+        const instance=factory.create(featureContext);featureInstances.set(name,instance);return instance;
+    }
+if (browser) {
         window.addEventListener('resize',()=>setMobileMenu(false,false));
         document.addEventListener('keydown',event=>{
             if(!document.body.classList.contains('learning-drawer-open'))return;
@@ -2449,10 +1406,10 @@ const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox
         document.addEventListener('visibilitychange',() => {
             if(document.hidden){pausePaymentCheck();if(live&&currentBattle?.mode==='bot'){botLeaseReady=false;window.GameSession?.unwatch();}}else resumePaymentCheck();
             if (document.hidden) {recordActivity();clearTimeout(notificationPollTimer);notificationPollTimer=null;}
-            else if (document.body.classList.contains('learning-mode') && host.progress?.name) {activityStarted = Date.now();resumeArena();refreshNotificationSummary({focus:true});}
+            else if (learnerBackgroundAllowed()&&document.body.classList.contains('learning-mode') && host.progress?.name) {activityStarted = Date.now();resumeArena();refreshNotificationSummary({focus:true});}
         });
         window.addEventListener('pagehide',recordActivity);
-        window.addEventListener('beforeunload',event=>{if(examDrafts.size||draftSaving){event.preventDefault();event.returnValue='';}});
+        window.addEventListener('beforeunload',event=>{if(learnerBackgroundAllowed()&&(examDrafts.size||draftSaving)){event.preventDefault();event.returnValue='';}});
         window.addEventListener('pagehide',pausePaymentCheck);
         window.addEventListener('pageshow',resumeArena);
         window.addEventListener('pageshow',resumePaymentCheck);

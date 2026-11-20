@@ -14,6 +14,7 @@ from unittest.mock import patch
 from backend.arena import Arena, ArenaError
 from backend.database import initialize
 from backend.platform_api import APIError, academic, connect, seed_catalog
+from backend import question_access
 from backend.question_bank import arena_questions, published_version_ids, sample_problem
 from test_platform_api import Client
 
@@ -31,6 +32,16 @@ class ReviewBankTests(unittest.TestCase):
 
     def seed(self):
         seed_catalog(self.path)
+
+    def approve_free_fixture(self, db, identities):
+        """Explicit QA-only approvals; publishing alone must not assign rights."""
+        staff_id = db.execute("INSERT INTO staff_users(login,full_name,password_hash,role,created_at) VALUES (?,'QA bank reviewer','unused','admin','2026-11-17T00:00:00Z')",
+                              ('review-bank-' + secrets.token_hex(5),)).lastrowid
+        for identity in identities:
+            question_access.classify(db, {'id': staff_id, 'role': 'admin'}, identity,
+                {'tier': 'free', 'purposes': ['practice', 'arena'], 'reviewStatus': 'approved',
+                 'sourceNote': 'Isolated regression fixture approval; not a production content review.',
+                 'expectedRevision': 0})
 
     def test_private_instances_are_not_the_public_offline_answer_catalog(self):
         self.seed()
@@ -71,7 +82,7 @@ class ReviewBankTests(unittest.TestCase):
             db.execute("INSERT INTO exam_items VALUES (?,1,?,1,'[\"2\",\"3\"]')", (exam, version))
             attempt = db.execute("INSERT INTO exam_attempts(exam_id,student_id,started_at,due_at,submitted_at,earned_points,total_points,status) VALUES (?,?,'2026-11-01T00:00:00Z','2026-11-01T00:10:00Z','2026-11-01T00:01:00Z',1,1,'submitted')", (exam, student)).lastrowid
         self.seed()
-        with connect(self.path) as db:
+        with connect(self.path, True) as db:
             row = db.execute('SELECT * FROM question_versions WHERE id=?', (version,)).fetchone()
             self.assertEqual(row['status'], 'retired')
             self.assertEqual(json.loads(row['grading_rule_json']), {'answer':'3'})
@@ -81,7 +92,13 @@ class ReviewBankTests(unittest.TestCase):
             self.assertNotIn(version, published_version_ids(db, 1, 1))
             self.assertEqual(db.execute('SELECT status FROM question_versions WHERE id=?', (copy,)).fetchone()[0], 'retired')
             self.assertEqual(db.execute('SELECT status FROM question_versions WHERE id=?', (private,)).fetchone()[0], 'published')
-            self.assertIn(private, published_version_ids(db, 1, 1))
+            # A private teacher edit preserves history but does not receive
+            # fresh delivery rights just by being marked published.
+            self.assertNotIn(private, published_version_ids(db, 1, 1))
+            self.approve_free_fixture(db, [private])
+            self.assertNotIn(private, published_version_ids(db, 1, 1))  # staging only
+            db.execute("UPDATE question_access_policy SET mode='classified'")
+            self.assertIn(private, published_version_ids(db, 1, 1, purpose='arena', public_game=True))
 
     def test_restart_does_not_republish_withdrawn_bank_or_reseed(self):
         self.seed()
@@ -114,13 +131,19 @@ class ReviewBankTests(unittest.TestCase):
             db.execute("UPDATE question_versions SET status='retired' WHERE id=?", (old['id'],))
             db.execute("UPDATE question_versions SET status='published' WHERE id=?", (draft,))
             pool = published_version_ids(db, 5, 1)
-            self.assertIn(draft, pool)
+            self.assertNotIn(draft, pool)  # new published versions are unmapped
             self.assertNotIn(old['id'], pool)
+            self.approve_free_fixture(db, [draft])
+            self.assertNotIn(draft, published_version_ids(db, 5, 1))
+            db.execute("UPDATE question_access_policy SET mode='classified'")
+            self.assertIn(draft, published_version_ids(db, 5, 1, purpose='arena', public_game=True))
             db.execute("UPDATE question_versions SET status='retired' WHERE question_id=?", (old['question_id'],))
+            game_ids = [row[0] for row in db.execute("SELECT v.id FROM question_versions v JOIN questions q ON q.id=v.question_id WHERE q.grade_id=5 AND v.status='published' AND v.difficulty IN (1,2) AND q.id<>? LIMIT 20", (old['question_id'],))]
+            self.approve_free_fixture(db, game_ids)
             for _ in range(8):
                 chosen = arena_questions(db, 5, 0, 'all')
                 self.assertFalse({old['id'],draft} & {q['questionVersionId'] for q in chosen})
-                self.assertTrue(all(q['questionVersionId'] in published_version_ids(db,5,q['difficulty']+1) for q in chosen))
+                self.assertTrue(all(q['questionVersionId'] in published_version_ids(db,5,q['difficulty']+1,purpose='arena',public_game=True) for q in chosen))
             self.assertEqual(published_version_ids(db,5,1,exact_week=53), [])
 
     def test_active_arena_keeps_snapshot_and_discloses_only_current_question(self):

@@ -1,7 +1,7 @@
 {
   "containsAccounts": false,
   "containsSessions": false,
-  "scope": "Source-only learning/demo data; no user database or authentication state; independent teacher approval unchanged",
+  "scope": "Account-free private source assets; explicit release op installs immutable samples; no real DB bundled",
   "files": [
     {
       "path": "cloudflare/learning-seed.sql",
@@ -10,8 +10,8 @@
     },
     {
       "path": "cloudflare/learning-names.json",
-      "bytes": 4860,
-      "sha256": "02c7b1546635b276f58bfbdf8426f412cd5d4b2225e2b45b429b707c403e5fbe"
+      "bytes": 7867,
+      "sha256": "2bb4526ecbeb8448e445a3d09d3f30f6e23da1ec4963c3e1a26c23a50363f25e"
     },
     {
       "path": "pilot-inputs/batch-manifest.json",

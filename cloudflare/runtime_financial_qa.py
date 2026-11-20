@@ -31,7 +31,8 @@ class Client:
             self.last_headers = {key.lower():value for key,value in response.headers.items()}
         if status != expected:
             # Avoid printing response bodies/credentials/row values on failure.
-            raise AssertionError('Financial HTTP QA status mismatch: '+str(status)+' expected '+str(expected))
+            diagnostic=json.loads(data).get('diagnostic',{})
+            raise AssertionError('Financial HTTP QA status mismatch on '+path.split('?')[0]+': '+str(status)+' expected '+str(expected)+' '+json.dumps(diagnostic))
         payload = json.loads(data)
         if payload.get('csrf'):
             self.csrf = payload['csrf']

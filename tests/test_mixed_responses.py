@@ -6,6 +6,8 @@ from backend.answers import requires_choice,validate_choices,propose_choices
 from backend.arena import Arena,ArenaError
 from backend.database import initialize
 from backend import platform_api as api
+from backend import question_access
+from backend.question_bank import published_version_ids
 from backend.staff_api import create_first_admin,save_question
 from test_platform_api import Client
 
@@ -84,7 +86,23 @@ class MixedExamTests(unittest.TestCase):
             saved=save_question(db,user,body)
             row=db.execute('SELECT id,grading_rule_json FROM question_versions WHERE question_id=?',(saved['id'],)).fetchone()
             self.assertEqual(json.loads(row['grading_rule_json'])['responseType'],'choice')
-            for value in ('5','6'):save_question(db,user,{**body,'prompt':'QA một đáp số '+value,'answer':value,'answerKind':'number','answerShape':'single','responseType':'typed','answerTargets':[],'options':[],'choiceRationales':[]})
+            question_ids = [saved['id']]
+            for value in ('5','6'):
+                single=save_question(db,user,{**body,'prompt':'QA một đáp số '+value,'answer':value,'answerKind':'number','answerShape':'single','responseType':'typed','answerTargets':[],'options':[],'choiceRationales':[]})
+                question_ids.append(single['id'])
+            session=api.read_session(c,db)
+            # Publishing the authored fixtures alone must not grant delivery.
+            self.assertEqual(published_version_ids(db,5,1,topic='qa-mixed',session=session),[])
+            placeholders=','.join('?' for _ in question_ids)
+            version_ids=[r[0] for r in db.execute('SELECT id FROM question_versions WHERE question_id IN ('+placeholders+") AND status='published'",question_ids)]
+            self.assertEqual(len(version_ids),3)
+            for version_id in version_ids:
+                question_access.classify(db,user,version_id,{'tier':'free','purposes':['practice'],
+                    'reviewStatus':'approved','sourceNote':'Isolated mixed-answer grading fixture approval; not a production content review.',
+                    'expectedRevision':0})
+            # Activate classified selection only in this disposable test DB.
+            db.execute("UPDATE question_access_policy SET mode='classified'")
+            self.assertEqual(set(published_version_ids(db,5,1,topic='qa-mixed',session=session)),set(version_ids))
         exam=c.call('exams',{'requestKey':secrets.token_hex(12),'topic':'qa-mixed','count':3})['exam']
         shown=c.call('exams/'+exam['id'])['exam'];choice=next(q for q in shown['questions'] if q['responseMode']=='choice');typed=next(q for q in shown['questions'] if q['responseMode']=='typed')
         self.assertNotIn('answer',choice);self.assertNotIn('options',typed)

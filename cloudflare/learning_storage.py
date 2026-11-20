@@ -86,3 +86,14 @@ class LearningDatabase:
             if not db.execute("SELECT 1 FROM sqlite_master WHERE name='pilot_environment'").fetchone():
                 from backend.database import execute_sql
                 execute_sql(db, (HERE / 'learning-seed.sql').read_text(encoding='utf-8'))
+            # Preserve the prior native store and apply the same versioned
+            # extensions selected by LocalPilot, within its own namespace.
+            from backend.local_pilot import migrate_pilot_premium
+            migrate_pilot_premium(self)
+            from backend.database import execute_sql, BACKEND
+            applied={r[0] for r in db.execute('SELECT name FROM schema_migrations')}
+            for path in sorted((BACKEND/'migrations').glob('*.sql')):
+                name=path.name
+                if name not in applied:
+                    execute_sql(db,path.read_text(encoding='utf-8'))
+                    db.execute('INSERT INTO schema_migrations(name) VALUES (?)',(name,))

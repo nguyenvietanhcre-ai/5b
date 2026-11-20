@@ -60,6 +60,19 @@ class FakeStorage:
 
 
 class StorageTests(unittest.TestCase):
+    def test_migration_constraint_probe_stays_transactional_without_temp_database(self):
+        storage=FakeStorage();database=StorageDatabase(storage)
+        try:
+            def probe(value):
+                with database.connect(True) as db:
+                    db.execute('CREATE TEMP TABLE mascot_rank_fk_check (violations INTEGER CHECK(violations=0))')
+                    db.execute('INSERT INTO mascot_rank_fk_check VALUES(?)',(value,))
+                    db.execute('DROP TABLE mascot_rank_fk_check')
+            database.run(lambda:probe(0))
+            with self.assertRaises(sqlite3.IntegrityError):database.run(lambda:probe(1))
+            self.assertIsNone(storage.db.execute("SELECT name FROM sqlite_master WHERE name='mascot_rank_fk_check'").fetchone())
+        finally:storage.db.close()
+
     def setUp(self):
         self.storage = FakeStorage()
         self.arena = Arena()

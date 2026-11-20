@@ -13,10 +13,12 @@ from backend.platform_api import APIError
 from sqlite_storage import StorageDatabase
 import crypto_compat
 import transfer
+import release_audit
+from release_bridge import website_request,bunny_transport,bunny_lifecycle,install_release
 
 
 def api_path(path):
-    return path.startswith(('/api/v1/', '/api/staff/', '/api/local-pilot/')) or path in ('/api/health', '/api/grade', '/api/webhooks/sepay','/api/site-visibility/check','/quan-tri/bao-tri/','/quan-tri/bao-tri')
+    return path.startswith(('/api/v1/', '/api/staff/', '/api/local-pilot/', '/api/family/', '/api/trial/', '/api/website/')) or path in ('/api/health', '/api/grade', '/api/webhooks/sepay','/api/site-visibility/check','/quan-tri/bao-tri/','/quan-tri/bao-tri')
 
 
 async def bounded_body(request, limit):
@@ -40,6 +42,10 @@ async def bounded_body(request, limit):
 def configure(env):
     # All bindings below are fixed per deployed Worker, never request data.
     os.environ['MAM_TOAN_PUBLIC_ORIGIN'] = env.PUBLIC_ORIGIN
+    os.environ['MAM_TOAN_CURRICULUM_SAMPLES'] = getattr(env,'MAM_TOAN_CURRICULUM_SAMPLES','0')
+    os.environ['MAM_TOAN_RESET_BASE_URL'] = env.PUBLIC_ORIGIN
+    bunny=getattr(env,'BUNNY_STREAM_CONFIG_JSON',None)
+    if bunny is not None:os.environ['BUNNY_STREAM_CONFIG_JSON']=bunny
     for name in ('BANK_ID', 'BANK_ACCOUNT', 'BANK_NAME', 'SEPAY_ENABLED', 'SEPAY_WEBHOOK_SECRET'):
         value = getattr(env, 'MAM_TOAN_' + name, None)
         if value is not None:
@@ -54,6 +60,7 @@ class SchoolBackend(DurableObject):
         self.ready = False
         self.learning = None
         self.demo_games = None
+        self.trial_alarm_scheduled=False
         if getattr(env,'DEMO_GAMES_ENABLED','false')=='true':
             from native_learning import CloudDemoGames
             self.demo_games = CloudDemoGames()
@@ -76,6 +83,28 @@ class SchoolBackend(DurableObject):
                 self.database.run(retire_legacy_grade5)
             self.ready = True
 
+    async def schedule_trial_cleanup(self):
+        if not self.trial_alarm_scheduled and getattr(self.env,'QA_LEGACY_CONTRACT','0')!='1':
+            import time
+            await self.ctx.storage.setAlarm(int(time.time()*1000)+3600000)
+            self.trial_alarm_scheduled=True
+
+    async def alarm(self):
+        configure(self.env)
+        release_id=getattr(self.env,'RELEASE_ID','')
+        if release_id and not release_audit.is_open(self.database,release_id):
+            import time
+            await self.ctx.storage.setAlarm(int(time.time()*1000)+30000)
+            return
+        self.initialize()
+        from backend import platform_api as api
+        from backend.trial_experience import cleanup
+        def expire():
+            with api.connect(self.database,True) as db:cleanup(db)
+        self.database.run(expire)
+        self.trial_alarm_scheduled=False
+        await self.schedule_trial_cleanup()
+
     async def fetch(self, request):
         path = urlsplit(request.url).path
         method = str(request.method)
@@ -83,7 +112,18 @@ class SchoolBackend(DurableObject):
             configure(self.env)
             if path.startswith('/__ops/'):
                 transfer.authorize(self.env, request.headers, importing=path == '/__ops/import')
-                if path == '/__ops/status' and method == 'GET':
+                release_id=getattr(self.env,'RELEASE_ID','')
+                if path == '/__ops/release-begin' and method == 'POST':
+                    raw=await bounded_body(request,4096)
+                    if json.loads(raw)!={'releaseId':release_id}:raise APIError('Release identity mismatch.',409)
+                    payload=release_audit.begin(self.database,release_id)
+                elif path == '/__ops/release-audit' and method == 'GET':
+                    payload=release_audit.compare(self.database,release_id)
+                elif path == '/__ops/release-finalize' and method == 'POST':
+                    raw=await bounded_body(request,4096)
+                    if json.loads(raw)!={'releaseId':release_id}:raise APIError('Release identity mismatch.',409)
+                    payload=release_audit.finalize(self.database,release_id)
+                elif path == '/__ops/status' and method == 'GET':
                     payload = transfer.status(self.database)
                 elif path == '/__ops/export' and method == 'GET':
                     payload = transfer.export_data(self.database)
@@ -94,18 +134,29 @@ class SchoolBackend(DurableObject):
                     payload = transfer.import_data(self.database, json.loads(raw))
                     self.ready = False
                     self.learning = None
+                elif path == '/__ops/release-content' and method == 'POST':
+                    if release_id and not release_audit.get(self.database,release_id):raise APIError('Record the tenant baseline before migration.',409)
+                    self.initialize()
+                    raw=await bounded_body(request,4096)
+                    payload=install_release(self.database,self.learning,json.loads(raw))
+                    self.learning=None
+                    self.ready=False
                 else:
                     raise APIError('API không tồn tại.', 404)
                 return Response.json(payload, headers={'Cache-Control': 'no-store'})
             if not api_path(path):
                 raise APIError('API không tồn tại.', 404)
+            release_id=getattr(self.env,'RELEASE_ID','')
+            if release_id and path!='/api/health' and not release_audit.is_open(self.database,release_id):
+                return Response('Bản cập nhật đang được kiểm tra. Vui lòng quay lại sau ít phút.',status=503,headers={'Cache-Control':'no-store','Retry-After':'30','X-5BMath-Maintenance':'1'})
             pending_import = getattr(self.env, 'TRANSFER_ENABLED', 'false') == 'true' and not transfer.table_names(self.database)
             if path == '/api/health' and method == 'GET':
-                return Response.json({'status': 'ok', 'ready': not pending_import,
+                return Response.json({'status': 'ok', 'ready': not pending_import and (not release_id or release_audit.is_open(self.database,release_id)),
                                       'backend': 'python-durable-object-sqlite'}, headers={'Cache-Control': 'no-store'})
             if pending_import:
                 raise APIError('Hệ thống đang chuyển dữ liệu. Vui lòng quay lại sau.', 503)
             self.initialize()
+            await self.schedule_trial_cleanup()
             from backend import site_visibility as visibility
             if path in (visibility.PORTAL,visibility.PORTAL.rstrip('/')) and method in ('GET','HEAD'):
                 return Response(visibility.page(True) if method=='GET' else b'',status=200,headers=visibility.headers(True))
@@ -119,7 +170,8 @@ class SchoolBackend(DurableObject):
             if method == 'POST':
                 if request.headers.get('Content-Type', '').split(';')[0].strip().lower() != 'application/json':
                     raise APIError('Use application/json', 415)
-                limit = 262144 if path.startswith('/api/staff/') else 16384
+                limit = 32768 if path.startswith(('/api/family/','/api/trial/')) else 262144 if path.startswith(('/api/staff/','/api/website/admin/')) else 16384
+                if path in ('/api/staff/lessons','/api/staff/native-lessons'):limit=8*1024*1024
                 if re.fullmatch(r'/api/(?:v1|local-pilot)/exams/\d+/scratch',path):limit=1048576+2048
                 if re.fullmatch(r'/api/v1/classes/\d+/assignments/\d+/submissions', path):
                     limit = 4 * ((10 * 1024 * 1024 + 2) // 3) + 2048
@@ -146,7 +198,24 @@ class SchoolBackend(DurableObject):
             handler.server.cloud_pdf_enabled = self.learning is not None
             handler.server.local_test_games = self.demo_games
             handler.server.cloud_demo_games = self.demo_games
-            if path.startswith('/api/local-pilot/'):
+            handler.server.cloud_paid_credits_enabled = self.learning is not None
+            handler.server.bunny_stream_transport = bunny_transport
+            handler.server.bunny_upload_lifecycle = bunny_lifecycle
+            handler.server.real_accounts = True
+            handler.server.family_registration_enabled = getattr(self.env,'QA_LEGACY_CONTRACT','0')!='1'
+            handler.server.website_readiness_enabled = getattr(self.env,'QA_LEGACY_CONTRACT','0')!='1'
+            if path.startswith('/api/family/'):
+                from backend.family_accounts import request as family_request
+                callback=lambda:family_request(handler,method,path,body)
+            elif path.startswith('/api/trial/'):
+                from backend.trial_experience import route as trial_request
+                callback=lambda:trial_request(handler,method,path,body)
+            elif path.startswith('/api/website/'):
+                callback=lambda:website_request(handler,method,path,body)
+            elif path.startswith('/api/staff/question-access'):
+                from backend.question_access import request as question_request
+                callback=lambda:question_request(handler,method,path,body)
+            elif path.startswith('/api/local-pilot/'):
                 if self.learning is None:raise APIError('Kho học tập chưa được cấu hình.',503)
                 from urllib.parse import parse_qs
                 from backend.system_settings import require_feature
@@ -167,6 +236,9 @@ class SchoolBackend(DurableObject):
             payload, status = self.database.run(callback)
             if isinstance(payload,dict) and 'authenticated' in payload:payload['localPilotEnabled']=self.learning is not None
             response_headers = {**handler.api_headers, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'}
+            if isinstance(payload,dict) and isinstance(payload.get('_lesson_binary'),bytes):
+                from urllib.parse import quote
+                return Response(payload['_lesson_binary'],status=status,headers={**response_headers,'Content-Type':payload['mime'],'Content-Disposition':'attachment; filename="lesson-material.pdf"; filename*=UTF-8'''+quote(payload['filename'],safe=''),'Content-Security-Policy':"sandbox; default-src 'none'"})
             if isinstance(payload,dict) and isinstance(payload.get('_local_binary'),bytes):
                 return Response(payload['_local_binary'],status=status,headers={**response_headers,'Content-Type':payload['mime'],'Content-Security-Policy':"sandbox; default-src 'none'"})
             if isinstance(payload, dict) and isinstance(payload.get('_binary'), bytes):
@@ -178,6 +250,9 @@ class SchoolBackend(DurableObject):
             payload = {'error': str(error)}
             if getattr(error, 'arenaDiscipline', None):
                 payload['arenaDiscipline'] = error.arenaDiscipline
+            if getattr(error,'familyAccessChanged',False):payload['familyAccessChanged']=True
+            if isinstance(getattr(error,'code',None),str):payload['code']=error.code
+            if getattr(error,'allocation',None) is not None:payload.update(reconfirm=True,allocation=error.allocation)
             for key in ('gameClaim','gameConflicts'):
                 if hasattr(error,key):payload[key]=getattr(error,key)
             return Response.json(payload, status=error.status, headers={'Cache-Control': 'no-store'})

@@ -65,8 +65,6 @@ def validate_batch(package,manifest,sources,*,allow_batch_qa=False,allow_draft_q
     return normalized,{'mode':mode,'draft':draft,'start':start.date().isoformat(),'end':end.date().isoformat(),'sets':sets}
 
 def require_database(path):
-    # The Cloudflare learning namespace is isolated from main account tables.
-    # Ordinary filesystem importers still require the original synthetic marker.
     if type(path).__module__ == 'learning_storage' and type(path).__name__ == 'LearningDatabase':
         with api.connect(path) as db:require_qa(db)
         return path

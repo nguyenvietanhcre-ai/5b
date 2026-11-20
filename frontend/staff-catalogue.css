@@ -1,3 +1,49 @@
 .admin-nav-search{display:grid;gap:5px;margin:8px 0 12px;font-size:12px;color:var(--muted)}.admin-nav-search input{min-width:0;width:100%;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff9ed}.staff-sidebar{max-height:100vh;overflow-y:auto}.staff-sidebar [hidden],.admin-hub [hidden]{display:none!important}.admin-hub-search{max-width:720px;margin-bottom:22px}.admin-hub-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.admin-hub-card{display:flex;flex-direction:column;gap:10px;text-align:left;min-width:0;border:1px solid var(--line);border-radius:16px;padding:20px;background:#fff9ed;color:#203a32;cursor:pointer;font:inherit}.admin-hub-card:hover,.admin-hub-card:focus-visible{border-color:#1f6248;box-shadow:0 0 0 2px #ffbe73}.admin-hub-card strong{font-size:17px}.admin-hub-card span{font-size:14px;line-height:1.7;flex:1}.admin-hub-card b:last-child{color:#1f6248;font-size:14px}.admin-question-picker{border:1px solid var(--line);border-radius:14px;padding:16px;margin:18px 0}.admin-question-picker summary{cursor:pointer;padding:12px 0;font-weight:700}.admin-question-picker input[type=search]{min-width:0;flex:1;padding:12px;border:1px solid var(--line);border-radius:10px}.admin-selected{padding-left:24px}.admin-selected li{padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.admin-selected small{display:block;color:#875323}.admin-pick-row{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer}.admin-pick-row input{width:22px;height:22px;flex:none}.admin-pick-row span{min-width:0;overflow-wrap:anywhere}.admin-pick-row small{display:block;font-size:14px;line-height:1.6}.admin-operation-facts>div{padding:14px 0;border-bottom:1px solid var(--line)}.admin-operation-facts dt{font-weight:700}.admin-operation-facts dd{margin:6px 0 0}.admin-preserved-text{white-space:pre-wrap}.staff-dialog .staff-field textarea{min-height:130px}.staff-tabs button[aria-pressed=true]{background:#1f6248;color:#fff}.staff-table td{overflow-wrap:anywhere}
 @media(max-width:1100px){.admin-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.staff-sidebar{max-height:none;overflow:visible}.staff-sidebar nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:230px;overflow-y:auto;gap:5px}.staff-sidebar nav button{min-width:0;white-space:normal;min-height:44px}.admin-nav-search{margin:6px 0}.admin-hub-grid{grid-template-columns:1fr}.staff-toolbar{flex-wrap:wrap}.staff-dialog .staff-field input,.staff-dialog .staff-field select,.staff-dialog .staff-field textarea{font-size:16px}.admin-question-picker{padding:12px}.admin-selected .staff-actions .btn{min-height:44px}.staff-panel .staff-table td{min-width:0}.staff-panel ul{padding-left:22px}}
+
+/* Only the two lesson editors use these controls. */
+body.staff-mode #modal:has(.lesson-editor) { width:min(920px,calc(100vw - 28px)); }
+.staff-dialog:has(.lesson-editor) { max-width:900px; width:100%; }
+.lesson-editor { min-width:0; }
+.lesson-editor-section { min-width:0; margin:20px 0 0; padding:18px; border:1px solid var(--line); border-radius:15px; background:var(--paper,#fff); }
+.lesson-editor-section > legend { max-width:100%; padding:0 8px; font-size:16px; font-weight:800; color:var(--green,#1f6248); }
+.lesson-editor-section .staff-field { min-width:0; margin-bottom:13px; }
+.lesson-editor .staff-field :is(input,textarea,select) { width:100%; min-width:0; max-width:100%; box-sizing:border-box; }
+.lesson-editor .staff-field textarea { min-height:92px; resize:vertical; }
+.lesson-editor .staff-note { margin:5px 0 12px; line-height:1.65; }
+.lesson-editor .btn { white-space:normal; overflow-wrap:anywhere; }
+.lesson-editor-card { min-width:0; margin:14px 0; padding:14px; border:1px solid var(--line); border-radius:12px; background:var(--cream,#fff9ed); }
+.lesson-editor-card-head { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+.lesson-editor-card-head h3 { font-size:15px; }
+.lesson-editor-empty { padding:14px 0; line-height:1.6; }
+.lesson-editor-check, .lesson-editor-correct { display:flex; align-items:center; gap:9px; min-height:44px; font-size:13px; line-height:1.5; }
+.lesson-editor :is(.lesson-editor-check,.lesson-editor-correct) input { width:21px; height:21px; flex:none; accent-color:var(--green,#1f6248); }
+.lesson-editor-choice { padding:14px 0 2px; border-top:1px solid var(--line); }
+.lesson-editor-correct { margin-bottom:10px; font-weight:750; }
+.lesson-editor-upload input[type=file] { white-space:normal; padding:10px; background:var(--cream,#fff9ed); font-size:13px; }
+.lesson-editor-upload small { display:block; line-height:1.6; color:var(--muted); }
+.lesson-editor-preview { margin-top:12px; display:grid; gap:10px; }
+.lesson-editor-preview:empty { display:none; }
+.lesson-editor-preview :is(iframe,video) { width:100%; height:auto; aspect-ratio:16/9; border:0; border-radius:12px; background:#e7ece8; }
+.lesson-editor-preview a { overflow-wrap:anywhere; display:inline-flex; align-items:center; min-height:44px; font-weight:750; color:var(--green,#1f6248); }
+.lesson-editor-notice { margin-top:16px; padding:12px 14px; border-radius:12px; background:var(--garden,#edf2e7); font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.lesson-editor-notice [data-lesson-discard], .lesson-editor-notice [data-lesson-conflict] { margin-top:10px; }
+.lesson-editor [hidden] { display:none!important; }
+.lesson-editor .staff-form-footer { position:sticky; bottom:-24px; z-index:2; padding:14px 0; background:var(--paper,#fff); border-top:1px solid var(--line); }
+.lesson-editor .bunny-upload { min-width:0; }
+.lesson-editor .bunny-upload .staff-actions { flex-wrap:wrap; gap:8px; }
+.lesson-editor .bunny-upload .btn { min-height:44px; max-width:100%; }
+.lesson-editor .bunny-upload [data-bunny-status]:empty { display:none; }
+.lesson-editor .bunny-upload progress { display:block; width:100%; height:13px; margin:8px 0; accent-color:var(--green,#1f6248); }
+@media(max-width:600px) {
+ .lesson-editor-section { margin-top:16px; padding:12px; }
+ .lesson-editor-card { padding:11px; }
+ .lesson-editor .staff-field :is(input,textarea,select) { font-size:16px; }
+ .lesson-editor-section > legend { font-size:15px; }
+ .lesson-editor-card-head .btn { padding:8px 11px; }
+ .lesson-editor-upload input[type=file] { font-size:13px; }
+ .lesson-editor .staff-form-footer { bottom:-20px; gap:8px; }
+ .lesson-editor .staff-form-footer .btn { min-width:0; }
+ .lesson-editor-notice .staff-actions .btn { flex:1 1 150px; }
+}

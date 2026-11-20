@@ -62,6 +62,8 @@ class Knowledge:
         with api.connect(provider.path,True) as db:
             require_qa(db)
             for sql in SCHEMA:db.execute(sql)
+            from .lesson_resources import initialize_storage
+            initialize_storage(db)
         manifest=self.inputs/'knowledge-manifest.json'
         if manifest.exists():
             m=load_json(manifest)
@@ -93,7 +95,16 @@ class Knowledge:
 
     def progress(self,db,session,key,revision):
         rows=[json.loads(r[0]) for r in db.execute('SELECT result_json FROM knowledge_checks WHERE student_id=? AND lesson_key=? AND lesson_revision=?',(session['student_id'],key,revision))]
-        return {'completed':bool(rows),'attemptCount':len(rows),'correctCount':sum(bool(r['correct']) for r in rows)}
+        marked=db.execute('SELECT completed_at FROM study_knowledge_completions WHERE student_id=? AND lesson_key=? AND lesson_revision=?',(session['student_id'],key,revision)).fetchone()
+        return {'completed':bool(rows or marked),'checked':bool(rows),'markedComplete':bool(marked),'completedAt':marked[0] if marked else None,'attemptCount':len(rows),'correctCount':sum(bool(r['correct']) for r in rows)}
+
+    def complete(self,db,session,key,body):
+        if not isinstance(body,dict) or set(body)!={'lessonRevision'} or type(body.get('lessonRevision')) is not int or body['lessonRevision']<1:raise api.APIError('Yêu cầu đánh dấu đã học không hợp lệ.')
+        value=self.current(db,key,body['lessonRevision'])
+        hidden=db.execute('SELECT archived FROM staff_knowledge_drafts WHERE lesson_key=?',(key,)).fetchone()
+        if hidden and hidden[0]:raise api.APIError('Bài học đã được rút khỏi danh mục.',404)
+        db.execute('INSERT OR IGNORE INTO study_knowledge_completions VALUES(?,?,?,?)',(session['student_id'],key,value['revision'],api.stamp()))
+        return {'completed':True,'lessonRevision':value['revision'],'progress':self.progress(db,session,key,value['revision'])}
 
     def catalogue(self,db,session):
         rows=db.execute('SELECT k.* FROM knowledge_lessons k WHERE k.revision=(SELECT max(v.revision) FROM knowledge_lessons v WHERE v.lesson_key=k.lesson_key) ORDER BY k.topic_key,k.lesson_key')
@@ -107,8 +118,13 @@ class Knowledge:
 
     def lesson(self,db,session,key,revision=None):
         value=self.current(db,key,revision);q=value['fixed'];fixed={k:q[k] for k in ('questionKey','revision','prompt','responseMode','inputGuide') if k in q}
+        db.execute('INSERT INTO study_lesson_opens VALUES(?,?,?,?) ON CONFLICT(student_id,lesson_key,lesson_revision) DO UPDATE SET opened_at=excluded.opened_at',
+                   (session['student_id'],key,value['revision'],api.stamp()))
         if q['responseMode']=='choice':fixed['options']=q['options']
-        return {'lesson':{k:value[k] for k in ('lessonKey','topicKey','title','revision','sections')}|{'fixed':fixed},'progress':self.progress(db,session,key,value['revision'])}
+        from .lesson_resources import lesson_video,project_materials
+        video=lesson_video(value,value.get('videoRef',''))
+        return {'lesson':{k:value[k] for k in ('lessonKey','topicKey','title','revision','sections')}|{'fixed':fixed,'videoRef':video.get('href','') if video else '',
+                'video':video,'videoPreview':video,'materials':project_materials(value.get('materials',[]),'native',key,value['revision'])},'progress':self.progress(db,session,key,value['revision'])}
 
     def check(self,db,session,key,body):
         if not isinstance(body,dict) or set(body)!={'requestKey','answer','lessonRevision'} or not isinstance(body.get('answer'),str) or len(body['answer'])>500:raise api.APIError('Đáp án tự kiểm tra không hợp lệ.')
@@ -129,7 +145,7 @@ class Knowledge:
         from .local_pilot import media_keys
         if revision is None:raise api.APIError('Cần phiên bản bài học cho tài sản.')
         value=self.current(db,key,revision);allowed=media_keys(value['sections'])
-        if self.progress(db,session,key,value['revision'])['completed']:allowed|=media_keys(value['fixed']['solution'])
+        if self.progress(db,session,key,value['revision'])['checked']:allowed|=media_keys(value['fixed']['solution'])
         if sha not in allowed:raise api.APIError('Hình không thuộc phần bài học em được mở.',404)
         row=db.execute('SELECT mime,payload FROM knowledge_assets WHERE sha256=?',(sha,)).fetchone()
         if not row:raise api.APIError('Chưa có hình của bài học.',404)

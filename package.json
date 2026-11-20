@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "check:js": "node scripts/check-js.cjs",
-    "test:browser": "node tests/browser-smoke.cjs",
+    "test:browser": "node tests/ci-site-smoke.cjs",
     "build:pages": "node scripts/build-pages.cjs work/pages-release cloudflare-live"
   },
   "devDependencies": {

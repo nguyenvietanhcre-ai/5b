@@ -37,11 +37,12 @@ def require_wallet(db):
 
 def scope_keys(db):
     row=db.execute("SELECT keys_json FROM wallet_scopes WHERE scope_id='qa.g5.vip10' AND grade=5").fetchone()
-    return json.loads(row[0]) if row else []
+    from .curriculum_samples import paid_keys
+    return sorted(set(json.loads(row[0]) if row else []) | paid_keys(db))
 
 
-def catalog_view(db):
-    count=len(scope_keys(db))
+def catalog_view(db,*,_scope=None):
+    count=len(scope_keys(db) if _scope is None else _scope)
     return CATALOG if count==5 else {**CATALOG,'scopeLabel':f'{count} câu VIP khối 5 trong batch QA; không mở tính năng VIP'}
 
 
@@ -54,12 +55,16 @@ def vip_budget(db,session,config):
         anchor=datetime.fromisoformat(term[0]);index=max(0,(now-anchor)//timedelta(days=30))
         start=api.stamp(anchor+timedelta(days=30*index));end=api.stamp(anchor+timedelta(days=30*(index+1)))
         if now<anchor:active=False
+    annual=bool(config.vip_cycle_start and config.vip_cycle_end)
+    if annual:
+        start,end=config.vip_cycle_start,config.vip_cycle_end
+        if not datetime.fromisoformat(start)<=now<datetime.fromisoformat(end):active=False
     day_used=db.execute("SELECT count(*) FROM wallet_debits WHERE student_id=? AND source='vip' AND local_day=?",(sid,day)).fetchone()[0]
     day_used+=db.execute('SELECT coalesce(sum(day_used),0) FROM wallet_usage_seeds WHERE student_id=? AND local_day=?',(sid,day)).fetchone()[0]
     cycle_used=db.execute("SELECT count(*) FROM wallet_debits WHERE student_id=? AND source='vip' AND cycle_start=?",(sid,start)).fetchone()[0]
     cycle_used+=db.execute('SELECT coalesce(sum(cycle_used),0) FROM wallet_usage_seeds WHERE student_id=? AND cycle_start=?',(sid,start)).fetchone()[0]
     expiry=db.execute('SELECT vip_expires_at FROM accounts WHERE id=?',(session['account_id'],)).fetchone()[0]
-    return {'active':active,'day':day,'dayUsed':day_used,'dayLimit':config.vip_daily,'cycleUsed':cycle_used,'cycleLimit':config.vip_cycle,
+    return {'active':active,'day':day,'dayUsed':day_used,'dayLimit':config.vip_daily,'cycleUsed':cycle_used,'cycleLimit':config.vip_cycle,'cyclePeriod':'year' if annual else 'month',
             'cycleStart':start,'cycleEnd':end,'vipExpiresAt':expiry,'available':max(0,min(config.vip_daily-day_used,config.vip_cycle-cycle_used)) if active else 0}
 
 
@@ -68,54 +73,62 @@ def pack_rows(db,sid):
 
 
 def balance(db,session,config):
-    require_wallet(db);now=api.stamp();packs=pack_rows(db,session['student_id'])
+    require_wallet(db);now=api.stamp();packs=pack_rows(db,session['student_id']);scope=scope_keys(db)
     for pack in packs:pack['usable']=pack['expires_at']>now and pack['remaining']>0 and pack['scope_id']=='qa.g5.vip10'
-    return {'policyVersion':POLICY,'catalog':catalog_view(db),'membership':membership(db,session),'vip':vip_budget(db,session,config),
+    return {'policyVersion':POLICY,'catalog':catalog_view(db,_scope=scope),'membership':membership(db,session),'vip':vip_budget(db,session,config),
             'privateRemaining':sum(p['remaining'] for p in packs if p['usable']),'packs':packs,
-            'orders':[order_view(db,session,r[0]) for r in db.execute('SELECT order_id FROM wallet_orders WHERE student_id=? ORDER BY created_at DESC,order_id LIMIT 20',(session['student_id'],))],'scopeKeys':scope_keys(db),'timezone':'Asia/Saigon',
+            'orders':[order_view(db,session,r[0]) for r in db.execute('SELECT order_id FROM wallet_orders WHERE student_id=? ORDER BY created_at DESC,order_id LIMIT 20',(session['student_id'],))],'scopeKeys':scope,'timezone':'Asia/Saigon',
             'seededCountersNotice':('Các bộ đếm biên QA có nhãn giả; kho 60 câu tự biên soạn, không tạo thêm câu để lấp hạn mức.' if config.batch_set_key else 'Các bộ đếm biên QA có nhãn giả; kho vẫn chỉ 10 câu.')}
 
 
 def selector(body):return {k:body[k] for k in ('setIndex','contentKeys','replayExamId','responseMode') if k in body}
 
 
-def plan(db,session,selected,grants,config,body):
+def plan(db,session,selected,grants,config,body,*,purchased_sku=None):
     require_wallet(db);state=balance(db,session,config);scope=set(state['scopeKeys']);sid=session['student_id']
     vip_left=state['vip']['available'];packs=[{**p} for p in state['packs'] if p['usable']];alloc=[]
     from .free_vip_pilot import clock_window
     _,start,end=clock_window()
     current_free={r[0] for r in db.execute('SELECT i.content_key FROM pilot_set_items i JOIN pilot_sets s ON s.set_key=i.set_key WHERE s.grade=? AND s.window_start=? AND s.window_end=?',(config.grade,start,end))}
+    from .curriculum_samples import free_keys,registered
+    current_free.update(free_keys(db))
     for quota,row in grants.items():
         ck=row['content_key'];version=row['version_id']
         old=db.execute('SELECT version_id FROM pilot_grants WHERE student_id=? AND content_key=?',(sid,quota)).fetchone()
         access=db.execute('SELECT proposed_access FROM pilot_content WHERE content_key=?',(ck,)).fetchone()[0]
         entry={'quotaKey':quota,'contentKey':ck,'versionId':version,'source':'retained','packId':None,'expiresAt':None}
         if old:
-            if access=='vip' and 'replayExamId' not in body and old[0]!=version and not state['vip']['active'] and not packs and not config.internal_unlimited:
+            if access=='vip' and 'replayExamId' not in body and old[0]!=version and not state['vip']['active'] and not packs and not config.internal_unlimited and not (purchased_sku and ck in scope):
                 raise api.APIError('Bài đã cấp giữ bản cũ; mở từ lịch sử để xem đúng phiên bản.',403)
         elif access=='free':
             if ck not in current_free:raise api.APIError('Câu Free ngoài manifest hiện hành.',403)
             entry['source']='free'
         else:
             if ck not in scope:raise api.APIError('Câu ngoài phạm vi gói QA.',403)
-            if config.internal_unlimited:
+            if purchased_sku:
+                entry['source']='purchased'
+            elif config.internal_unlimited:
                 entry.update(source='free',reason='server-internal-entitlement')
             elif vip_left:
                 entry['source']='vip';vip_left-=1
             else:
-                pack=next((p for p in packs if p['remaining']>0),None)
+                # Original private QA packs retain their original scope. Newly
+                # authored samples use VIP or actually purchased permanent credits.
+                pack=next((p for p in packs if p['remaining']>0),None) if registered(db,version) is None else None
                 if not pack:raise api.APIError('Không đủ lượt VIP/gói riêng còn hạn; chưa cấp hoặc trừ câu nào.',402)
                 pack['remaining']-=1;entry.update(source='pack',packId=pack['pack_id'],expiresAt=pack['expires_at'])
         alloc.append(entry)
-    return {'policyVersion':POLICY,'newPaid':sum(a['source'] in ('vip','pack') for a in alloc),
+    return {'policyVersion':POLICY,'newPaid':sum(a['source'] in ('vip','pack','purchased') for a in alloc),
             'vip':sum(a['source']=='vip' for a in alloc),'private':sum(a['source']=='pack' for a in alloc),
             'free':sum(a['source']=='free' for a in alloc),'retained':sum(a['source']=='retained' for a in alloc),
             'allocations':alloc,'vipBudget':state['vip'],'selector':selector(body),'scopeLabel':catalog_view(db)['scopeLabel']}
 
 
 class QuoteChanged(api.APIError):
-    def __init__(self,allocation):
-        super().__init__('Phân bổ đã đổi hoặc xác nhận hết hạn. Xem lại và xác nhận gói riêng trước khi cấp.',409)
+    def __init__(self,allocation,*,purchased=False):
+        message = ('Lượt đã mua hoặc phiên xác nhận đã đổi. Hãy xem báo giá mới trước khi tạo đề.' if purchased else
+                   'Phân bổ đã đổi hoặc xác nhận hết hạn. Xem lại và xác nhận gói riêng trước khi cấp.')
+        super().__init__(message,409)
         self.allocation=allocation
 
 

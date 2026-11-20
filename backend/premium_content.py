@@ -26,7 +26,7 @@ def series(db, session):
                 'SELECT id,title,position FROM series_videos WHERE series_slug=? AND published=1 AND archived=0 ORDER BY position',
                 (item['slug'],)), 1):
             videos.append({**dict(video), 'accessible': opened and (paid or index <= 3)})
-        result.append({'slug': item['slug'], 'title': item['title'], 'videos': videos,
+        result.append({'slug': item['slug'], 'title': 'Giải câu điểm 10' if item['slug'] == 'cau-phan-loai' else item['title'], 'videos': videos,
                        'freePreviewCount': 3})
     return {'series': result}
 
@@ -87,7 +87,16 @@ def start_set(db, session, body):
     return issue_exam(db,session,payload,key,'PREMIUM-'+slug+'-'+secrets.token_hex(8))
 
 
-def issue_exam(db,session,payload,key,code):
+def issue_exam(db,session,payload,key,code,*,purchase_order_id=None):
+    from .question_access import valid_payload,purchased_payload
+    if purchase_order_id is not None:
+        owned_payload=purchased_payload(db,session,purchase_order_id)
+        if owned_payload != payload:
+            raise APIError('Đề yêu cầu không khớp bản lưu của đơn đã mua.',403)
+    else:
+        require_plus(db,session)
+        if not valid_payload(db,payload,session=session,purpose='premium'):
+            raise APIError('Bộ nội dung chưa đủ phiên bản và quyền đã duyệt; chưa cấp bài.',503)
     grade, year = api.ensure_grade(db, session['student_id'], session['birth_year'])
     if grade != payload['grade']:
         raise APIError('Bộ nội dung không thuộc khối của em.', 403)
@@ -96,7 +105,7 @@ def issue_exam(db,session,payload,key,code):
             or any(type(identity) is not int for identity in ids) or len(set(ids)) != len(ids)):
         raise APIError('Bộ nội dung cần được rà lại.', 503)
     for identity in ids:
-        valid = db.execute("SELECT 1 FROM question_versions v JOIN questions q ON q.id=v.question_id WHERE v.id=? AND v.status='published' AND q.grade_id=?", (identity, grade)).fetchone()
+        valid = db.execute("SELECT 1 FROM question_versions v JOIN questions q ON q.id=v.question_id WHERE v.id=? AND q.grade_id=?", (identity, grade)).fetchone()
         if not valid:
             raise APIError('Có câu chưa được phát hành; chưa cấp bài.', 503)
     if db.execute('SELECT count(*) FROM exam_attempts WHERE student_id=? AND started_at>?',

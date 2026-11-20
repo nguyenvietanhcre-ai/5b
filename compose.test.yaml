@@ -6,6 +6,10 @@ services:
     tmpfs:
       - /tmp
       - /app/work:uid=65532,gid=65532
+      - /test-runs:uid=65532,gid=65532
+      - /test-databases:uid=65532,gid=65532
+      - /test-tmp:uid=65532,gid=65532
+      - /qa:uid=65532,gid=65532
     volumes:
       - ./tests:/app/tests:ro
       - ./qa-inputs:/app/qa-inputs:ro

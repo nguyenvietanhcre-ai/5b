@@ -69,7 +69,7 @@ def webcrypto_pbkdf2(hash_name, password, salt, iterations, dklen=None):
 
 def install():
     """Install once per isolate; mutable results are kept only in ContextVar."""
-    from backend import platform_api, staff_api
+    from backend import platform_api, staff_api, family_accounts
     if getattr(platform_api.password_hash, '_worker_cached', False):
         return
     if not hasattr(hashlib, 'pbkdf2_hmac'):
@@ -77,6 +77,17 @@ def install():
     original_hash = platform_api.password_hash
     original_verify = platform_api.verify_password
     original_limit = platform_api.limit_auth
+    original_pin_hash=family_accounts._hash_pin
+
+    def cached_pin_hash(value,parent=False):
+        scope=REQUEST_SCOPE.get();key=('family-pin-hash',value,parent)
+        if scope and key in scope.crypto:return scope.crypto[key]
+        if scope and scope.transaction:
+            from sqlite_storage import NeedsExternal
+            raise NeedsExternal(key,lambda:original_pin_hash(value,parent))
+        result=original_pin_hash(value,parent)
+        if scope:scope.crypto[key]=result
+        return result
 
     def cached_hash(password):
         scope = REQUEST_SCOPE.get()
@@ -109,3 +120,4 @@ def install():
     platform_api.password_hash = staff_api.password_hash = cached_hash
     platform_api.verify_password = staff_api.verify_password = cached_verify
     platform_api.limit_auth = staff_api.limit_auth = limited_once
+    family_accounts._hash_pin=cached_pin_hash

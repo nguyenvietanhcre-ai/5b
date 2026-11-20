@@ -265,6 +265,9 @@ def student_cookie_name(handler):
 
 
 def read_session(handler, db):
+    from .family_accounts import family_present, read_learner_session
+    if family_present(handler):
+        return read_learner_session(handler, db)
     cookie = SimpleCookie()
     try:
         cookie.load(handler.headers.get('Cookie', ''))
@@ -307,6 +310,9 @@ def nickname_field(body):
 def register(handler, db, body, credential=None):
     from .system_settings import require_feature
     require_feature(db, 'registration_open')
+    if getattr(handler.server,'website_readiness_enabled',False) or 'legalConsent' in body:
+        from .website_legal import validate_consent
+        validate_consent(body)
     login = text_field(body, 'login', 100, 3).lower()
     if not re.fullmatch(r'[a-z0-9][a-z0-9_.@+\-]{2,99}', login):
         raise APIError('Tên đăng nhập dùng ít nhất 3 chữ cái không dấu, số hoặc . _ @ + -')
@@ -326,6 +332,9 @@ def register(handler, db, body, credential=None):
     if (db.execute('SELECT 1 FROM accounts WHERE lower(login_identifier)=?', (login,)).fetchone()
             or db.execute('SELECT 1 FROM staff_users WHERE login=?', (login,)).fetchone()):
         raise APIError('Tên đăng nhập này đã được sử dụng.', 409)
+    if (db.execute("SELECT 1 FROM sqlite_master WHERE name='family_accounts'").fetchone()
+            and db.execute('SELECT 1 FROM family_accounts WHERE email=?', (login,)).fetchone()):
+        raise APIError('Tên đăng nhập này đã được sử dụng.', 409)
     code = secrets.token_hex(8).upper()
     aid = db.execute('INSERT INTO accounts(account_code,login_identifier,birth_year,invite_code,created_at,password_hash) '
                      'VALUES (?,?,?,?,?,?)', ('ACC-'+code,login,birth,'5B'+code[:10],stamp(),credential)).lastrowid
@@ -343,6 +352,9 @@ def register(handler, db, body, credential=None):
     if inviter:
         db.execute('INSERT INTO account_referrals(inviter_account_id,invitee_account_id,invite_code,registered_at) VALUES (?,?,?,?)',
                    (inviter[0],aid,invite.strip().upper(),stamp()))
+    if getattr(handler.server,'website_readiness_enabled',False) or 'legalConsent' in body:
+        from .website_legal import record_consent
+        record_consent(db,aid,body)
     return issue_session(handler,db,aid)
 
 
@@ -384,9 +396,21 @@ def verified_login(db, proof):
     return row
 
 
+def grade_for_student(db, sid, birth):
+    if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='family_children'").fetchone():
+        child = db.execute('SELECT declared_grade,grade_academic_year FROM family_children WHERE student_id=?', (sid,)).fetchone()
+        if child:
+            return max(1, min(5, child['declared_grade'] + max(0, academic()[0] - child['grade_academic_year'])))
+    if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='local_pilot_family_grades'").fetchone():
+        child = db.execute('SELECT declared_grade,grade_academic_year FROM local_pilot_family_grades WHERE pilot_student_id=?', (sid,)).fetchone()
+        if child:
+            return max(1, min(5, child['declared_grade'] + max(0, academic()[0] - child['grade_academic_year'])))
+    return max(1, min(5, academic()[0] - birth - 5))
+
+
 def ensure_grade(db, sid, birth):
     year, _ = academic()
-    grade = max(1,min(5,year-birth-5))
+    grade = grade_for_student(db, sid, birth)
     label = f'{year}–{year+1}'
     row = db.execute('SELECT id FROM academic_years WHERE label=?', (label,)).fetchone()
     if row:
@@ -414,13 +438,20 @@ def blocks_text(blocks):
 
 def exam_view(db, attempt, summary=False):
     submitted = attempt['status'] == 'submitted'
+    from .study_retake import root_id, exists, versions_retakable
+    lineage = {'rootExamId':str(root_id(db,attempt['exam_id'])) if exists(db,'study_retakes') else str(attempt['exam_id'])}
+    if submitted:
+        own=db.execute('SELECT owner_student_id,form_id,status FROM exams WHERE id=?',(attempt['exam_id'],)).fetchone()
+        lineage['canRetake']=bool(own and own['owner_student_id']==attempt['student_id'] and own['form_id'] is None and own['status']=='published'
+            and db.execute("SELECT 1 FROM exams WHERE id=? AND status='published'",(int(lineage['rootExamId']),)).fetchone()
+            and versions_retakable(db,attempt['exam_id']))
     if summary and submitted:
         return {'id':str(attempt['exam_id']),'code':attempt['exam_code'],'title':attempt['title'],
                 'grade':attempt['grade_level'],'submittedAt':attempt['submitted_at'],
-                'score':round(attempt['earned_points']/attempt['total_points']*10,1),'questions':[]}
+                  'score':round(attempt['earned_points']/attempt['total_points']*10,1),'questions':[],**lineage}
     answers = {str(r['position']):r['answer'] for r in db.execute('SELECT position,answer FROM exam_draft_answers WHERE attempt_id=?', (attempt['id'],))}
     questions = []
-    for row in db.execute('SELECT i.position,i.options_json,v.*,t.title topic_title FROM exam_items i '
+    for row in db.execute('SELECT i.position,i.options_json,v.*,q.question_code,t.title topic_title FROM exam_items i '
                           'JOIN question_versions v ON v.id=i.question_version_id JOIN questions q ON q.id=v.question_id '
                           'JOIN topics t ON t.id=q.topic_id WHERE i.exam_id=? ORDER BY i.position', (attempt['exam_id'],)):
         prompt = json.loads(row['prompt_json'])
@@ -443,21 +474,30 @@ def exam_view(db, attempt, summary=False):
                 guide=json.loads(metadata[0]).get('inputGuide') if metadata else None
                 if guide:question['inputGuide']={k:guide[k] for k in ('instruction','labels','units','separator')}
         if submitted:
+            question['questionCode']=row['question_code']
             rule = json.loads(row['grading_rule_json'])
             steps = json.loads(row['solution_steps_json'])
             question.update(answer=rule['answer'],steps=[blocks_text([b]) for b in steps],
                             solution=steps,thinking=blocks_text(json.loads(row['hints_json'])))
             awarded = db.execute('SELECT awarded_points FROM exam_answers WHERE attempt_id=? AND position=?', (attempt['id'],row['position'])).fetchone()
             question['correct'] = bool(awarded[0]) if awarded else False
+        from .curriculum_samples import annotate as annotate_sample
+        annotate_sample(db,row['id'],question,submitted=submitted)
         questions.append(question)
     assets = [dict(r) for r in db.execute('SELECT DISTINCT m.* FROM media_assets m JOIN question_assets a ON a.asset_id=m.id '
                                          'JOIN exam_items i ON i.question_version_id=a.question_version_id WHERE i.exam_id=?', (attempt['exam_id'],))]
     start = datetime.fromisoformat(attempt['started_at'].replace('Z','+00:00'))
     due = datetime.fromisoformat(attempt['due_at'].replace('Z','+00:00'))
-    result = {'id':str(attempt['exam_id']),'code':attempt['exam_code'],'title':attempt['title'],
+    result = {**lineage,'id':str(attempt['exam_id']),'code':attempt['exam_code'],'title':attempt['title'],
               'grade':attempt['grade_level'],'responseMode':attempt['response_mode'],'questions':questions,'assets':assets,'answers':answers,
               'index':attempt['cursor'],'startedAt':int(start.timestamp()*1000),'expiresAt':int(due.timestamp()*1000)}
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='family_exam_revisions'").fetchone():
+        revision = db.execute('SELECT revision FROM family_exam_revisions WHERE attempt_id=?', (attempt['id'],)).fetchone()
+        result['revision'] = revision[0] if revision else 0
     result['reference']='pilot:'+str(attempt['exam_id']) if db.execute("SELECT 1 FROM sqlite_master WHERE name='pilot_environment'").fetchone() else 'main:'+str(attempt['exam_id'])
+    from .purchased_credits import receipt as purchased_receipt
+    purchased=purchased_receipt(db,attempt['student_id'],attempt['exam_id'])
+    if purchased:result['purchasedCredits']=purchased
     if submitted:
         end = datetime.fromisoformat(attempt['submitted_at'].replace('Z','+00:00'))
         result.update(submittedAt=attempt['submitted_at'],correct=attempt['earned_points'],
@@ -489,19 +529,44 @@ def submit(db, attempt):
                (stamp(),earned,len(rows),attempt['id']))
 
 
-def create_exam(db, session, body):
+def create_exam(db, session, body, *, native_db=None, quote_only=False):
     from .learning_update import consume, membership
-    key = text_field(body,'requestKey',80,8)
-    old = db.execute('SELECT exam_id FROM exam_attempts WHERE student_id=? AND request_key=?', (session['student_id'],key)).fetchone()
-    if old:
-        return exam_view(db,owned_attempt(db,session,old[0]))
+    from . import purchased_credits as credits
+    sku=credits.funding(body)
+    sid=session['student_id']
+    selector_fields={'count','difficulty','topic','category','week','maxWeek','school','funding'}
+    if sku or quote_only:
+        if not sku:raise APIError('Chọn loại lượt đã mua cần xem trước.')
+        allowed=selector_fields|(set() if quote_only else {'requestKey','quoteId','confirmPurchased'})
+        if set(body)-allowed:raise APIError('Chỉ gửi tiêu chí và xác nhận tạo đề.')
+        selector={k:body[k] for k in body if k in selector_fields}
+    if not quote_only:
+        key = text_field(body,'requestKey',80,8)
+        old = db.execute('SELECT exam_id FROM exam_attempts WHERE student_id=? AND request_key=?', (sid,key)).fetchone()
+        if old:
+            if sku:
+                previous=credits.recent_request(db,session,key,body)
+                if previous:return previous
+                raise APIError('Mã yêu cầu đã dùng cho một bài khác.',409)
+            if credits.receipt(db,sid,old[0]):raise APIError('Mã yêu cầu đã dùng với nguồn lượt khác.',409)
+            return exam_view(db,owned_attempt(db,session,old[0]))
+    if 'family_id' in session:
+        active = db.execute("SELECT exam_id FROM exam_attempts WHERE student_id=? AND status='in_progress' AND due_at>? LIMIT 1",
+                            (session['student_id'], stamp())).fetchone()
+        if active:
+            raise APIError('Con còn bài đang làm. Hãy tiếp tục hoặc nộp bài trước khi mở lượt mới.', 409)
     count, difficulty = body.get('count',10), body.get('difficulty',0)
     if type(count) is not int or count not in (3,10) or type(difficulty) is not int or difficulty not in range(4):
         raise APIError('Số câu hoặc độ khó không hợp lệ.')
+    if sku==credits.EXAMS and count!=credits.COMPLETE_COUNT:
+        raise APIError('Một lượt tạo đề đã mua dùng cho một đề đủ 10 câu.')
     if db.execute('SELECT count(*) FROM exam_attempts WHERE student_id=? AND started_at>?',
                   (session['student_id'],stamp(now()-timedelta(hours=1)))).fetchone()[0] >= 60:
         raise APIError('Em đã tạo nhiều đề. Hãy tiếp tục bài đang làm trước.',429)
-    grade, ayid = ensure_grade(db,session['student_id'],session['birth_year'])
+    if quote_only:
+        grade = grade_for_student(db,sid,session['birth_year'])
+    else:
+        grade, ayid = ensure_grade(db,sid,session['birth_year'])
     from .content_retirement import retired
     if retired(db,grade):raise APIError('Kho lớp5 cũ đã ngừng cấp đề mới; em hãy dùng Luyện tập mới.',503)
     topic = body.get('topic','')
@@ -524,14 +589,50 @@ def create_exam(db, session, body):
     if exact_week is not None and (type(exact_week) is not int or exact_week not in range(1,academic()[1]+1)):
         raise APIError('Tuần học không hợp lệ.')
     from .question_bank import published_version_ids
-    pool = published_version_ids(db, grade, difficulty + 1, max_week, topic, exact_week)
+    pool = published_version_ids(db, grade, difficulty + 1, max_week, topic, exact_week,
+                                 session=session, purpose='practice')
     if len(pool)<count:
         raise APIError('Chưa đủ câu hỏi trong phạm vi này.')
-    if category!='school': consume(db,session,category,key)
-    previous = db.execute('SELECT exam_id FROM exam_attempts WHERE student_id=? ORDER BY id DESC LIMIT 1', (session['student_id'],)).fetchone()
-    used = {r[0] for r in db.execute('SELECT question_version_id FROM exam_items WHERE exam_id=?', (previous[0],))} if previous else set()
-    fresh = [qid for qid in pool if qid not in used]
-    selected = secrets.SystemRandom().sample(fresh if len(fresh)>=count else pool,count)
+    if sku:
+        from .wallet_qa import QuoteChanged
+        balances=credits.balance(db,sid,native_db)
+        eligible_versions=set(pool)
+        candidates={r['id']:r['question_id'] for r in db.execute(
+            'SELECT v.id,v.question_id FROM question_versions v JOIN questions q ON q.id=v.question_id '
+            'WHERE q.grade_id=? AND v.status=\'published\'',(grade,)) if r['id'] in eligible_versions}
+        seen={r[0] for r in db.execute('SELECT DISTINCT v.question_id FROM exam_attempts a '
+            'JOIN exam_items i ON i.exam_id=a.exam_id JOIN question_versions v ON v.id=i.question_version_id '
+            'WHERE a.student_id=?',(sid,))} if sku==credits.QUESTIONS else set()
+        fresh=[vid for vid in pool if candidates[vid] not in seen]
+        if quote_only:
+            if sku==credits.QUESTIONS:
+                count_new=min(count,len(fresh),credits.amount_left(balances,sku))
+                retained=[vid for vid in pool if candidates[vid] in seen]
+                if count_new+len(retained)<count:
+                    raise APIError('Không đủ lượt câu hỏi đã mua để tạo đề này. Số dư được giữ nguyên.',402)
+                rng=secrets.SystemRandom()
+                selected=rng.sample(fresh,count_new)+rng.sample(retained,count-count_new)
+                rng.shuffle(selected)
+            else:
+                selected=secrets.SystemRandom().sample(pool,count)
+            question_keys=[str(candidates[vid]) for vid in selected if candidates[vid] not in seen] if sku==credits.QUESTIONS else []
+            purchased=credits.allocation(sku,balances,question_keys)
+            ticket=credits.quote(db,session,sku,selector,{'selected':selected,'grade':grade,'purchased':purchased})
+            return {**ticket,'purchased':purchased,'questionCount':count}
+        prior=credits.confirm(db,session,sku,selector,body)
+        selected=prior['selected']
+        if prior['grade']!=grade or len(selected)!=count or not set(selected)<=eligible_versions:
+            raise QuoteChanged({},purchased=True)
+        question_keys=[str(candidates[vid]) for vid in selected if candidates[vid] not in seen] if sku==credits.QUESTIONS else []
+        purchased=credits.allocation(sku,balances,question_keys)
+        if purchased['quantity']!=prior['purchased']['quantity']:
+            raise QuoteChanged({'purchased':purchased},purchased=True)
+    else:
+        if category!='school': consume(db,session,category,key)
+        previous = db.execute('SELECT exam_id FROM exam_attempts WHERE student_id=? ORDER BY id DESC LIMIT 1', (sid,)).fetchone()
+        used = {r[0] for r in db.execute('SELECT question_version_id FROM exam_items WHERE exam_id=?', (previous[0],))} if previous else set()
+        fresh = [qid for qid in pool if qid not in used]
+        selected = secrets.SystemRandom().sample(fresh if len(fresh)>=count else pool,count)
     minutes = 10 if count==3 else 30
     code = '5B-'+secrets.token_hex(5).upper()
     title = ('Luyện theo trường · '+{'cau-giay':'Cầu Giấy','ngoai-ngu':'Ngoại ngữ','ntt':'Nguyễn Tất Thành'}[body['school']]+' · Mẫu tự biên soạn') if category=='school' else 'Luyện theo nội dung' if category=='content' else 'Luyện đề tổng hợp'
@@ -551,6 +652,7 @@ def create_exam(db, session, body):
         db.execute('INSERT INTO exam_items VALUES (?,?,?,?,?)', (eid,position,qid,1,packed(options)))
     db.execute('INSERT INTO exam_attempts(exam_id,student_id,started_at,due_at,status,request_key) VALUES (?,?,?,?,\'in_progress\',?)',
                (eid,session['student_id'],stamp(),stamp(now()+timedelta(minutes=minutes)),key))
+    if sku:credits.debit(db,session,db,sid,eid,body,purchased,question_keys)
     return exam_view(db,owned_attempt(db,session,eid))
 
 
@@ -574,14 +676,15 @@ def lesson_payload(row):
     lesson['example'] = ({'text': example['text'], 'steps': list(example['steps'])}
         if isinstance(example, dict) and isinstance(example.get('text'), str) and example['text'].strip() and
         isinstance(example.get('steps'), list) and all(isinstance(step, str) for step in example['steps']) else None)
-    video = row['video_ref'] or ''
-    try:
-        parsed = urlsplit(video)
-        safe_video = not parsed.username and not parsed.password and '\\' not in video and not any(ord(c) < 32 for c in video) and (
-            parsed.scheme in ('http', 'https') and parsed.netloc or video.startswith('/') and not video.startswith('//'))
-    except ValueError:
-        safe_video = False
-    lesson['videoRef'] = video if safe_video else ''
+    from .lesson_resources import lesson_video, project_materials, public_examples
+    lesson['revision'] = row['revision']
+    lesson['examples'] = public_examples(lesson)
+    lesson['materials'] = project_materials(lesson.get('materials', []), 'main', row['client_key'], row['revision'])
+    lesson['videoPreview'] = lesson_video(lesson, row['video_ref'] or '')
+    lesson.pop('bunnyVideo', None)
+    if lesson['videoPreview'] and lesson['videoPreview']['provider'] == 'bunny':
+        lesson['video'] = lesson['videoPreview']
+    lesson['videoRef'] = lesson['videoPreview'].get('href', '') if lesson['videoPreview'] else ''
     lesson['video_ref'] = lesson['videoRef']
     return lesson
 
@@ -614,6 +717,7 @@ def vietnam_activity(rows):
 
 
 def identity_view(db, session):
+    from .family_features import companion_remaining
     """Small authenticated public-page snapshot; full learning state stays on demand."""
     sid = session['student_id']
     profile = db.execute('SELECT s.full_name,a.login_identifier FROM students s JOIN accounts a ON a.id=s.account_id WHERE s.id=?', (sid,)).fetchone()
@@ -622,20 +726,26 @@ def identity_view(db, session):
     completed = {r['client_key']: {'date':r['first_completed_at'],'grade':r['grade_id']} for r in db.execute(
         "SELECT l.client_key,l.grade_id,p.first_completed_at FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id WHERE p.student_id=? AND l.client_key IN ('public-decimal','public-percent')", (sid,))}
     theme = preferences['theme'] if preferences else DEFAULT_THEME
-    return {'authenticated':True,'csrf':session['csrf_token'],'name':safe_nickname(profile['full_name']),
-            'account':{'id':session['account_id'],'login':profile['login_identifier']},'partial':True,
-            'state':{'birthYear':session['birth_year'],'completed':completed,
+    from .family_accounts import learning_payload
+    return learning_payload(session, {'authenticated':True,'csrf':session['csrf_token'],'name':safe_nickname(profile['full_name']),
+            'account':{'id':session['account_id'],'login':profile['login_identifier'],'companionChangesRemaining':companion_remaining(db,sid)},'partial':True,
+            'state':{'birthYear':session['birth_year'],'completed':completed,'companionChangesRemaining':companion_remaining(db,sid),
                      'mascot':mascot_code(companion['name'] if companion else None),
                      'points':companion['xp'] if companion else 0,
-                     'theme':theme if theme in LEARNING_THEMES else DEFAULT_THEME}}
+                     'theme':theme if theme in LEARNING_THEMES else DEFAULT_THEME}})
 
 
-def state_view(db, session, review=False, read_only=False):
+def state_view(db, session, review=False, read_only=False, personal_provider=None):
+    from .family_features import companion_remaining
+    from .family_personal import summary as personal_summary
+    if not read_only:
+        from .family_personal import activate_held
+        activate_held(db,session['account_id'])
     from .zoom_classroom import unread_summary
     from .learning_update import usage, membership as member_label
     from .notifications import inbox, referrals as referral_page
     sid, aid = session['student_id'],session['account_id']
-    grade = max(1, min(5, academic()[0] - session['birth_year'] - 5))
+    grade = grade_for_student(db, sid, session['birth_year'])
     if not read_only:
         ensure_grade(db,sid,session['birth_year'])
     current = db.execute('SELECT * FROM accounts WHERE id=?',(aid,)).fetchone()
@@ -684,18 +794,20 @@ def state_view(db, session, review=False, read_only=False):
             battle['date']=battles[battle['id']]['date']
             battles[battle['id']]=battle
     from .system_settings import settings
-    return {'authenticated':True,'csrf':session['csrf_token'],'features':settings(db),'arenaDiscipline':arena_discipline(db,sid),'name':safe_nickname(db.execute('SELECT full_name FROM students WHERE id=?',(sid,)).fetchone()[0]),
-            'account':{'id':aid,'login':current['login_identifier'],'membership':membership,'vipExpiresAt':current['vip_expires_at'],'vipPlusExpiresAt':current['vip_plus_expires_at'],
+    from .family_accounts import learning_payload
+    return learning_payload(session, {'authenticated':True,'csrf':session['csrf_token'],'features':settings(db),'arenaDiscipline':arena_discipline(db,sid),'name':safe_nickname(db.execute('SELECT full_name FROM students WHERE id=?',(sid,)).fetchone()[0]),
+            'account':{'id':aid,'login':current['login_identifier'],'membership':membership,'vipExpiresAt':current['vip_expires_at'],'vipPlusExpiresAt':current['vip_plus_expires_at'],'companionChangesRemaining':companion_remaining(db,sid),
                        'notifications':notification_page['rows'],'notificationUnreadCount':notification_page['unreadCount'],
                        'notificationTotal':notification_page['total'],'referrals':referral_result['rows'],
                        'referralTotal':referral_result['total'],'classes':classes if internal else [],'usage':usage(db,session),
                        'classroomUnread':unread_summary(db,session)},
+            'personalSummary': personal_summary(db,session,personal_provider),
             'questionBankReady': bool(db.execute("SELECT 1 FROM questions q JOIN question_versions v ON v.question_id=q.id JOIN topics t ON t.id=q.topic_id WHERE q.grade_id=? AND v.status='published' AND t.client_key IS NOT NULL LIMIT 1", (grade,)).fetchone()),
-            'lessons':lessons,'state':{'birthYear':session['birth_year'],'inviteCode':session['invite_code'],
+            'lessons':lessons,'state':{'birthYear':session['birth_year'],'inviteCode':session['invite_code'],'companionChangesRemaining':companion_remaining(db,sid),
             'invitedBy':invited[0] if invited else '', 'grade':grade,'week':academic()[1],
             'mascot':mascot_code(companion['name'] if companion else None),'points':companion['xp'] if companion else 0,
             'theme':theme if theme in LEARNING_THEMES else DEFAULT_THEME,
-            'completed':completed,'exams':exams,'battles':battles,'activity':activity,'lastLesson':preferences['last_lesson'] if preferences else '', 'activeExam':active}}
+            'completed':completed,'exams':exams,'battles':battles,'activity':activity,'lastLesson':preferences['last_lesson'] if preferences else '', 'activeExam':active}})
 
 
 def leaderboard(db, session, query):
@@ -884,9 +996,17 @@ def qa_arena_source(handler, db):
 
 
 def with_qa_arena_metadata(handler,db,value):
-    if getattr(handler.server,'native_python_backend',False) is True or getattr(handler.server,'cloud_pdf_enabled',False) is True:
+    from .learning_update import unlimited_games
+    value={**value,'gameLimitsUnlimited':unlimited_games()}
+    if getattr(handler.server,'native_python_backend',False) is True:
         from .practice_export_api import available
         value={**value,'practiceExport':{'enabled':available(handler),'scope':'local-only','websiteLookupPublished':False}}
+    provider=getattr(handler.server,'local_pilot',None)
+    if hasattr(getattr(provider,'practice',None),'supports_grade'):
+        grade=value.get('state',{}).get('grade')
+        from .curriculum_samples import active
+        if grade in range(1,6) and active(db,grade):
+            value={**value,'curriculumSamples':{'enabled':True,'grade':grade,'teacherReview':'pending','responseType':'choice'}}
     native=native_test_games(handler)
     if native is not None:
         return {**value,'arenaQuestionSource':native.metadata('pvp'),'arenaBotQuestionSource':native.metadata('bot')}
@@ -949,7 +1069,8 @@ def _arena_request_locked(handler, db, session, body, snapshot):
     if entering and getattr(handler.server,'qa_arena_enabled',False) is True and qa_source is None:
         raise APIError('Nguồn Đấu trí QA chưa được cấu hình an toàn.',503)
     from .content_retirement import retired
-    if entering and retired(db,grade) and qa_source is None:raise APIError('Đấu trí lớp5 đang chờ ngân hàng mới; trận đang diễn và lịch sử được giữ.',503)
+    from .curriculum_samples import active as samples_active
+    if entering and retired(db,grade) and qa_source is None and not samples_active(db,grade):raise APIError('Đấu trí lớp5 đang chờ ngân hàng mới; trận đang diễn và lịch sử được giữ.',503)
     if not entering and action != 'list':
         token=body.get('token')
         if not isinstance(token,str): raise APIError('Phiên phòng không hợp lệ.',403)
@@ -1173,9 +1294,30 @@ def read_needs_maintenance(handler, path):
 def dispatch(handler, method, path, body=None):
     """Return payload, status. Header mutation is limited to the session cookie."""
     body = body or {}
+    if (path == '/api/v1/auth/register' and method == 'POST' and
+            getattr(handler.server, 'family_registration_enabled', False)):
+        raise APIError('Hãy đăng ký tài khoản gia đình tại /api/family/register, rồi thêm hồ sơ con.', 409)
+    if path == '/api/v1/auth/logout' and method == 'POST':
+        from .family_accounts import family_present, request as family_request
+        if family_present(handler):
+            return family_request(handler, method, '/api/family/logout', body)
     if path in ('/api/v1/game-claim','/api/v1/bot/adopt'):
         from .game_claims import dispatch as claim_dispatch
         return claim_dispatch(handler,method,path,body)
+    if path == '/api/v1/game-limits':
+        if method != 'GET':
+            raise APIError('Phương thức không hợp lệ.', 405)
+        from . import game_claims, game_limits
+        with connect(handler.server.database_path) as db:
+            session = read_session(handler, db)
+            if not session:
+                raise APIError('Em hãy đăng nhập để tiếp tục.', 401)
+            if urlsplit(handler.path).query or body:
+                raise APIError('Chỉ xem được lượt chơi của hồ sơ đang mở.')
+            # Read caps and admissions in one snapshot, including legacy sessions.
+            if not db.in_transaction:
+                db.execute('BEGIN')
+            return game_limits.student_view(db, session['student_id'], game_claims.now(handler)), 200
     if path in ('/api/v1/practice-export','/api/v1/practice-lookup'):
         if getattr(handler.server,'native_python_backend',False) is not True and getattr(handler.server,'cloud_pdf_enabled',False) is not True:
             raise APIError('PDF và tra cứu mã cục bộ chưa mở trên môi trường này.',503)
@@ -1187,6 +1329,12 @@ def dispatch(handler, method, path, body=None):
     if path.startswith('/api/v1/admissions'):
         from .admissions import dispatch as admissions_dispatch
         return admissions_dispatch(handler, method, path, body)
+    if method=='GET' and path=='/api/v1/payments':
+        from .payments import order_history
+        with connect(handler.server.database_path) as db:
+            session=read_session(handler,db)
+            if not session:raise APIError('Em hãy đăng nhập để tiếp tục.',401)
+            return order_history(db,session,parse_qs(urlsplit(handler.path).query)),200
     payment_match = re.fullmatch(r'/api/v1/payments/(\d+)', path)
     if method == 'GET' and payment_match:
         from .payments import order_status
@@ -1219,6 +1367,7 @@ def dispatch(handler, method, path, body=None):
     with connect(handler.server.database_path, write) as db:
         session = read_session(handler,db)
         def snapshot(*args, **kwargs):
+            kwargs['personal_provider']=getattr(handler.server,'local_pilot',None)
             if not getattr(handler.server, 'free_vip_pilot', None):
                 return with_qa_arena_metadata(handler,db,state_view(*args, **kwargs))
             from .free_vip_pilot import snapshot as pilot_snapshot
@@ -1239,8 +1388,19 @@ def dispatch(handler, method, path, body=None):
             return {'authenticated':False},200
         if not session:
             raise APIError('Em hãy đăng nhập để tiếp tục.',401)
+        if method == 'GET' and path.startswith('/api/v1/lesson-materials/'):
+            from .lesson_resources import material_download
+            return material_download(handler, db, session, path), 200
         if method=='POST' and not hmac.compare_digest(handler.headers.get('X-CSRF-Token',''),session['csrf_token']):
             raise APIError('Phiên đăng nhập cần được tải lại.',403)
+        if path in ('/api/v1/lesson-videos/playback', '/api/v1/lesson-videos/progress'):
+            if method != 'POST':
+                raise APIError('Phương thức không hợp lệ.',405)
+            from .bunny_stream import learner_video
+            return learner_video(handler, db, session, path.rsplit('/', 1)[1], body), 200
+        if method=='POST' and path=='/api/v1/payments/preview':
+            from .payments import checkout_preview
+            return checkout_preview(db,session,body),200
         if method == 'POST' and re.fullmatch(r'/api/v1/premium/purchases/\d+/start',path):
             from .exam_commerce import start_order
             from .system_settings import require_feature
@@ -1264,8 +1424,18 @@ def dispatch(handler, method, path, body=None):
         if pilot and method == 'GET' and path == '/api/v1/pilot/sets':
             return metadata(db, session, pilot), 200
         from .system_settings import require_feature
-        if method=='POST' and path=='/api/v1/exams':
+        if method=='GET' and path=='/api/v1/purchased-credits':
+            from .purchased_credits import catalogue
+            return catalogue(db,session,getattr(handler.server,'local_pilot',None)),200
+        if method=='POST' and path in ('/api/v1/exams','/api/v1/exams/quote'):
             require_feature(db, 'practice_open')
+        if method=='POST' and path in ('/api/v1/exams','/api/v1/exams/quote') and (path.endswith('/quote') or 'funding' in body):
+            from .purchased_credits import native_connection
+            if pilot:raise APIError('Kho mô phỏng này không sử dụng lượt đã mua.',403)
+            with native_connection(getattr(handler.server,'local_pilot',None)) as source:
+                quote_only=path.endswith('/quote')
+                result=create_exam(db,session,body,native_db=source,quote_only=quote_only)
+                return (result if quote_only else {'exam':result}),200
         if method=='POST' and path.startswith('/api/v1/lessons/'):
             require_feature(db, 'learning_open')
         if method=='GET' and path=='/api/v1/leaderboard':
@@ -1278,6 +1448,13 @@ def dispatch(handler, method, path, body=None):
             if write:
                 _arena_preflight(db, handler.server.arena, session)
             return (with_qa_arena_metadata(handler,db,identity_view(db,session)) if compact else snapshot(db,session,review,read_only=not write)),200
+        if path in ('/api/v1/personal/notifications','/api/v1/personal/notifications/read'):
+            from .family_personal import safe_notices
+            if method=='GET' and path.endswith('/notifications'):
+                return safe_notices(db,session),200
+            if method=='POST' and path.endswith('/read'):
+                return safe_notices(db,session,body.get('ids')),200
+            raise APIError('Phương thức không hợp lệ.',405)
         if method=='POST' and path=='/api/v1/auth/logout':
             db.execute('DELETE FROM auth_sessions WHERE token_hash=?',(session['token_hash'],))
             handler.api_headers={'Set-Cookie': session_cookie(student_cookie_name(handler), '', 0)}
@@ -1287,10 +1464,8 @@ def dispatch(handler, method, path, body=None):
             db.execute('UPDATE students SET full_name=? WHERE id=?',(nickname_field(body),session['student_id']))
             db.execute('UPDATE accounts SET revision=revision+1 WHERE id=?',(session['account_id'],))
         elif method=='POST' and path=='/api/v1/mascot':
-            pet=body.get('mascot')
-            if not isinstance(pet,str) or pet not in MASCOT_NAMES: raise APIError('Linh vật không hợp lệ.')
-            db.execute('UPDATE student_companions SET mascot_id=(SELECT id FROM mascots WHERE name=?) WHERE student_id=?',
-                       (MASCOT_NAMES[pet],session['student_id']))
+            from .family_features import reselect
+            reselect(db,session['student_id'],body.get('mascot'))
         elif method=='POST' and path=='/api/v1/preferences':
             if (not isinstance(body,dict) or set(body) != {'theme'} or
                     not isinstance(body['theme'],str) or body['theme'] not in LEARNING_THEMES):
@@ -1313,10 +1488,18 @@ def dispatch(handler, method, path, body=None):
         elif re.fullmatch(r'/api/v1/exams/\d+/scratch',path):
             from .scratchpads import access
             return access(db,session,int(path.split('/')[4]),method,body,parse_qs(urlsplit(handler.path).query)),200
+        elif method=='POST' and re.fullmatch(r'/api/v1/exams/\d+/retake',path):
+            from .study_retake import retake
+            return retake(db,session,int(path.split('/')[4]),body),200
         elif re.fullmatch(r'/api/v1/exams/\d+(/answers|/submit)?',path):
             attempt=owned_attempt(db,session,int(path.split('/')[4]))
             expired=attempt['due_at']<=stamp()
             if method=='POST' and path.endswith('/answers') and attempt['status']!='submitted' and not expired:
+                if 'family_id' in session:
+                    revision = db.execute('SELECT revision FROM family_exam_revisions WHERE attempt_id=?', (attempt['id'],)).fetchone()
+                    current_revision = revision[0] if revision else 0
+                    if type(body.get('revision')) is not int or body['revision'] != current_revision:
+                        raise APIError('Bài làm vừa được lưu trên thiết bị khác. Hãy tải lại trước khi ghi tiếp.', 409)
                 position,answer=body.get('position'),body.get('answer')
                 if type(position) is not int or not isinstance(answer,str) or len(answer)>500:
                     raise APIError('Câu trả lời không hợp lệ.')
@@ -1330,12 +1513,16 @@ def dispatch(handler, method, path, body=None):
                            'DO UPDATE SET answer=excluded.answer,saved_at=excluded.saved_at',
                            (attempt['id'],attempt['exam_id'],position,answer,stamp()))
                 db.execute('UPDATE exam_attempts SET cursor=? WHERE id=?',(position-1,attempt['id']))
+                if 'family_id' in session:
+                    db.execute('INSERT INTO family_exam_revisions(attempt_id,revision) VALUES(?,1) '
+                               'ON CONFLICT(attempt_id) DO UPDATE SET revision=revision+1', (attempt['id'],))
             elif method=='POST' and not path.endswith('/submit') and not path.endswith('/answers'):
                 raise APIError('Thao tác không hợp lệ.',404)
             if expired or (method=='POST' and path.endswith('/submit')):
                 if not write:
                     # The deadline may pass between the read preflight and view.
-                    db.execute('BEGIN IMMEDIATE')
+                    if not getattr(db, 'in_transaction', False):
+                        db.execute('BEGIN IMMEDIATE')
                     attempt=owned_attempt(db,session,attempt['exam_id'])
                 submit(db,attempt)
             return {'exam':exam_view(db,owned_attempt(db,session,attempt['exam_id']))},200
@@ -1343,21 +1530,29 @@ def dispatch(handler, method, path, body=None):
             return leaderboard(db,session,parse_qs(urlsplit(handler.path).query)),200
         elif method=='GET' and path=='/api/v1/classes/unread':
             from .zoom_classroom import unread_summary
-            return {'classroomUnread':unread_summary(db,session)},200
+            from .family_accounts import learning_payload
+            return learning_payload(session, {'classroomUnread':unread_summary(db,session)}),200
         elif method=='GET' and re.fullmatch(r'/api/v1/class-submissions/\d+/file',path):
             from .zoom_classroom import file_payload
             return file_payload(db,int(path.split('/')[4]),session=session),200
         elif method=='POST' and re.fullmatch(r'/api/v1/classes/\d+/read',path):
+            if isinstance(session,dict) and session.get('family_scope') == 'child' and body.get('section') == 'fees':
+                raise APIError('Học phí chỉ mở trong Góc phụ huynh sau xác thực đầy đủ.',403)
             from .zoom_classroom import mark_read
-            return mark_read(db,session,int(path.split('/')[4]),body),200
+            from .family_accounts import learning_payload
+            return learning_payload(session,mark_read(db,session,int(path.split('/')[4]),body)),200
         elif method=='POST' and re.fullmatch(r'/api/v1/classes/\d+/assignments/\d+/submissions',path):
             from .zoom_classroom import submit_file
             return submit_file(db,session,int(path.split('/')[4]),int(path.split('/')[6]),body),200
         elif method=='GET' and re.fullmatch(r'/api/v1/classes/\d+(/ranking)?',path):
             from .learning_update import classroom, class_ranking
             fn=class_ranking if path.endswith('/ranking') else classroom
-            return fn(db,session,int(path.split('/')[4]),parse_qs(urlsplit(handler.path).query)),200
+            from .family_accounts import learning_payload
+            return learning_payload(session,fn(db,session,int(path.split('/')[4]),parse_qs(urlsplit(handler.path).query))),200
         elif method=='POST' and path=='/api/v1/payments':
+            if getattr(handler.server,'website_readiness_enabled',False):
+                from .payments import create_order
+                return create_order(db,session,body,require_checkout=True),200
             from .learning_update import payment
             return payment(db,session,body),200
         elif method=='POST' and path=='/api/v1/bot/start':
@@ -1380,7 +1575,7 @@ def dispatch(handler, method, path, body=None):
             return claims.bot_start(handler,db,session,body,questions,metadata),200
         elif method=='GET' and path=='/api/v1/materials':
             from .content_retirement import retired
-            if retired(db,max(1,min(5,academic()[0]-session['birth_year']-5))):raise APIError('Phiếu lớp 5 đang được cập nhật; chưa có nguồn mới đã duyệt.',503)
+            if retired(db,grade_for_student(db,session['student_id'],session['birth_year'])):raise APIError('Phiếu lớp 5 đang được cập nhật; chưa có nguồn mới đã duyệt.',503)
             from .learning_update import membership
             if membership(db,session)=='Free': raise APIError('Tải tài liệu dành cho VIP và SVip.',403)
             if not db.execute("SELECT 1 FROM questions q JOIN question_versions v ON v.question_id=q.id WHERE q.grade_id=? AND v.status='published' LIMIT 1",

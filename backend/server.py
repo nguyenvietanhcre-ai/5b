@@ -7,7 +7,7 @@ import re
 import sqlite3
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer as StandardThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlsplit, parse_qs
+from urllib.parse import unquote, urlsplit, parse_qs, quote
 from .content import grade
 from .database import count_published_exams, demo_samples, initialize
 from .arena import Arena, ArenaError
@@ -47,15 +47,58 @@ LEARNING_ROUTES = {
     "tra-cuu-cau-hoi": "lookup",
 }
 PAGES.update({"/" + path + "/": "learn-" + name for path, name in LEARNING_ROUTES.items()})
+WEBSITE_PAGES = {**{'/'+slug+'/':'legal/'+slug+'/index.html' for slug in
+    ('phap-ly','lien-he','dieu-khoan','bao-ve-du-lieu','thanh-toan-va-cung-cap','huy-va-hoan-tien','khieu-nai')},
+    '/ho-tro/':'support-center/index.html', '/quan-tri/website/':'support-center/index.html',
+    '/gia-dinh/':'family/index.html', '/trai-nghiem/':'trial-experience/index.html',
+    '/quan-tri/phan-loai-cau/':'question-access-admin/index.html'}
+WEBSITE_CUTOVER_STATE = Path(__file__).resolve().parent/'website-cutover-state.json'
+
+def website_cutover_frozen():
+    if not WEBSITE_CUTOVER_STATE.exists():return False
+    try:return json.loads(WEBSITE_CUTOVER_STATE.read_text(encoding='utf-8')).get('frozen') is not False
+    except (OSError,ValueError,AttributeError):return True
+
+def website_html(body):
+    if b'</body>' not in body:return body
+    if b'family-profiles.js' not in body:
+        body=body.replace(b'<head>',b'<head><link rel="stylesheet" href="/family-profiles.css"><script src="/family-profiles.js" defer></script>',1)
+    if b'website-shell.css' not in body:
+        body=body.replace(b'</head>',b'<link rel="stylesheet" href="/website-shell.css"></head>',1)
+    if b'app-shell.js' not in body:
+        body=body.replace(b'</head>',b'<link rel="stylesheet" href="/app-shell.css"><script src="/app-shell.js" defer></script></head>',1)
+    if b'legal-footer' not in body and b'data-website-footer' not in body:
+        footer='<div class="website-footer" data-website-footer><nav aria-label="Thông tin dịch vụ"><a href="/phap-ly/">Thông tin pháp lý</a><a href="/lien-he/">Liên hệ</a><a href="/dieu-khoan/">Điều khoản</a><a href="/bao-ve-du-lieu/">Bảo vệ dữ liệu</a><a href="/thanh-toan-va-cung-cap/">Thanh toán và cung cấp</a><a href="/huy-va-hoan-tien/">Hủy và hoàn tiền</a><a href="/khieu-nai/">Khiếu nại</a><a href="/ho-tro/">Hỗ trợ và đơn hàng</a></nav><p>Bản thử nghiệm trên localhost · Chính sách chờ chủ quản duyệt. Thông tin chủ quản xem tại trang Liên hệ.</p></div>'.encode()
+        if b'data-page="staff-admin"' in body:
+            footer=footer.replace(b'</nav>', '<a href="/quan-tri/website/">Quản trị thông tin và hỗ trợ</a></nav>'.encode(),1)
+        body=body.replace(b'</body>',footer+b'</body>',1)
+    return body
+
+def website_dispatch(handler,method,path,body=None):
+    if method=='GET' and path=='/api/website/legal':
+        from .website_legal import public_info
+        from .platform_api import connect
+        with connect(handler.server.database_path) as db:return public_info(db),200
+    from .website_support import dispatch as support_dispatch
+    return support_dispatch(handler,method,path,body)
+
 PRIVATE_PAGES = {"dashboard", *("learn-" + name for name in LEARNING_ROUTES.values())}
 PAGES.update({"/giao-vien/": "staff-teacher", "/quan-tri/": "staff-admin"})
 PRIVATE_PAGES.update({"staff-teacher", "staff-admin"})
+
+def safe_log_route(route):
+    # Never reflect arbitrary URL segments into access/error logs.
+    if route == '/api/health' or route in ASSETS or route in PAGES or route in WEBSITE_PAGES:
+        return route
+    for prefix in ('/api/trial/','/api/family/','/api/v1/','/api/staff/','/api/website/','/api/local-pilot/'):
+        if route.startswith(prefix):return prefix+'[request]'
+    return '[unrecognized path]'
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "MamToan"
     def log_request(self, code='-', size='-'):
         # Contact searches and other private query parameters do not belong in access logs.
-        self.log_message('"%s %s %s" %s %s', self.command, urlsplit(self.path).path,
+        self.log_message('"%s %s %s" %s %s', self.command, safe_log_route(urlsplit(self.path).path),
                          self.request_version, str(code), str(size))
 
     def respond(self, status, body, content_type, cache_control="no-store", etag=None):
@@ -96,6 +139,31 @@ class Handler(BaseHTTPRequestHandler):
         if self.visibility_gate():return
         url = urlsplit(self.path)
         route = unquote(url.path)
+        if route.startswith('/api/') and route!='/api/health' and website_cutover_frozen():
+            self.api_headers={'Retry-After':'2'}
+            self.json_response(503,{'error':'Bản cập nhật cục bộ đang được xác minh. Vui lòng thử lại sau giây lát.'});return
+        if route in WEBSITE_PAGES:
+            body=website_html((FRONTEND/WEBSITE_PAGES[route]).read_bytes())
+            if b'data-legal=' in body:
+                from html import escape
+                from .website_legal import public_info
+                from .platform_api import connect
+                with connect(self.server.database_path) as db:info=public_info(db)
+                text=body.decode('utf-8')
+                text=re.sub(r'(<(span|strong) data-legal="([A-Za-z]+)">)[^<]*(</\2>)',lambda m:m[1]+escape(str(info.get(m[3]) or 'Chờ chủ quản cập nhật'))+m[4],text)
+                body=text.encode('utf-8')
+            if route in ('/ho-tro/','/quan-tri/website/'):
+                body=body.replace(b'</head>',b'<meta name="robots" content="noindex"></head>',1)
+            self.respond(200,body,'text/html; charset=utf-8');return
+        if route+'/' in WEBSITE_PAGES:
+            self.send_response(308);self.send_header('Location',route+'/');self.send_header('Content-Length','0');self.end_headers();return
+        if route.startswith('/api/staff/question-access'):
+            from .question_access import dispatch as access_dispatch
+            if access_dispatch(self,self.server.database_path):return
+        if route.startswith(('/api/family/', '/api/trial/')):
+            self.platform_request('GET',route);return
+        if route.startswith('/api/website/'):
+            self.platform_request('GET',route);return
         if route.startswith('/api/local-pilot/'):
             self.local_pilot_request('GET',route)
             return
@@ -143,6 +211,7 @@ class Handler(BaseHTTPRequestHandler):
                         body = body.replace(b'<html lang="vi"', b'<html lang="vi" data-database="enabled"', 1)
                     if page in PRIVATE_PAGES:
                         body = body.replace(b"</head>", b'    <meta name="robots" content="noindex">\n</head>', 1)
+                if file.suffix == '.html':body=website_html(body)
                 etag = '"' + hashlib.sha256(body).hexdigest() + '"'
                 cache = 'no-store' if page in PRIVATE_PAGES else 'public, max-age=0, must-revalidate'
                 if cache != 'no-store' and self.headers.get('If-None-Match') == etag:
@@ -164,8 +233,18 @@ class Handler(BaseHTTPRequestHandler):
         if not self.visibility_gate():self.json_response(405,{'error':'Method not allowed'})
     do_PUT=do_PATCH=do_DELETE=do_OPTIONS=do_other
     def do_POST(self):
+        if website_cutover_frozen():
+            self.api_headers={'Retry-After':'2'}
+            self.json_response(503,{'error':'Bản cập nhật cục bộ đang được xác minh. Vui lòng thử lại sau giây lát.'});return
         if self.visibility_gate():return
         endpoint = urlsplit(self.path).path
+        if endpoint.startswith('/api/staff/question-access'):
+            from .question_access import dispatch as access_dispatch
+            if access_dispatch(self,self.server.database_path):return
+        if endpoint.startswith(('/api/family/', '/api/trial/')):
+            self.platform_request('POST',endpoint);return
+        if endpoint.startswith('/api/website/'):
+            self.platform_request('POST',endpoint);return
         if endpoint.startswith('/api/local-pilot/'):
             self.local_pilot_request('POST',endpoint)
             return
@@ -266,6 +345,7 @@ class Handler(BaseHTTPRequestHandler):
         except APIError as error:
             from .wallet_qa import QuoteChanged
             payload={'error':str(error)}
+            if getattr(error,'familyAccessChanged',False):payload['familyAccessChanged']=True
             if isinstance(error,QuoteChanged):payload.update(reconfirm=True,allocation=error.allocation)
             self.json_response(error.status,payload)
         except (ValueError,TypeError,KeyError,UnicodeError,RecursionError):self.json_response(400,{'error':'Dữ liệu thí điểm không hợp lệ.'})
@@ -282,7 +362,13 @@ class Handler(BaseHTTPRequestHandler):
                     length = int(self.headers.get('Content-Length', '0'))
                 except ValueError:
                     raise APIError('Invalid content length')
-                limit = 262144 if endpoint.startswith('/api/staff/') else MAX_BODY
+                lesson_upload = endpoint in ('/api/staff/lessons', '/api/staff/native-lessons')
+                if lesson_upload or endpoint.startswith(('/api/trial/','/api/family/')):
+                    lengths=self.headers.get_all('Content-Length',[])
+                    if self.headers.get('Transfer-Encoding') or len(lengths)!=1 or not re.fullmatch(r'[0-9]+',lengths[0]):
+                        raise APIError('Invalid content length')
+                limit = 32768 if endpoint.startswith(('/api/trial/','/api/family/')) else 262144 if endpoint.startswith(('/api/staff/', '/api/website/admin/')) else MAX_BODY
+                if lesson_upload:limit = 8 * 1024 * 1024
                 if re.fullmatch(r'/api/v1/exams/\d+/scratch',endpoint):limit=1048576+2048
                 if re.fullmatch(r'/api/v1/classes/\d+/assignments/\d+/submissions', endpoint):
                     limit = 4 * ((10 * 1024 * 1024 + 2) // 3) + 2048
@@ -291,12 +377,21 @@ class Handler(BaseHTTPRequestHandler):
                 body = json.loads(self.rfile.read(length).decode())
                 if not isinstance(body, dict):
                     raise APIError('Invalid body')
-            api = staff_dispatch if endpoint.startswith('/api/staff/') else dispatch
+            if endpoint.startswith('/api/family/'):
+                from .family_accounts import request as api
+            elif endpoint.startswith('/api/trial/'):
+                from .trial_experience import route as api
+            else:
+                api = website_dispatch if endpoint.startswith('/api/website/') else staff_dispatch if endpoint.startswith('/api/staff/') else dispatch
             payload, status = api(self, method, endpoint, body)
             if isinstance(payload,dict) and 'authenticated' in payload and getattr(self.server,'local_pilot',None):payload['localPilotEnabled']=True
         except APIError as error:
             self.api_headers = {}
             payload = {'error': str(error)}
+            allocation = getattr(error, 'allocation', None)
+            if allocation is not None:payload.update(reconfirm=True,allocation=allocation)
+            if getattr(error,'familyAccessChanged',False):payload['familyAccessChanged']=True
+            if isinstance(getattr(error,'code',None),str):payload['code']=error.code
             discipline = getattr(error, 'arenaDiscipline', None)
             if discipline is not None:
                 payload['arenaDiscipline'] = discipline
@@ -308,10 +403,14 @@ class Handler(BaseHTTPRequestHandler):
             self.json_response(400, {'error': 'Dữ liệu gửi lên không hợp lệ.'})
         except sqlite3.Error:
             self.api_headers = {}
-            self.log_error('Database operation failed for %s', endpoint)
+            self.log_error('Database operation failed for %s', safe_log_route(endpoint))
             self.json_response(503, {'error': 'Chưa thể lưu dữ liệu. Em hãy thử lại.'})
         else:
-            if isinstance(payload, dict) and isinstance(payload.get('_binary'), bytes):
+            if isinstance(payload, dict) and isinstance(payload.get('_lesson_binary'), bytes):
+                self.api_headers['Content-Disposition'] = "attachment; filename=\"lesson-material.pdf\"; filename*=UTF-8''" + quote(payload['filename'], safe='')
+                self.api_headers['Content-Security-Policy'] = "sandbox; default-src 'none'"
+                self.respond(status, payload['_lesson_binary'], payload['mime'], cache_control='private, no-store')
+            elif isinstance(payload, dict) and isinstance(payload.get('_binary'), bytes):
                 self.api_headers['Content-Disposition'] = payload['disposition']
                 self.api_headers['Content-Security-Policy'] = "sandbox; default-src 'none'"
                 self.respond(status, payload['_binary'], payload['contentType'])
@@ -337,6 +436,8 @@ def main():
     server.review_upgrades = os.environ.get('MAM_TOAN_REVIEW_UPGRADES') == '1'
     server.arena = ARENA
     server.real_accounts = True
+    server.family_registration_enabled = True
+    server.website_readiness_enabled = True
     server.native_python_backend = True
     server.practice_export_enabled=os.environ.get('MAM_TOAN_PRACTICE_EXPORT')=='1'
     server.practice_export_ports=frozenset(int(p) for p in os.environ.get('MAM_TOAN_PRACTICE_EXPORT_PORTS','8765').split(','))
@@ -350,13 +451,20 @@ def main():
         server.local_pilot_ports={int(v) for v in os.environ.get('MAM_TOAN_LOCAL_PILOT_PORTS',str(args.port)).split(',')}
         if not server.local_pilot_ports or any(not 1024<=v<=65535 for v in server.local_pilot_ports):raise ValueError('Trusted local pilot external port required')
         server.local_pilot=LocalPilot(args.database,os.environ.get('MAM_TOAN_LOCAL_PILOT_DATABASE','/pilot/local-pilot.sqlite3'),os.environ.get('MAM_TOAN_LOCAL_PILOT_INPUTS',str(FRONTEND.parent/'pilot-inputs')),restructure_inputs=(os.environ.get('MAM_TOAN_RESTRUCTURE_INPUTS',str(FRONTEND.parent/'restructure-inputs')) if os.environ.get('MAM_TOAN_RESTRUCTURE')=='1' else None))
+        if hasattr(server.local_pilot.practice,'supports_grade') and getattr(server,'local_test_games',None):
+            from .curriculum_samples import install_game_sources
+            install_game_sources(server.local_test_games,server.local_pilot.practice.package)
     server.daemon_threads = True
+    from .trial_experience import start_cleanup_worker
+    trial_worker,trial_stop=start_cleanup_worker(args.database,interval_seconds=60,frozen=website_cutover_frozen)
     print(f"Mam Toan (Python): http://{args.host}:{server.server_port}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
+        trial_stop.set()
+        trial_worker.join(timeout=2)
         server.server_close()
 
 if __name__ == "__main__":

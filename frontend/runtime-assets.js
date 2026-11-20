@@ -4,11 +4,14 @@ const RuntimeAssets = (() => {
     const manifest = /* RUNTIME_MANIFEST_START */
 {
     "files": [
+        "ui-controls.js",
         "page-loading.js",
         "runtime-assets.js",
         "learning-content.js",
         "arena-audio.js",
         "game-session.js",
+        "game-allowance.js",
+        "game-allowance.css",
         "learning.js",
         "learning.css",
         "staff.js",
@@ -72,40 +75,191 @@ const RuntimeAssets = (() => {
         "race-scenes/coast-768.webp",
         "race-scenes/coast-1280.webp",
         "staff-catalogue.js",
-        "staff-catalogue.css"
+        "staff-catalogue.css",
+        "study-library.js",
+        "study-library.css",
+        "practice-layout.js",
+        "practice-layout.css",
+        "game-session.css",
+        "parent-plan-picker.js",
+        "parent-plan-picker.css",
+        "solution-format.js",
+        "solution-format.css",
+        "arena-shared.js",
+        "arena-shared.css",
+        "lesson-study.js",
+        "lesson-study.css",
+        "family-cart.js",
+        "family-cart.css",
+        "lesson-editor.js",
+        "vendor/tus.min.js",
+        "vendor/tus-LICENSE.txt",
+        "vendor/tus-PROVENANCE.json",
+        "bunny-upload.js",
+        "bunny-player.js",
+        "question-frame.js",
+        "practice-scratchpad.js",
+        "learning-modules/study.js",
+        "learning-modules/practice.js",
+        "learning-modules/profile.js",
+        "learning-modules/commerce.js",
+        "learning-modules/classroom.js",
+        "learning-modules/arena.js"
     ],
     "groups": {
         "learning": {
             "scripts": [
+                "ui-controls.js",
                 "arena-art/badge-mascots/data.js",
                 "arena-art/badge-mascots/runtime.js",
                 "learning-content.js",
                 "arena-audio.js",
                 "game-session.js",
+                "game-allowance.js",
+                "solution-format.js",
+                "question-frame.js",
+                "learning.js",
+                "practice-scratchpad.js",
+                "bunny-player.js",
+                "lesson-study.js",
                 "local-pilot.js",
+                "study-library.js",
+                "learning-modules/study.js",
+                "practice-layout.js",
+                "practice-export.js",
+                "learning-modules/practice.js",
+                "learning-modules/profile.js",
+                "parent-plan-picker.js",
+                "family-cart.js",
+                "learning-modules/commerce.js",
+                "learning-modules/classroom.js",
                 "race-scenes.js",
                 "games-art.js",
                 "game-rules.js",
+                "arena-shared.js",
                 "group-games.js",
-                "learning.js",
-                "practice-export.js"
+                "learning-modules/arena.js"
             ],
             "styles": [
                 "learning.css",
+                "game-session.css",
+                "game-allowance.css",
+                "solution-format.css",
                 "local-pilot.css",
+                "study-library.css",
+                "lesson-study.css",
+                "practice-layout.css",
+                "practice-export.css",
+                "parent-plan-picker.css",
+                "family-cart.css",
                 "games-art.css",
                 "group-games.css",
-                "practice-export.css"
+                "arena-shared.css"
             ]
         },
         "staff": {
             "scripts": [
+                "vendor/tus.min.js",
+                "bunny-upload.js",
+                "lesson-editor.js",
                 "staff-catalogue.js",
                 "staff.js"
             ],
             "styles": [
                 "staff.css",
                 "staff-catalogue.css"
+            ]
+        },
+        "learningCore": {
+            "scripts": [
+                "ui-controls.js",
+                "arena-art/badge-mascots/data.js",
+                "arena-art/badge-mascots/runtime.js",
+                "learning-content.js",
+                "arena-audio.js",
+                "game-session.js",
+                "game-allowance.js",
+                "solution-format.js",
+                "question-frame.js",
+                "learning.js"
+            ],
+            "styles": [
+                "learning.css",
+                "game-session.css",
+                "game-allowance.css",
+                "solution-format.css"
+            ]
+        },
+        "learningStudy": {
+            "scripts": [
+                "practice-scratchpad.js",
+                "bunny-player.js",
+                "lesson-study.js",
+                "local-pilot.js",
+                "study-library.js",
+                "learning-modules/study.js"
+            ],
+            "styles": [
+                "local-pilot.css",
+                "study-library.css",
+                "lesson-study.css"
+            ]
+        },
+        "learningPractice": {
+            "scripts": [
+                "practice-scratchpad.js",
+                "local-pilot.js",
+                "practice-layout.js",
+                "practice-export.js",
+                "learning-modules/practice.js"
+            ],
+            "styles": [
+                "local-pilot.css",
+                "practice-layout.css",
+                "practice-export.css"
+            ]
+        },
+        "learningProfile": {
+            "scripts": [
+                "practice-scratchpad.js",
+                "local-pilot.js",
+                "learning-modules/profile.js"
+            ],
+            "styles": [
+                "local-pilot.css"
+            ]
+        },
+        "learningCommerce": {
+            "scripts": [
+                "parent-plan-picker.js",
+                "family-cart.js",
+                "learning-modules/commerce.js"
+            ],
+            "styles": [
+                "parent-plan-picker.css",
+                "family-cart.css"
+            ]
+        },
+        "learningClassroom": {
+            "scripts": [
+                "learning-modules/commerce.js",
+                "learning-modules/classroom.js"
+            ],
+            "styles": []
+        },
+        "learningArena": {
+            "scripts": [
+                "race-scenes.js",
+                "games-art.js",
+                "game-rules.js",
+                "arena-shared.js",
+                "group-games.js",
+                "learning-modules/arena.js"
+            ],
+            "styles": [
+                "games-art.css",
+                "group-games.css",
+                "arena-shared.css"
             ]
         }
     },
@@ -409,6 +563,68 @@ const RuntimeAssets = (() => {
                 "Quản trị hệ thống"
             ]
         }
+    },
+    "learningRouteGroups": {
+        "dashboard": [
+            "learningStudy"
+        ],
+        "weekly": [
+            "learningStudy"
+        ],
+        "topics": [
+            "learningStudy"
+        ],
+        "lesson": [
+            "learningStudy"
+        ],
+        "advanced": [
+            "learningStudy"
+        ],
+        "exams": [
+            "learningPractice"
+        ],
+        "testing": [
+            "learningPractice"
+        ],
+        "results": [
+            "learningPractice"
+        ],
+        "lookup": [
+            "learningPractice"
+        ],
+        "profile": [
+            "learningProfile"
+        ],
+        "mascot": [
+            "learningProfile"
+        ],
+        "zoomRegistration": [
+            "learningCommerce"
+        ],
+        "upgrade": [
+            "learningCommerce"
+        ],
+        "payment": [
+            "learningCommerce"
+        ],
+        "classroom": [
+            "learningClassroom"
+        ],
+        "arena": [
+            "learningArena"
+        ],
+        "rank": [
+            "learningArena"
+        ],
+        "room": [
+            "learningArena"
+        ],
+        "battle": [
+            "learningArena"
+        ],
+        "battleResult": [
+            "learningArena"
+        ]
     }
 }
 /* RUNTIME_MANIFEST_END */;
@@ -442,11 +658,21 @@ const RuntimeAssets = (() => {
         // Start independent transfers together; async=false preserves execution order.
         await Promise.all([...entry.styles.map(path=>asset(path,'style')),...entry.scripts.map(path=>asset(path,'script'))]);
     }
-    const ensureLearning=()=>group(manifest.groups.learning);
+    const ensureLearningCore=()=>group(manifest.groups.learningCore);
+    async function ensureLearning(){
+        await group(manifest.groups.learningCore);
+        for(const name of Object.keys(manifest.groups).filter(name=>name.startsWith('learning')&&name!=='learning'&&name!=='learningCore'))await group(manifest.groups[name]);
+    }
     const ensureStaff=()=>group(manifest.groups.staff);
     async function ensureRoute(route) {
-        if(route==='dashboard'||route.startsWith('learn-'))await ensureLearning();
-        else if(route.startsWith('staff-'))await ensureStaff();
+        if(route==='dashboard'||route.startsWith('learn-')){
+            await group(manifest.groups.learningCore);
+            const key=route==='dashboard'?'dashboard':route.slice(6);
+            const selected=new Set(manifest.learningRouteGroups[key]||[]);
+            // An existing live room/claim can still resume when another learning page opens.
+            try{if(sessionStorage.getItem('5bmath-room')||sessionStorage.getItem('5bmath-bot-battle'))selected.add('learningArena');}catch{}
+            for(const name of selected)await group(manifest.groups[name]);
+        }else if(route.startsWith('staff-'))await ensureStaff();
     }
     function unmountMascots() {
         generation++;observer?.disconnect();observer=null;observedRoot=null;queued=false;
@@ -492,7 +718,7 @@ const RuntimeAssets = (() => {
         }));
     }
     window.addEventListener('pagehide',unmountMascots);
-    return {manifest,managed:true,ensureRoute,ensureLearning,ensureStaff,syncMascots,unmountMascots,
+    return {manifest,managed:true,ensureRoute,ensureLearning,ensureLearningCore,ensureStaff,syncMascots,unmountMascots,
         inspect:()=>({scripts:[...scripts.keys()],activeMascots:[...active.keys()],observerActive:Boolean(observer)})};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=RuntimeAssets;

@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import test_platform_api as platform_tests
 from backend.arena import Arena
 from backend.database import initialize
-from backend.platform_api import APIError, connect, seed_catalog
+from backend.platform_api import APIError, MASCOT_NAMES, connect, seed_catalog
 
 
 class CatMascotTests(unittest.TestCase):
@@ -62,8 +62,15 @@ class CatMascotTests(unittest.TestCase):
         self.assertEqual(resumed['state']['mascot'], 'cat')
 
     def test_seed_is_idempotent_and_invalid_choices_preserve_current_mascot(self):
-        client, _, _, _ = self.user()
+        client, initial, _, _ = self.user()
         for code in ('sprout', 'fox', 'rabbit', 'cat'):
+            # Seed initial fixture choices without spending the one reselect.
+            # Only the final target below changes the saved value through API.
+            if code != 'cat':
+                with connect(self.path, True) as db:
+                    db.execute('UPDATE student_companions SET mascot_id=(SELECT id FROM mascots WHERE name=?) '
+                               'WHERE student_id=(SELECT id FROM students WHERE account_id=?)',
+                               (MASCOT_NAMES[code], initial['account']['id']))
             self.assertEqual(client.call('mascot', {'mascot': code})['state']['mascot'], code)
             self.assertEqual(client.call('session')['state']['mascot'], code)
             mine = next(row for row in client.call('leaderboard?kind=battle&period=all')['rows'] if row['mine'])

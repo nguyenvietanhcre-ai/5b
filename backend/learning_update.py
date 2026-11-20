@@ -1,11 +1,17 @@
 """Membership, usage, classroom views and pending bank-transfer orders."""
 from collections import defaultdict
 from datetime import datetime, timedelta
+import os
 
 from .platform_api import APIError, VN, now, stamp
 from .nickname_policy import safe_nickname
 
 LIMITS = {'content': 1, 'combined': 1, 'human': 3, 'bot': 5}
+
+
+def unlimited_games():
+    """Temporary game-only policy, enabled explicitly by the local runtime."""
+    return os.environ.get('MAM_TOAN_UNLIMITED_GAMES') == '1'
 
 
 def membership(db, session):
@@ -14,10 +20,12 @@ def membership(db, session):
                   (aid, stamp(), stamp())).fetchone():
         return 'SVip'
     plus = db.execute('SELECT vip_plus_expires_at FROM accounts WHERE id=?', (aid,)).fetchone()[0]
-    if plus and plus > stamp():
+    from .family_personal import bonus_tier
+    bonus = bonus_tier(db,aid)
+    if (plus and plus > stamp()) or bonus == 'VIP+':
         return 'VIP+'
     expiry = db.execute('SELECT vip_expires_at FROM accounts WHERE id=?', (aid,)).fetchone()[0]
-    return 'VIP' if expiry and expiry > stamp() else 'Free'
+    return 'VIP' if (expiry and expiry > stamp()) or bonus == 'VIP' else 'Free'
 
 
 def usage(db, session):
@@ -27,7 +35,10 @@ def usage(db, session):
                              (session['student_id'], day)))
     paid = membership(db, session) != 'Free'
     limits = settings(db)['free_limits']
-    return {key: {'used': counts.get(key, 0), 'limit': None if paid else limits[key]} for key in LIMITS}
+    games_open = unlimited_games()
+    return {key: {'used': counts.get(key, 0),
+                  'limit': None if paid or games_open and key in ('human', 'bot') else limits[key]}
+            for key in LIMITS}
 
 
 def consume(db, session, category, key):

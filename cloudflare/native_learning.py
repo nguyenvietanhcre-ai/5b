@@ -5,6 +5,7 @@ The source's draft/demo labels stay intact. No local account database is bundled
 import hashlib
 import json
 import threading
+from dataclasses import replace
 from base64 import b64decode
 from pathlib import Path
 from backend.local_pilot import LocalPilot, safe_svg
@@ -53,6 +54,9 @@ class CloudLearning(LocalPilot):
         self.knowledge = Knowledge.__new__(Knowledge)
         self.knowledge.provider = self
         self.knowledge.inputs = root / 'restructure-inputs'
+        from backend.curriculum_samples import activate_provider
+        self.practice=activate_provider(self,self.practice)
+        if hasattr(self.practice,'supports_grade'):self.choice_required.update(self.practice.questions)
 
     def ensure_week(self):
         # Never cache transaction-owned state across rollback or preflight replay.
@@ -64,6 +68,11 @@ class CloudLearning(LocalPilot):
         result['notice']=result['notice'].replace('Thí điểm cục bộ','Học tập bản mẫu')
         return result
 
+    def paid_inventory(self,db,grade=5):
+        # Parent cart and credit status can precede the first catalogue visit.
+        config,_=self.ensure_week()
+        return self.practice.paid_inventory(db,replace(config,grade=grade)) if self.practice else (0,0)
+
 
 class CloudDemoGames(NativeLocalTestGames):
     """Same labeled synthetic game source as localhost, explicitly opted in.
@@ -72,6 +81,9 @@ class CloudDemoGames(NativeLocalTestGames):
     """
     def __init__(self):
         super().__init__({19061})
+        from backend.curriculum_samples import loaded_package,install_game_sources
+        package=loaded_package()
+        if package:install_game_sources(self,package)
 
     def allowed(self,handler):
         return bool(getattr(handler.server,'cloud_demo_games',None) is self and api.same_origin(handler))

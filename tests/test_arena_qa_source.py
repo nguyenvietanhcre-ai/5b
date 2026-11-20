@@ -15,7 +15,7 @@ CREDENTIAL=api.password_hash('synthetic-duel-source-only')
 
 class ArenaQAQuestionSourceTests(unittest.TestCase):
     def setUp(self):
-        folder=Path(__file__).resolve().parents[1]/'work/test-runs';folder.mkdir(parents=True,exist_ok=True)
+        folder=Path(__file__).resolve().parents[2]/'test-runs';folder.mkdir(parents=True,exist_ok=True)
         self.temp=tempfile.TemporaryDirectory(dir=folder);self.path=Path(self.temp.name)/'new-fake.sqlite3'
         initialize(self.path);api.initialize_catalog(self.path)
         with api.connect(self.path,True) as db:

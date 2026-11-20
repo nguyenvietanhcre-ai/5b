@@ -101,9 +101,9 @@ class AdminCatalogueTests(unittest.TestCase):
         self.assertEqual(self.admin.call('notifications/preview',{'audience':'VIP'})['recipientCount'],0)
 
     def test_native_draft_publish_archive_preserves_fixed_and_original_version(self):
-        if not (Path(__file__).resolve().parents[1]/'pilot-inputs/manifest.json').exists():self.skipTest('Private native-library fixture; run the local release gate')
         from backend.local_pilot import LocalPilot
         root=Path(__file__).resolve().parents[1]
+        if not (root/'pilot-inputs/manifest.json').is_file():self.skipTest('Private sealed learning inputs; mandatory local release gate')
         pilot=LocalPilot(self.path,Path(self.tmp.name)/'pilot.sqlite3',root/'pilot-inputs',restructure_inputs=root/'restructure-inputs')
         self.client.server.local_pilot=pilot
         rows=self.admin.call('native-lessons')['rows'];self.assertEqual(len(rows),24);key=rows[0]['lessonKey']

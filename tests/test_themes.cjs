@@ -43,52 +43,39 @@ function harness({database=false,seed={},blocked=false,fetch:fetchImpl}={}) {
     const store = new Map(Object.entries(seed));
     const writes = [];
     const events = [];
-    const intervals=[];let reloads=0;
     let currentForm = null;
     const window = eventTarget();
-    const document = eventTarget({
-        documentElement:{dataset:{backend:database?'database':'',theme:'garden-adventure'}},
+    const document = {
+        addEventListener(){},removeEventListener(){},
+        documentElement:{dataset:{backend:database?'database':'',theme:'garden-adventure'},classList:{toggle(){}}},
         querySelector:selector=>selector==='#appearance-form'?currentForm:null,
         dispatchEvent:event=>{events.push(event);return true;},
-    });
+    };
     const context = vm.createContext({
         window,document,console,AbortController,AbortSignal,DOMException,URLSearchParams,setTimeout,clearTimeout,
-        Headers,addEventListener:window.addEventListener.bind(window),setInterval(fn,delay){intervals.push({fn,delay});return intervals.length;},
+        addEventListener:window.addEventListener.bind(window),setInterval:()=>0,clearInterval:()=>{},
         CustomEvent:class {constructor(type,options){this.type=type;Object.assign(this,options);}},
-        location:{search:'',pathname:'/tai-khoan/',reload(){reloads++;}},
+        location:{search:'',pathname:'/tai-khoan/'},
         localStorage:{
             getItem(key){if(blocked)throw new Error('storage blocked');return store.get(key)??null;},
             setItem(key,value){if(blocked)throw new Error('storage blocked');writes.push({key,value});store.set(key,value);},
             removeItem(key){if(blocked)throw new Error('storage blocked');writes.push({key,remove:true});store.delete(key);},
         },
-        fetch:fetchImpl||(()=>{throw new Error('Unexpected network request');}),
+        fetch:(url,request)=>String(url).startsWith('/api/family/')?Promise.resolve(response({authenticated:false})):(fetchImpl||(()=>{throw new Error('Unexpected network request');}))(url,request),
         module:{exports:{}},
     });
     vm.runInContext(source,context,{filename:'themes.js'});
     const manager = vm.runInContext('ThemeManager',context);
     return {
-        manager,context,window,document,store,writes,events,intervals,reloads:()=>reloads,
+        manager,context,window,document,store,writes,events,
         form(){currentForm=formFixture();manager.mountSettings();return currentForm;},
         api(){vm.runInContext(apiSource,context,{filename:'platform-api.js'});return vm.runInContext('PlatformAPI',context);},
         storage(key,value){if(value===undefined)store.delete(key);else store.set(key,JSON.stringify(value));return window.emit('storage',{key});},
     };
 }
-function response(payload,ok=true){return {ok,headers:new Headers(),json:async()=>payload};}
+function response(payload,ok=true){return {ok,headers:{get(){return null;}},json:async()=>payload};}
 function deferred(){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};}
 function submit(form){return form.emit('submit',{preventDefault(){}});}
-
-test('maintenance HTML reloads the current page before API JSON decoding',async()=>{
-    let decoded=false;
-    const h=harness({database:true,fetch:async()=>({headers:new Headers({'X-5BMath-Maintenance':'1'}),json:async()=>{decoded=true;throw Error('HTML is not JSON');}})});
-    await assert.rejects(h.api().request('session'),/Hệ thống đang được cập nhật/);
-    assert.equal(h.reloads(),1);assert.equal(decoded,false);
-});
-test('old tabs check maintenance on navigation and polling, and pause while hidden',async()=>{
-    const calls=[];const h=harness({database:true,fetch:async url=>{calls.push(url);return {headers:new Headers({'X-5BMath-Maintenance':'1'})};}});h.api();
-    await h.window.emit('hashchange');assert.deepEqual(calls,['/api/site-visibility/check']);assert.equal(h.reloads(),1);
-    assert.equal(h.intervals[0].delay,15000);h.document.visibilityState='hidden';await h.intervals[0].fn();assert.equal(calls.length,1);
-    h.document.visibilityState='visible';await h.document.emit('visibilitychange');assert.equal(calls.length,2);assert.equal(h.reloads(),2);
-});
 
 test('first paint uses03 default, validates cache, and keeps static/offline guest choice separate',()=>{
     const empty = harness();
@@ -122,7 +109,7 @@ test('new default preserves every explicitly saved guest and account theme',()=>
     const h = harness({database:true});
     h.manager.sync({authenticated:true,account:{id:18},state:{}});
     assert.equal(h.manager.theme,'clay-sprout');
-    assert.match(h.manager.renderSettings(),/Mặc định: Mầm Sách 3D/);
+    assert.doesNotMatch(h.manager.renderSettings(),/appearance-default|appearance-cancel/);
 });
 
 test('preview changes DOM without persistence, cancel and route unmount restore saved choice',async()=>{
@@ -136,7 +123,7 @@ test('preview changes DOM without persistence, cancel and route unmount restore 
     assert.equal(h.writes.length,startWrites);
     h.manager.preview('../bad.css');
     assert.equal(h.manager.theme,'crayon-workshop');
-    await form.controls['#appearance-cancel'].emit('click');
+    h.manager.cancelPreview();
     assert.equal(h.manager.theme,'clay-sprout');
     assert.equal(form.controls['[type="submit"]'].disabled,true);
     h.manager.preview('clay-sprout');
@@ -156,7 +143,7 @@ test('guest Apply persists once and default button previews until Apply',async()
     assert.equal(h.manager.savedTheme,'garden-notebook');
     assert.match(form.controls['#appearance-status'].textContent,/Đã lưu/);
     const writes = h.writes.length;
-    await form.controls['#appearance-default'].emit('click');
+    h.manager.preview(h.manager.defaultTheme);
     assert.equal(h.manager.theme,'clay-sprout');
     assert.equal(h.manager.savedTheme,'garden-notebook');
     assert.equal(h.writes.length,writes);

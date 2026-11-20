@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||path.resolve('work/release-5bmath-20261115/repo/node_modules/playwright'));
+const front=path.resolve(__dirname,'../frontend'),out=path.resolve(__dirname,'../../artifacts/family-busy');fs.mkdirSync(out,{recursive:true});
+(async()=>{const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});let release,calls=0;const errors=[];
+try{const page=await browser.newPage({viewport:{width:360,height:800}});page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/*',async route=>{const u=new URL(route.request().url());if(u.hostname!=='127.0.0.1')return route.abort();
+  if(u.pathname==='/api/family/config')return route.fulfill({json:{legalVersion:'fixture',companions:[],passwordReset:{available:false}}});
+  if(u.pathname==='/api/family/state')return route.fulfill({json:{authenticated:false}});
+  if(u.pathname==='/api/family/login'){calls++;await new Promise(r=>release=r);return route.fulfill({status:503,json:{error:'Lỗi mạng kiểm thử'}});}
+  const file=path.join(front,u.pathname==='/gia-dinh/'?'family/index.html':u.pathname);if(!fs.existsSync(file))return route.fulfill({status:404,body:''});return route.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.html')?'text/html':'image/svg+xml'});
+ });
+ await page.goto('http://127.0.0.1:19199/gia-dinh/');await page.getByLabel('Email của ba mẹ').fill('qa@example.test');await page.getByLabel('Mật khẩu 5BMath',{exact:true}).fill('fixture-password');
+ await page.evaluate(()=>{window.sentinel=UIControls.create(document,'Chưa đủ điều kiện');sentinel.disabled=true;document.getElementById('family-view').append(sentinel);});
+ const submit=page.locator('.family-form button[type=submit]');await submit.click();await page.waitForFunction(()=>document.getElementById('family-view').getAttribute('aria-busy')==='true');
+ assert(await submit.isDisabled());assert.equal(await submit.getAttribute('aria-busy'),'true');assert(await page.evaluate(()=>sentinel.disabled));assert.equal(calls,1);
+ release();await page.getByText('Lỗi mạng kiểm thử',{exact:true}).waitFor();assert(await submit.isEnabled());assert.equal(await submit.getAttribute('aria-busy'),null);assert(await page.evaluate(()=>sentinel.disabled));assert.equal(calls,1);
+ const box=await submit.boundingBox();assert(box.height>=48&&box.width>=44);assert(await submit.evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=14));await page.keyboard.press('Tab');await submit.focus();assert.equal(await submit.evaluate(el=>getComputedStyle(el).outlineStyle),'solid');
+ assert.deepEqual(errors,[]);fs.writeFileSync(path.join(out,'RESULT.json'),JSON.stringify({passed:true,checks:['busy controls prevent duplicate request','failed request restores only previously enabled controls','originally disabled control remains disabled','aria-busy restored','48px button 14px text and keyboard focus'],requests:calls,errors,fixtureOnly:true},null,2));console.log('PASS family busy, error recovery, disabled guard and touch/focus');
+}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});

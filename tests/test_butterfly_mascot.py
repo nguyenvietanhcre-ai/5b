@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 from backend.arena import Arena
 from backend.database import initialize
-from backend.platform_api import APIError, academic, connect, seed_catalog
+from backend.platform_api import APIError, MASCOT_NAMES, academic, connect, seed_catalog
 from test_platform_api import Client
 
 
@@ -77,6 +77,13 @@ class ButterflyMascotTests(unittest.TestCase):
     def test_reseed_and_rejected_choices_preserve_butterfly_and_experience(self):
         client, initial, _, _ = self.user()
         for code in ('sprout', 'fox', 'butterfly'):
+            # Seed initial fixture choices without spending the one reselect.
+            # Only the final target below changes the saved value through API.
+            if code != 'butterfly':
+                with connect(self.path, True) as db:
+                    db.execute('UPDATE student_companions SET mascot_id=(SELECT id FROM mascots WHERE name=?) '
+                               'WHERE student_id=(SELECT id FROM students WHERE account_id=?)',
+                               (MASCOT_NAMES[code], initial['account']['id']))
             state = client.call('mascot', {'mascot': code})['state']
             self.assertEqual(state['mascot'], code)
             self.assertEqual(state['points'], initial['state']['points'])

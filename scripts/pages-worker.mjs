@@ -22,7 +22,7 @@ export default {
             }
         }
         if(pathname==='/api/site-visibility/check')return env.BACKEND.fetch(request);
-        if (pathname.startsWith('/api/v1/') || pathname.startsWith('/api/staff/') || pathname.startsWith('/api/local-pilot/') ||
+        if (pathname.startsWith('/api/v1/') || pathname.startsWith('/api/staff/') || pathname.startsWith('/api/local-pilot/') || pathname.startsWith('/api/family/') || pathname.startsWith('/api/trial/') || pathname.startsWith('/api/website/') ||
             pathname === '/api/webhooks/sepay' || pathname === '/api/health' || pathname === '/api/grade') {
             if (!env.BACKEND) return Response.json({error:'Backend chưa được kết nối.'}, {status:503,headers});
             try { return await env.BACKEND.fetch(request); }

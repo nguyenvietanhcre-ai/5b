@@ -1,0 +1,1032 @@
+{
+  "schemaVersion": 1,
+  "poolId": "5bmath-trial-grade5-public-r1",
+  "revision": 1,
+  "finite": true,
+  "grade": 5,
+  "label": "Học liệu mẫu tự biên soạn · Tự kiểm số học · Chờ giáo viên duyệt",
+  "reviewStatus": "arithmetic_checked",
+  "independentTeacherReview": "pending",
+  "localPilot": true,
+  "sourcePolicy": "Chỉ ví dụ công khai và câu tự biên soạn cố định. Không rút, seed lại hoặc fallback từ kho câu hỏi thật. Không gọi trạng thái này là giáo viên đã duyệt hoặc sẵn sàng production.",
+  "sourceReferences": [
+    "baseline/backend/learning-catalog.json (4 bài công khai khối5; không dùng private bank)",
+    "docs/LESSON_AUTHORING_STANDARD.md",
+    "docs/PHUONG_PHAP_GIAI_TOAN_TIEU_HOC.md (tham khảo phương pháp rút về đơn vị; không chép đề/lời giải sách)"
+  ],
+  "modeRequirements": {
+    "practice": {
+      "minimum": 5
+    },
+    "bot": {
+      "minimum": 20,
+      "scope": "all",
+      "difficulty": [
+        1,
+        2
+      ]
+    },
+    "capture_flag": {
+      "minimum": 5,
+      "status": "source_ready_local_pilot_engine_integration_pending",
+      "sourceContract": "baseline/backend/group_games.py QuestionSource.select and TARGET=5; all questions grade5, typed single numeric result; adapt purpose=group-games, responseMode=typed, modes explicitly; no real room or rewards"
+    },
+    "animal_race": {
+      "minimum": 5,
+      "status": "source_ready_local_pilot_engine_integration_pending",
+      "sourceContract": "baseline/backend/group_games.py QuestionSource.select and TARGET=5; all questions grade5, typed single numeric result; adapt purpose=group-games, responseMode=typed, modes explicitly; no real room or rewards"
+    }
+  },
+  "lesson": {
+    "id": "TRIAL5-LESSON-PERCENT-R1",
+    "revision": 1,
+    "grade": 5,
+    "title": "Tìm giá trị phần trăm của một số",
+    "prompt": "Vườn có 80 cây. Có 25% số cây đang nở hoa. Hỏi có bao nhiêu cây đang nở hoa?",
+    "source": "Diễn giải tự biên soạn theo ví dụ công khai g5-percent trong baseline/backend/learning-catalog.json; không trích bài từ ngân hàng hoặc nguyên văn SGK.",
+    "reviewStatus": "arithmetic_checked",
+    "independentTeacherReview": "pending",
+    "status": "local_pilot_draft",
+    "sections": [
+      {
+        "key": "thinking",
+        "title": "Định hướng tư duy",
+        "body": "Em thử nghĩ: 25% có nghĩa là bao nhiêu phần trong 100 phần bằng nhau? Muốn tìm 25% của 80 cây, ta có thể tìm số cây ứng với 1% rồi nhân với 25. Vì 25% = 1/4, em cũng có thể chia 80 cây thành 4 phần bằng nhau."
+      },
+      {
+        "key": "key",
+        "title": "Điểm mấu chốt",
+        "body": "Toàn bộ 80 cây ứng với 100%. Chỉ lấy 25 phần trong 100 phần ấy, không cộng thêm 25 cây. Cách ngắn: 25% = 1/4 nên tìm một phần tư của 80."
+      },
+      {
+        "key": "detail",
+        "title": "Bài giải chi tiết",
+        "body": "Số cây đang nở hoa là: 80 × 25 : 100 = 20 (cây). Đáp số: 20 cây. Thử lại: 20 : 80 = 1/4 = 25%, khớp đề bài. Cách khác: 80 : 4 = 20 (cây). Vận dụng: nếu 50% trong 80 cây đang nở hoa thì có bao nhiêu cây? Gợi ý đối chiếu: 50% = 1/2, nên 80 : 2 = 40 (cây)."
+      }
+    ],
+    "diagram": {
+      "kind": "equal_parts",
+      "parts": 4,
+      "selected": 1,
+      "labels": [
+        "20 cây nở hoa",
+        "20 cây",
+        "20 cây",
+        "20 cây"
+      ],
+      "description": "80 cây chia thành 4 phần bằng nhau, mỗi phần 20 cây. Một phần ứng với 25%."
+    },
+    "answer": "20",
+    "unit": "cây"
+  },
+  "questions": [
+    {
+      "id": "TRIAL5-R1-001",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Tìm 20% của 120.",
+      "answerKind": "number",
+      "answer": "24",
+      "unit": "",
+      "explanation": "120 × 20 : 100 = 24. Kiểm tra: 24 : 120 × 100 = 20%.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "existing_public_example",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_of",
+        "operands": [
+          "120",
+          "20"
+        ],
+        "exactRational": "24/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-002",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Vườn có 80 cây. Có 25% số cây đang nở hoa. Hỏi có bao nhiêu cây đang nở hoa?",
+      "answerKind": "number",
+      "answer": "20",
+      "unit": "cây",
+      "explanation": "1% số cây là 80 : 100 = 0,8 (cây); 25% số cây là 0,8 × 25 = 20 (cây). Kiểm tra: 20 : 80 = 1/4 = 25%.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_of",
+        "operands": [
+          "80",
+          "25"
+        ],
+        "exactRational": "20/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-003",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Tìm 15% của 200.",
+      "answerKind": "number",
+      "answer": "30",
+      "unit": "",
+      "explanation": "1% của 200 là 2; 15% của 200 là 2 × 15 = 30. Kiểm tra: 30 : 200 × 100 = 15%.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_of",
+        "operands": [
+          "200",
+          "15"
+        ],
+        "exactRational": "30/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-004",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một cuốn sách có 160 trang. An đã đọc 30% số trang. An đã đọc bao nhiêu trang?",
+      "answerKind": "number",
+      "answer": "48",
+      "unit": "trang",
+      "explanation": "Số trang An đã đọc là 160 × 30 : 100 = 48 (trang). Kiểm tra: 48 : 160 = 0,3 = 30%.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_of",
+        "operands": [
+          "160",
+          "30"
+        ],
+        "exactRational": "48/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-005",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Lớp có 40 học sinh, trong đó có 18 học sinh nữ. Số học sinh nữ chiếm bao nhiêu phần trăm số học sinh cả lớp?",
+      "answerKind": "number",
+      "answer": "45",
+      "unit": "%",
+      "explanation": "Tỉ số học sinh nữ so với cả lớp là 18 : 40 = 0,45. Đổi ra phần trăm: 0,45 × 100 = 45%. Kiểm tra: 40 × 45 : 100 = 18.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_ratio",
+        "operands": [
+          "18",
+          "40"
+        ],
+        "exactRational": "45/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-006",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một số có 25% bằng 18. Tìm số đó.",
+      "answerKind": "number",
+      "answer": "72",
+      "unit": "",
+      "explanation": "1% của số đó là 18 : 25 = 0,72. Số cần tìm là 0,72 × 100 = 72. Kiểm tra: 72 × 25 : 100 = 18.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_inverse",
+        "operands": [
+          "18",
+          "25"
+        ],
+        "exactRational": "72/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-007",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một hộp có 80 bút chì. Đã dùng 35% số bút. Hỏi trong hộp còn bao nhiêu bút chì?",
+      "answerKind": "number",
+      "answer": "52",
+      "unit": "bút chì",
+      "explanation": "Số bút đã dùng là 80 × 35 : 100 = 28 (bút). Số bút còn lại là 80 − 28 = 52 (bút). Kiểm tra: 28 + 52 = 80 và 28 : 80 = 35%.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_remaining",
+        "operands": [
+          "80",
+          "35"
+        ],
+        "exactRational": "52/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-008",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "percent",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Giá ban đầu của một quyển vở là 20000 đồng. Cửa hàng giảm 10% giá ban đầu. Hỏi giá sau khi giảm là bao nhiêu đồng?",
+      "answerKind": "number",
+      "answer": "18000",
+      "unit": "đồng",
+      "explanation": "Số tiền được giảm là 20000 × 10 : 100 = 2000 (đồng). Giá sau khi giảm là 20000 − 2000 = 18000 (đồng). Kiểm tra: 18000 + 2000 = 20000.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-percent",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "percent_remaining",
+        "operands": [
+          "20000",
+          "10"
+        ],
+        "exactRational": "18000/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-009",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Tính 3,75 + 2,6.",
+      "answerKind": "number",
+      "answer": "6.35",
+      "unit": "",
+      "explanation": "Viết 2,6 = 2,60 rồi cộng theo từng hàng: 3,75 + 2,60 = 6,35. Kiểm tra: 6,35 − 2,60 = 3,75.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "add",
+        "operands": [
+          "3.75",
+          "2.6"
+        ],
+        "exactRational": "127/20"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-010",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Tính 8,4 − 3,75.",
+      "answerKind": "number",
+      "answer": "4.65",
+      "unit": "",
+      "explanation": "Viết 8,4 = 8,40 rồi trừ theo từng hàng: 8,40 − 3,75 = 4,65. Kiểm tra: 4,65 + 3,75 = 8,40.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "subtract",
+        "operands": [
+          "8.4",
+          "3.75"
+        ],
+        "exactRational": "93/20"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-011",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một đoạn dây dài 2,4 m. Ba đoạn dây như thế dài tất cả bao nhiêu mét?",
+      "answerKind": "number",
+      "answer": "7.2",
+      "unit": "m",
+      "explanation": "Ba đoạn dây dài tất cả: 2,4 × 3 = 7,2 (m). Kiểm tra: 7,2 : 3 = 2,4 (m).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "multiply",
+        "operands": [
+          "2.4",
+          "3"
+        ],
+        "exactRational": "36/5"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-012",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Chia đều 7,2 lít nước vào 6 bình. Mỗi bình có bao nhiêu lít nước?",
+      "answerKind": "number",
+      "answer": "1.2",
+      "unit": "lít",
+      "explanation": "Mỗi bình có: 7,2 : 6 = 1,2 (lít). Kiểm tra: 1,2 × 6 = 7,2 (lít).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "divide",
+        "operands": [
+          "7.2",
+          "6"
+        ],
+        "exactRational": "6/5"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-013",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Tính 0,48 × 10.",
+      "answerKind": "number",
+      "answer": "4.8",
+      "unit": "",
+      "explanation": "Nhân với 10, chuyển dấu phẩy sang phải một chữ số: 0,48 × 10 = 4,8. Kiểm tra: 4,8 : 10 = 0,48.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "multiply",
+        "operands": [
+          "0.48",
+          "10"
+        ],
+        "exactRational": "24/5"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-014",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Tính 35,6 : 100.",
+      "answerKind": "number",
+      "answer": "0.356",
+      "unit": "",
+      "explanation": "Chia cho 100, chuyển dấu phẩy sang trái hai chữ số: 35,6 : 100 = 0,356. Kiểm tra: 0,356 × 100 = 35,6.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "divide",
+        "operands": [
+          "35.6",
+          "100"
+        ],
+        "exactRational": "89/250"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-015",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Có 4,5 kg gạo, chia vào các túi, mỗi túi 0,5 kg. Chia được bao nhiêu túi?",
+      "answerKind": "number",
+      "answer": "9",
+      "unit": "túi",
+      "explanation": "Số túi chia được là 4,5 : 0,5 = 45 : 5 = 9 (túi). Kiểm tra: 9 × 0,5 = 4,5 (kg).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "divide",
+        "operands": [
+          "4.5",
+          "0.5"
+        ],
+        "exactRational": "9/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-016",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "decimal",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một tấm bìa hình vuông có cạnh 1,5 cm. Diện tích tấm bìa là bao nhiêu xăng-ti-mét vuông?",
+      "answerKind": "number",
+      "answer": "2.25",
+      "unit": "cm²",
+      "explanation": "Diện tích hình vuông bằng cạnh nhân cạnh: 1,5 × 1,5 = 2,25 (cm²). Kiểm tra bằng đổi đơn vị: 15 × 15 = 225 (mm²) = 2,25 (cm²).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-decimal",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "multiply",
+        "operands": [
+          "1.5",
+          "1.5"
+        ],
+        "exactRational": "9/4"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-017",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "fraction",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Viết kết quả của 1/4 + 2/4 dưới dạng số thập phân.",
+      "answerKind": "number",
+      "answer": "0.75",
+      "unit": "",
+      "explanation": "Hai phân số cùng mẫu: 1/4 + 2/4 = 3/4. Đổi 3/4 = 75/100 = 0,75. Kiểm tra: 0,75 − 0,5 = 0,25.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-fraction",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "fraction_add",
+        "operands": [
+          "1/4",
+          "2/4"
+        ],
+        "exactRational": "3/4"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-018",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "fraction",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Viết kết quả của 7/10 − 2/10 dưới dạng số thập phân.",
+      "answerKind": "number",
+      "answer": "0.5",
+      "unit": "",
+      "explanation": "Trừ hai tử số, giữ mẫu số: 7/10 − 2/10 = 5/10 = 0,5. Kiểm tra: 0,5 + 0,2 = 0,7.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-fraction",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "fraction_subtract",
+        "operands": [
+          "7/10",
+          "2/10"
+        ],
+        "exactRational": "1/2"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-019",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "fraction",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một vườn có 40 cây, trong đó 3/5 số cây là cây cam. Hỏi có bao nhiêu cây cam?",
+      "answerKind": "number",
+      "answer": "24",
+      "unit": "cây",
+      "explanation": "1/5 số cây là 40 : 5 = 8 (cây). Số cây cam là 8 × 3 = 24 (cây). Kiểm tra: 24 : 40 = 3/5.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-fraction",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "fraction_of",
+        "operands": [
+          "40",
+          "3/5"
+        ],
+        "exactRational": "24/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-020",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "fraction",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Viết phân số 7/20 dưới dạng số thập phân.",
+      "answerKind": "number",
+      "answer": "0.35",
+      "unit": "",
+      "explanation": "Nhân cả tử và mẫu với 5: 7/20 = 35/100 = 0,35. Kiểm tra: 0,35 × 20 = 7.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-fraction",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "divide",
+        "operands": [
+          "7",
+          "20"
+        ],
+        "exactRational": "7/20"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-021",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "fraction",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một giỏ có 36 quả cam. Đã lấy ra 2/3 số cam. Hỏi trong giỏ còn bao nhiêu quả cam?",
+      "answerKind": "number",
+      "answer": "12",
+      "unit": "quả cam",
+      "explanation": "Số cam đã lấy là 36 : 3 × 2 = 24 (quả). Số cam còn lại là 36 − 24 = 12 (quả). Kiểm tra: 24 + 12 = 36 và 24 : 36 = 2/3.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-fraction",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "fraction_remaining",
+        "operands": [
+          "36",
+          "2/3"
+        ],
+        "exactRational": "12/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-022",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "fraction",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Viết kết quả của 1/2 + 1/4 dưới dạng số thập phân.",
+      "answerKind": "number",
+      "answer": "0.75",
+      "unit": "",
+      "explanation": "Đổi 1/2 = 2/4. Khi đó 2/4 + 1/4 = 3/4 = 0,75. Kiểm tra: 0,75 − 0,25 = 0,5 = 1/2.",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-fraction",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "fraction_add",
+        "operands": [
+          "1/2",
+          "1/4"
+        ],
+        "exactRational": "3/4"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-023",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "area",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Mảnh bìa hình chữ nhật dài 2,5 m, rộng 1,2 m. Diện tích là bao nhiêu mét vuông?",
+      "answerKind": "number",
+      "answer": "3",
+      "unit": "m²",
+      "explanation": "Diện tích hình chữ nhật là 2,5 × 1,2 = 3 (m²). Kiểm tra: 3 : 1,2 = 2,5 (m).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-area",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "multiply",
+        "operands": [
+          "2.5",
+          "1.2"
+        ],
+        "exactRational": "3/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-024",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "area",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một tam giác có đáy 8 cm, chiều cao tương ứng 3,5 cm. Diện tích là bao nhiêu xăng-ti-mét vuông?",
+      "answerKind": "number",
+      "answer": "14",
+      "unit": "cm²",
+      "explanation": "Diện tích tam giác bằng đáy nhân chiều cao tương ứng rồi chia 2: 8 × 3,5 : 2 = 14 (cm²). Kiểm tra: 14 × 2 : 8 = 3,5 (cm).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "5BMath tự biên soạn: công thức diện tích hình học Toán5; không trích đề/lời giải ngân hàng hoặc SGK",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "triangle_area",
+        "operands": [
+          "8",
+          "3.5"
+        ],
+        "exactRational": "14/1"
+      },
+      "localPilot": true,
+      "figure": {
+        "kind": "triangle",
+        "notToScale": true,
+        "description": "Một tam giác có đáy 8 cm, chiều cao tương ứng 3,5 cm. Diện tích là bao nhiêu xăng-ti-mét vuông?"
+      }
+    },
+    {
+      "id": "TRIAL5-R1-025",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "area",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một hình thang có hai đáy dài 6 cm và 4 cm, chiều cao 3,2 cm. Diện tích là bao nhiêu xăng-ti-mét vuông?",
+      "answerKind": "number",
+      "answer": "16",
+      "unit": "cm²",
+      "explanation": "Tổng hai đáy là 6 + 4 = 10 (cm). Diện tích hình thang là 10 × 3,2 : 2 = 16 (cm²). Kiểm tra: 16 × 2 : 10 = 3,2 (cm).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "5BMath tự biên soạn: công thức diện tích hình học Toán5; không trích đề/lời giải ngân hàng hoặc SGK",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "trapezoid_area",
+        "operands": [
+          "6",
+          "4",
+          "3.2"
+        ],
+        "exactRational": "16/1"
+      },
+      "localPilot": true,
+      "figure": {
+        "kind": "trapezoid",
+        "notToScale": true,
+        "description": "Một hình thang có hai đáy dài 6 cm và 4 cm, chiều cao 3,2 cm. Diện tích là bao nhiêu xăng-ti-mét vuông?"
+      }
+    },
+    {
+      "id": "TRIAL5-R1-026",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "area",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Một hình chữ nhật có diện tích 13,5 m² và chiều rộng 3 m. Chiều dài là bao nhiêu mét?",
+      "answerKind": "number",
+      "answer": "4.5",
+      "unit": "m",
+      "explanation": "Chiều dài bằng diện tích chia chiều rộng: 13,5 : 3 = 4,5 (m). Kiểm tra: 4,5 × 3 = 13,5 (m²).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "baseline/backend/learning-catalog.json#lesson:g5-area",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "divide",
+        "operands": [
+          "13.5",
+          "3"
+        ],
+        "exactRational": "9/2"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-027",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "units",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Đổi 2,75 m thành xăng-ti-mét.",
+      "answerKind": "number",
+      "answer": "275",
+      "unit": "cm",
+      "explanation": "1 m = 100 cm nên 2,75 m = 2,75 × 100 = 275 cm. Kiểm tra: 275 : 100 = 2,75 (m).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "5BMath tự biên soạn: quan hệ đơn vị độ dài, khối lượng và diện tích; không trích đề ngân hàng",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "multiply",
+        "operands": [
+          "2.75",
+          "100"
+        ],
+        "exactRational": "275/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-028",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "units",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Đổi 4500 g thành ki-lô-gam.",
+      "answerKind": "number",
+      "answer": "4.5",
+      "unit": "kg",
+      "explanation": "1 kg = 1000 g nên 4500 g = 4500 : 1000 = 4,5 kg. Kiểm tra: 4,5 × 1000 = 4500 (g).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "5BMath tự biên soạn: quan hệ đơn vị độ dài, khối lượng và diện tích; không trích đề ngân hàng",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "divide",
+        "operands": [
+          "4500",
+          "1000"
+        ],
+        "exactRational": "9/2"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-029",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 1,
+      "topic": "units",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Đổi 0,36 km thành mét.",
+      "answerKind": "number",
+      "answer": "360",
+      "unit": "m",
+      "explanation": "1 km = 1000 m nên 0,36 km = 0,36 × 1000 = 360 m. Kiểm tra: 360 : 1000 = 0,36 (km).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "5BMath tự biên soạn: quan hệ đơn vị độ dài, khối lượng và diện tích; không trích đề ngân hàng",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "multiply",
+        "operands": [
+          "0.36",
+          "1000"
+        ],
+        "exactRational": "360/1"
+      },
+      "localPilot": true
+    },
+    {
+      "id": "TRIAL5-R1-030",
+      "revision": 1,
+      "grade": 5,
+      "difficulty": 2,
+      "topic": "units",
+      "purposes": [
+        "practice",
+        "bot",
+        "capture_flag",
+        "animal_race"
+      ],
+      "prompt": "Đổi 2,4 m² thành đề-xi-mét vuông.",
+      "answerKind": "number",
+      "answer": "240",
+      "unit": "dm²",
+      "explanation": "1 m² = 100 dm² nên 2,4 m² = 2,4 × 100 = 240 dm². Kiểm tra: 240 : 100 = 2,4 (m²).",
+      "reviewStatus": "arithmetic_checked",
+      "source": "5BMath tự biên soạn: quan hệ đơn vị độ dài, khối lượng và diện tích; không trích đề ngân hàng",
+      "sourceKind": "self_authored_public_trial",
+      "independentTeacherReview": "pending",
+      "verification": {
+        "operation": "multiply",
+        "operands": [
+          "2.4",
+          "100"
+        ],
+        "exactRational": "240/1"
+      },
+      "localPilot": true
+    }
+  ],
+  "sourceRevisionSha256": "1d77c984acb96801778c0af3dce300a9ce48f6cd8eec19f4ca783f3cdd4cca6a",
+  "verificationSummary": {
+    "tool": "Python fractions.Fraction exact rational arithmetic",
+    "checkedQuestions": 30,
+    "result": "30/30 exact answers match explicit derivation; assistant also checked prompts, units and inverse checks",
+    "teacherApproval": false
+  }
+}

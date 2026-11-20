@@ -10,9 +10,9 @@ const StaffApp = (() => {
     const statusLabel = value => ({
         active:'Đang hoạt động',closed:'Đã kết thúc',disabled:'Đã khóa',suspended:'Tạm khóa',deleted:'Đã xóa',
         published:'Đã phát hành',draft:'Bản nháp',retired:'Ngừng phát hành',pending:'Chờ đối soát',
-        paid:'Đã thanh toán',cancelled:'Đã hủy',teacher:'Giáo viên',admin:'Quản trị viên',
+        paid:'Đã thanh toán',review:'Cần đối soát',cancelled:'Đã hủy',teacher:'Giáo viên',admin:'Quản trị viên',
     }[value] || value);
-    const badge = value => `<span class="staff-badge ${['closed','disabled','suspended','deleted','retired','cancelled'].includes(value) ? 'muted' : ['draft','pending'].includes(value) ? 'warm' : ''}">${esc(statusLabel(value))}</span>`;
+    const badge = value => `<span class="staff-badge ${['closed','disabled','suspended','deleted','retired','cancelled'].includes(value) ? 'muted' : ['draft','pending','review'].includes(value) ? 'warm' : ''}">${esc(statusLabel(value))}</span>`;
     const input = (label,name,value='',type='text',extra='') => `<label class="staff-field"><span>${label}</span><input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;
     const text = (label,name,value='',extra='') => `<label class="staff-field"><span>${label}</span><textarea name="${name}" rows="4" ${extra}>${esc(value)}</textarea></label>`;
     const select = (label,name,options,value='',accessibleLabel='') => `<label class="staff-field"><span>${label}</span><select name="${name}" ${accessibleLabel?'aria-label="'+esc(accessibleLabel)+'"':''}>${options.map(([key,title]) => `<option value="${esc(key)}" ${String(value)===String(key)?'selected':''}>${esc(title)}</option>`).join('')}</select></label>`;
@@ -67,12 +67,12 @@ const StaffApp = (() => {
         const result = await response.json().catch(()=>({error:'Mở trang bằng máy chủ Python để sử dụng quản trị.'}));
         if (!response.ok) {
             if(response.status===401) {user=null;csrf='';resetNotificationDraft();}
-            const error=new Error(result.error || 'Chưa thể kết nối. Vui lòng thử lại.');error.status=response.status;throw error;
+            const error=new Error(result.error || 'Chưa thể kết nối. Vui lòng thử lại.');error.status=response.status;error.code=result.code;throw error;
         }
         return result;
     }
 
-    const catalogueUI=typeof StaffCatalogue!=='undefined'?StaffCatalogue.create({request,header,panel,empty,table,input,text,select,stats,money,date,openForm,pagination,message,grades:gradeOptions,payload:()=>payload,filter:()=>filter,setFilter:value=>{filter=value;},tab:()=>tab,reload:loadTab,owner:()=>user?.id+':'+csrf}):null;
+    const catalogueUI=typeof StaffCatalogue!=='undefined'?StaffCatalogue.create({request,header,panel,empty,table,input,text,select,stats,money,date,openForm,pagination,message,grades:gradeOptions,payload:()=>payload,filter:()=>filter,setFilter:value=>{filter=value;},tab:()=>tab,reload:loadTab,owner:()=>user?.id+':'+csrf,staffId:()=>user?.id}):null;
     function header(title,copy,actions='') {
         return `<div class="staff-page-head"><div><h1>${title}</h1><p>${copy}</p></div><div class="staff-actions">${actions}</div></div>`;
     }
@@ -364,10 +364,36 @@ const StaffApp = (() => {
         return `<div class="staff-referrer-info"><div class="staff-referrer-heading"><b class="staff-referrer-login">${esc(referrer.login)}</b>${confirm}${badge(membership)}</div>${referrer.name?'<small>'+esc(referrer.name)+'</small>':''}<small class="staff-referral-state">${status}</small>${expanded&&referrer.supportConfirmedAt?'<small>Ngày xác nhận hỗ trợ: '+date(referrer.supportConfirmedAt)+'</small>':''}${expanded&&referrer.rewardGrantedAt?'<small>Ngày nhận thưởng: '+date(referrer.rewardGrantedAt)+'</small>':''}${expanded&&referrer.rewardVipExpiresAt?'<small>VIP sau nhận thưởng đến: '+date(referrer.rewardVipExpiresAt)+'</small>':''}</div>`;
     }
 
+    function paymentContent(row) {
+        if(row.isFamilyOrder) {
+            const states={granted:'Đã xử lý',pending:'Chờ xử lý',review:'Đang đối soát',cancelled:'Đã hủy'};
+            const lines=row.items.map(item=>{
+                const type=item.type||'subscription';
+                const title=type==='subscription'?item.plan+' · '+(item.period==='year'?'1 năm':'1 tháng'):item.title;
+                const detail=type==='tuition'?item.className:type==='credits'?(item.quantity||1)+' gói':null;
+                return `<li>${esc(item.studentName)} · ${esc(title)}${detail?' · '+esc(detail):''} · ${money(item.amount)}${states[item.fulfillmentStatus]?' · '+states[item.fulfillmentStatus]:''}</li>`;
+            });
+            return `<b>Đơn gia đình</b><ul>${lines.join('')}</ul>`;
+        }
+        if(row.fee_id) return esc(row.class_name)+' · '+esc(row.month);
+        if(row.purchase_type==='exam') return esc(row.exam_title);
+        return esc(row.subscription_plan||'VIP')+' · '+(row.subscription_period==='year'?'1 năm · 12 tháng':Number(row.vip_months||1)+' tháng');
+    }
+    function paymentRow(row) {
+        const action=['pending','review'].includes(row.status)&&row.fulfillmentStatus!=='cancelled'
+            ?button('Đối soát','confirm-payment',`data-id="${row.id}" ${row.isFamilyOrder?'data-family-order="true"':''}`)
+            :'Đã xử lý';
+        const status=row.fee_id&&row.status==='paid'?'<span class="staff-badge">Đã hoàn thành</span>':badge(row.status);
+        return `<tr><td data-label="Mã đơn / người mua"><b>${esc(row.reference)}</b><small><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</small><small>${date(row.created_at)}</small></td>
+            <td data-label="Người giới thiệu">${row.isFamilyOrder?'Theo từng hồ sơ con':paymentReferrerMarkup(row.referrer)}</td>
+            <td data-label="Nội dung">${paymentContent(row)}</td><td data-label="Số tiền"><b>${money(row.amount)}</b></td>
+            <td data-label="Trạng thái">${status}${row.paid_at?'<small>'+date(row.paid_at)+'</small>':''}${row.reviewReason?'<small>'+esc(row.reviewReason)+'</small>':''}</td>
+            <td data-label="Thao tác">${action}</td></tr>`;
+    }
     function paymentsView() {
         const search=`<form class="staff-toolbar" id="staff-filter-form">${input('Mã đơn / học sinh','q',filter.q,'search','placeholder="Mã đơn, tên đăng nhập hoặc biệt danh…" maxlength="100"')}${input('Người giới thiệu','referrer',filter.referrer||'','search','placeholder="Tên đăng nhập hoặc biệt danh người giới thiệu…" maxlength="100"')}${submit('Tìm kiếm')}</form>`;
         return header('Đối soát thanh toán','Theo dõi thanh toán tự động và kiểm tra các khoản tiền cần đối soát.')+
-            panel('Đơn thanh toán',search+'<p class="staff-note staff-payment-note">Loại tài khoản người giới thiệu là gói đang hiệu lực. Trạng thái thưởng được lấy từ hồ sơ giới thiệu.</p>'+(payload.rows?.length?table(['Mã đơn / học sinh','Người giới thiệu','Nội dung','Số tiền','Trạng thái','Thao tác'],payload.rows.map(row=>`<tr><td data-label="Mã đơn / học sinh"><b>${esc(row.reference)}</b><small><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</small><small>${date(row.created_at)}</small></td><td data-label="Người giới thiệu">${paymentReferrerMarkup(row.referrer)}</td><td data-label="Nội dung">${row.fee_id?esc(row.class_name)+' · '+esc(row.month):row.purchase_type==='exam'?esc(row.exam_title):esc(row.subscription_plan||'VIP')+' · 1 tháng'}</td><td data-label="Số tiền"><b>${money(row.amount)}</b></td><td data-label="Trạng thái">${row.fee_id&&row.status==='paid'?'<span class="staff-badge">Đã hoàn thành</span>':badge(row.status)}${row.paid_at?'<small>'+date(row.paid_at)+'</small>':''}</td><td data-label="Thao tác">${row.status==='pending'?button('Đối soát','confirm-payment','data-id="'+row.id+'"'):'Đã xử lý'}</td></tr>`)):empty('Không có đơn thanh toán phù hợp','Thử đổi mã đơn, tên học sinh hoặc người giới thiệu.'))+pagination(),'staff-payment-list')+panel('Giao dịch ngân hàng','<div id="staff-bank-receipts">'+receiptsMarkup()+'</div>','staff-receipt-list');
+            panel('Đơn thanh toán',search+'<p class="staff-note staff-payment-note">Loại tài khoản người giới thiệu là gói đang hiệu lực. Trạng thái thưởng được lấy từ hồ sơ giới thiệu.</p>'+(payload.rows?.length?table(['Mã đơn / người mua','Người giới thiệu','Nội dung','Số tiền','Trạng thái','Thao tác'],payload.rows.map(paymentRow)):empty('Không có đơn thanh toán phù hợp','Thử đổi mã đơn, tên người mua, học sinh hoặc người giới thiệu.'))+pagination(),'staff-payment-list')+panel('Giao dịch ngân hàng','<div id="staff-bank-receipts">'+receiptsMarkup()+'</div>','staff-receipt-list');
     }
     function receiptReason(row){
         const reasons={paid:'Đã xác nhận thanh toán',settled:'Đã xác nhận thanh toán',processed:'Đã xác nhận thanh toán',amount_mismatch:'Số tiền chưa khớp đơn',unknown_reference:'Chưa tìm thấy đơn theo mã',missing_reference:'Chưa nhận diện được mã thanh toán',ambiguous_reference:'Nội dung có nhiều mã thanh toán',order_cancelled:'Đơn đã hủy',cancelled_order:'Đơn đã hủy',order_paid:'Đơn đã được thanh toán trước đó',already_paid:'Đơn đã được thanh toán trước đó',duplicate_payment:'Có khoản chuyển khác cho đơn đã hoàn tất',wrong_account:'Tài khoản nhận chưa khớp',account_mismatch:'Tài khoản nhận chưa khớp',bank_mismatch:'Ngân hàng nhận chưa khớp',outgoing:'Giao dịch tiền ra',not_incoming:'Giao dịch tiền ra',fee_changed:'Học phí đã thay đổi',fee_paid:'Học phí đã được thanh toán',account_inactive:'Tài khoản học sinh không hoạt động',invalid_owner:'Chủ tài khoản và học phí chưa khớp',legacy_unconfigured:'Đơn cũ chưa đủ thông tin ngân hàng để tự xác nhận'};
@@ -508,11 +534,12 @@ const StaffApp = (() => {
             control.disabled=true;
             try {
                 await onSave(new FormData(form),form);
+                if(!form.isConnected)return;
                 document.querySelector('#modal').close();
                 await loadTab();
                 message('Đã lưu thay đổi.');
             } catch(error) {
-                document.querySelector('#staff-form-error').textContent=error.message;
+                if(form.isConnected)form.querySelector('#staff-form-error').textContent=error.message;
             } finally {control.disabled=false;}
         };
         form.querySelector('input,select,textarea')?.focus();
@@ -789,18 +816,15 @@ const StaffApp = (() => {
 
     function contentForm(row=null) {
         const kind=topicKind;
+        const staffId=user?.id,staffToken=csrf;
         const grade=row?.grade_id||Number(filter.grade)||5;
         const topicOptions=value=>(payload.topics||[]).filter(topic=>topic.grade_id===Number(value)).map(topic=>[topic.id,topic.title]);
         const base=select('Khối','grade',gradeOptions,grade);
         let fields;
         if(kind==='topics') fields=base+input('Tên chuyên đề','title',row?.title||'','text','required maxlength="180"')+text('Nội dung mở đầu','intro',row?.intro||'');
-        else if(kind==='lessons') fields=`<div class="staff-form-grid">${base}${select('Chuyên đề','topicId',topicOptions(grade),row?.topic_id)}${select('Loại bài','kind',[['weekly','Bài theo tuần'],['topic','Bài theo chuyên đề']],row?.kind||'weekly')}${input('Tuần học','week',row?.week_no||1,'number','required min="1" max="53"')}</div>
-            ${input('Tiêu đề bài giảng','title',row?.title||'','text','required maxlength="180"')}${text('Nội dung mở đầu / quy tắc','intro',row?.intro||'','required maxlength="20000"')}
-            ${text('Đề bài ví dụ (tùy chọn)','exampleText',row?.exampleText||'','maxlength="10000"')}
-            ${text('Lời giải ví dụ · mỗi dòng một bước','exampleSteps',Array.isArray(row?.exampleSteps)?row.exampleSteps.join('\n'):(row?.exampleSteps||''),'maxlength="20000"')}
-            <p class="staff-note">Chỉ nhập ví dụ và lời giải đã biên soạn. Bỏ trống khi bài học chưa có ví dụ.</p>
-            ${input('Liên kết video','videoUrl',row?.videoUrl||row?.video_ref||'','url','placeholder="https://…"')}
-            ${select('Phát hành','status',[['draft','Lưu bản nháp'],['published','Phát hành cho học sinh']],row?.publication_status||'draft')}`;
+        else if(kind==='lessons') fields=LessonEditor.section('Thông tin bài giảng',`<div class="staff-form-grid">${base}${select('Chuyên đề','topicId',topicOptions(grade),row?.topic_id)}${select('Loại bài','kind',[['weekly','Bài theo tuần'],['topic','Bài theo chuyên đề']],row?.kind||'weekly')}${input('Tuần học','week',row?.week_no||1,'number','required min="1" max="53"')}</div>
+            ${input('Tiêu đề bài giảng','title',row?.title||'','text','required maxlength="180"')}${text('Nội dung mở đầu / quy tắc','intro',row?.intro||'','required maxlength="20000"')}`)+
+            LessonEditor.resources(row||{},{examples:true})+LessonEditor.section('Lưu và phát hành',select('Thao tác lưu','status',[['draft','Lưu bản nháp'],['published','Phát hành cho học sinh']], 'draft')+'<p class="staff-note">Bản nháp chỉ dành cho quản trị. Chọn Phát hành để đưa video, tài liệu và câu hỏi mẫu lên Học bài. Phiên bản học sinh đã học được giữ trong lịch sử.</p>');
         else fields=`<div class="staff-form-grid">${base}${select('Chuyên đề','topicId',topicOptions(grade),row?.topic_id)}${select('Mức độ','difficulty',[[1,'Cơ bản'],[2,'Nâng cao'],[3,'Khó'],[4,'Tư duy']],row?.difficulty||1)}${input('Tuần kiến thức','week',row?.curriculum_week||1,'number','required min="1" max="53"')}</div>
             ${text('Nội dung câu hỏi','prompt',row?.prompt||'','required maxlength="10000"')}
             <div class="staff-form-grid">${input('Đáp án đúng','answer',row?.answer||'','text','required maxlength="500"')}${select('Cách chấm','answerKind',[['auto','Tự nhận dạng số hoặc văn bản'],['number','Số / phân số tương đương'],['text','Văn bản / dấu chính xác'],['ordered','Nhiều kết quả · đúng thứ tự'],['unordered','Nhiều kết quả · không xét thứ tự']],row?.answerKind||'auto')}</div><p class="staff-note">Một đáp số dùng ô nhập. Câu nhiều ý hoặc nhiều đối tượng dùng một phương án chứa toàn bộ kết quả; ghi rõ đơn vị.</p>
@@ -812,14 +836,35 @@ const StaffApp = (() => {
             ${text('Lời giải · mỗi dòng một bước','steps',row?.steps||'','required maxlength="20000"')}${text('Hướng dẫn tư duy','thinking',row?.thinking||'')}
             ${select('Trạng thái','status',[['draft','Lưu bản nháp'],['published','Phát hành phiên bản mới'],['retired','Ngừng phát hành câu hỏi']],row?.status||'draft')}
             <p class="staff-note">Lưu câu hỏi tạo một phiên bản mới. Các đề đã sinh giữ nội dung và lời giải của phiên bản trước.</p>`;
+        let lessonEditor=null;
         openForm((row?'Chỉnh sửa ':'Thêm ')+({topics:'chuyên đề',lessons:'bài giảng',questions:'câu hỏi'}[kind]),fields,async(values,form)=>{
             const body={id:row?.id,revision:row?.revision,grade:Number(values.get('grade')||row?.grade_id),topicId:Number(values.get('topicId')||row?.topic_id),
                 title:values.get('title'),intro:values.get('intro'),kind:values.get('kind'),week:Number(values.get('week')),videoUrl:values.get('videoUrl'),exampleText:values.get('exampleText'),exampleSteps:values.get('exampleSteps'),
                 status:values.get('status'),difficulty:Number(values.get('difficulty')),prompt:values.get('prompt'),answer:values.get('answer'),
                 responseType:values.get('responseType')||'auto',answerShape:values.get('answerShape')||'single',answerTargets:String(values.get('answerTargets')||'').split('\n').map(s=>s.trim()).filter(Boolean),options:String(values.get('options')||'').split('\n').map(s=>s.trim()).filter(Boolean),choiceRationales:String(values.get('choiceRationales')||'').split('\n').map(s=>s.trim()).filter(Boolean),answerKind:values.get('answerKind')||'auto',steps:values.get('steps'),thinking:values.get('thinking')};
-            await request(kind,body);
+            if(kind==='lessons') {
+                if(!lessonEditor.active)throw Error('Phiên biên tập đã thay đổi. Mở lại bài để tiếp tục.');
+                Object.assign(body,lessonEditor.read());delete body.exampleText;delete body.exampleSteps;
+                lessonEditor.setBusy(true);
+                try {await request(kind,body);lessonEditor.destroy();}
+                catch(error){lessonEditor.setBusy(false);lessonEditor.error(error);throw error;}
+            } else await request(kind,body);
         });
         const form=document.querySelector('#staff-modal-form');
+        if(kind==='lessons')lessonEditor=LessonEditor.bind(form,row||{},{examples:true,
+            active:()=>user?.id===staffId&&csrf===staffToken&&tab==='content'&&topicKind==='lessons',
+            bunny:{staffId,provider:'main',lessonKey:row?.client_key,request},reload:async()=>{
+            const errorBox=form.querySelector('#staff-form-error');
+            lessonEditor.setBusy(true);
+            try {
+                // Search the current grade so a renamed lesson can still be reloaded by identity.
+                let latest=null,page=1;
+                do {const result=await request('content?'+new URLSearchParams({kind:'lessons',grade:row.grade_id,q:'',page}));latest=result.rows.find(item=>item.id===row.id);if(latest||page*result.pageSize>=result.total)break;page++;}while(page<=1000);
+                if(!lessonEditor.active)return;
+                if(!latest)throw Error('Không còn tìm thấy bài này trong khối hiện tại. Đóng hộp và tải lại danh sách bài giảng.');
+                lessonEditor.destroy();contentForm(latest);
+            } catch(error){if(lessonEditor.active){lessonEditor.setBusy(false);lessonEditor.error({status:409});errorBox.textContent=error.message;}}
+        }});
         const gradeInput=form.elements.grade;
         if(row && ['topics','questions'].includes(kind)) gradeInput.disabled=true;
         if(row && kind==='questions') form.elements.topicId.disabled=true;
@@ -870,9 +915,13 @@ const StaffApp = (() => {
     }
 
     function paymentForm(row) {
-        openForm('Đối soát đơn '+esc(row.reference),`<div class="staff-payment-summary"><b><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</b><strong>${money(row.amount)}</strong><span>${row.fee_id?'Học phí '+esc(row.month):row.purchase_type==='exam'?esc(row.exam_title):esc(row.subscription_plan||'VIP')+' · 1 tháng'}</span><div class="staff-payment-referrer"><h3>Người giới thiệu</h3>${paymentReferrerMarkup(row.referrer,true)}</div></div>
+        const details=row.isFamilyOrder
+            ?(row.reviewReason?`<p>${esc(row.reviewReason)}${Number.isFinite(row.receivedAmount)?' · '+money(row.receivedAmount):''}</p>`:'')
+            :`<div class="staff-payment-referrer"><h3>Người giới thiệu</h3>${paymentReferrerMarkup(row.referrer,true)}</div>`;
+        const endpoint=row.isFamilyOrder?'family-payments':'payments';
+        openForm('Đối soát đơn '+esc(row.reference),`<div class="staff-payment-summary"><b><span class="staff-payer-login">${esc(row.login_identifier)}</span> · ${esc(row.full_name)}</b><strong>${money(row.amount)}</strong><div>${paymentContent(row)}</div>${details}</div>
             <p>Chỉ xác nhận sau khi đã đối chiếu khoản tiền thực nhận.</p>${input('Nhập lại mã đơn','reference','','text','required autocomplete="off"')}${input('Số tiền đã nhận · đồng','amount','','number','required min="1" step="1"')}`,
-            async values=>{await request('payments/'+row.id+'/confirm',{reference:values.get('reference').trim(),amount:Number(values.get('amount'))});},'Xác nhận đã nhận tiền');
+            async values=>{await request(endpoint+'/'+row.id+'/confirm',{reference:values.get('reference').trim(),amount:Number(values.get('amount'))});},'Xác nhận đã nhận tiền');
     }
 
     function passwordForm() {
@@ -938,7 +987,7 @@ const StaffApp = (() => {
             else if(value==='restore-account') restoreAccountForm(payload.rows.find(item=>item.id===id));
             else if(value==='new-content') contentForm();
             else if(value==='edit-content') contentForm(payload.rows.find(item=>item.id===id));
-            else if(value==='confirm-payment') paymentForm(payload.rows.find(item=>item.id===id));
+            else if(value==='confirm-payment') paymentForm(payload.rows.find(item=>item.id===id&&Boolean(item.isFamilyOrder)===(action.dataset.familyOrder==='true')));
             else if(value==='confirm-referral-support') referralSupportForm(payload.rows.find(item=>item.referrer?.referralId===id));
             else if(value==='account-status') {
                 const row=payload.rows.find(item=>item.id===id),status=row.status==='active'?'suspended':'active';

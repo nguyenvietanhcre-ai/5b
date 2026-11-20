@@ -339,6 +339,7 @@ def seed_question_bank(db, catalog):
     rng = secrets.SystemRandom()
     seen = {(lesson['grade'], lesson['example']['text']) for lesson in catalog['lessons'] if lesson.get('example')}
     seeded = 0
+    seeded_ids = []
     for lesson in catalog['lessons']:
         grade, topic = lesson['grade'], lesson['topic']
         topic_id = db.execute('SELECT id FROM topics WHERE grade_id=? AND client_key=?', (grade, topic)).fetchone()[0]
@@ -362,26 +363,33 @@ def seed_question_bank(db, catalog):
                 seen.add((grade, question['text']))
                 identity = db.execute('INSERT INTO questions(grade_id,topic_id,question_code) VALUES (?,?,?)',
                     (grade, topic_id, 'BANK2-' + secrets.token_hex(16).upper())).lastrowid
-                db.execute('INSERT INTO question_versions(question_id,revision,difficulty,curriculum_week,prompt_json,'
+                version_id = db.execute('INSERT INTO question_versions(question_id,revision,difficulty,curriculum_week,prompt_json,'
                     'grading_rule_json,solution_steps_json,hints_json,status,options_json) VALUES (?,1,?,?,?,?,?,?,\'published\',?)',
                     (identity, difficulty + 1, lesson['week'], _packed([{'type':'text','text':question['text']}]),
                      _packed({'answer':question['answer']}), _packed([{'type':'text','text':value} for value in question['steps']]),
-                     _packed([{'type':'text','text':lesson['theory']}, {'type':'text','text':SAMPLE_LABEL}]), _packed(question['options'])))
+                     _packed([{'type':'text','text':lesson['theory']}, {'type':'text','text':SAMPLE_LABEL}]), _packed(question['options']))).lastrowid
+                seeded_ids.append(version_id)
                 seeded += 1
+    from .question_access import snapshot_seed_versions
+    snapshot_seed_versions(db, seeded_ids)
     db.execute('INSERT INTO system_settings(name,value_json,updated_at) VALUES (?,?,strftime(\'%Y-%m-%dT%H:%M:%SZ\',\'now\'))',
                (MARKER, _packed({'version':BANK_VERSION, 'sample':True, 'seededCount':seeded})))
 
 
-def published_version_ids(db, grade, difficulty, max_week=35, topic='', exact_week=None):
-    """The shared exam/Arena source, using the latest currently published version."""
+def published_version_ids(db, grade, difficulty, max_week=35, topic='', exact_week=None, *, session=None, purpose='practice', public_game=False):
+    """Shared source, pinned compatibility baseline or approved classified pool."""
     from .content_retirement import retired
-    if retired(db,grade):return []
-    return [row[0] for row in db.execute('SELECT v.id FROM questions q JOIN question_versions v ON v.question_id=q.id '
+    retired_grade=retired(db,grade)
+    candidates = [row[0] for row in db.execute('SELECT v.id FROM questions q JOIN question_versions v ON v.question_id=q.id '
         "JOIN topics t ON t.id=q.topic_id WHERE q.grade_id=? AND v.status='published' "
         'AND (? IS NULL OR v.difficulty=?) AND v.curriculum_week<=? AND t.client_key IS NOT NULL '
-        "AND (?='' OR t.client_key=?) AND (? IS NULL OR v.curriculum_week=?) "
-        "AND v.revision=(SELECT max(latest.revision) FROM question_versions latest WHERE latest.question_id=q.id AND latest.status='published')",
+        "AND (?='' OR t.client_key=?) AND (? IS NULL OR v.curriculum_week=?) ORDER BY q.id,v.revision",
         (grade, difficulty, difficulty, max_week, topic, topic, exact_week, exact_week))]
+    from .question_access import filter_ids
+    if retired_grade:
+        from .curriculum_samples import registered
+        candidates=[identity for identity in candidates if registered(db,identity)]
+    return filter_ids(db,candidates,session=session,purpose=purpose,public_game=public_game)
 
 
 def arena_questions(db, grade, difficulty, scope='weekly', max_week=35):
@@ -389,7 +397,8 @@ def arena_questions(db, grade, difficulty, scope='weekly', max_week=35):
     levels = (1, 2) if difficulty == 0 else (min(4, difficulty + 1),)
     ids = []
     for level in levels:
-        ids.extend(published_version_ids(db, grade, level, max_week if scope == 'weekly' else 35))
+        ids.extend(published_version_ids(db, grade, level, max_week if scope == 'weekly' else 35,
+                                         purpose='arena',public_game=True))
     rng = secrets.SystemRandom()
     if len(ids) < 20:
         raise ArenaError('Chưa đủ câu hỏi đã phát hành cho trận đấu. Thầy cô cần bổ sung ngân hàng câu hỏi.', 503)

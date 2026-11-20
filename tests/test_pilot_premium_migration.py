@@ -15,7 +15,7 @@ class PilotPremiumMigrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=root) as folder:
             folder=Path(folder);old=folder/'legacy';(old/'migrations').mkdir(parents=True)
             for source in (BACKEND/'migrations').glob('*.sql'):
-                if source.name not in ('0021_group_games.sql','0023_game_claims.sql','0024_vip_plus.sql','0025_exam_commerce.sql','0027_premium_admin.sql','0028_native_admin.sql'):
+                if source.name < '0030' and source.name not in ('0021_group_games.sql','0023_game_claims.sql','0024_vip_plus.sql','0025_exam_commerce.sql','0027_premium_admin.sql','0028_native_admin.sql'):
                     shutil.copy2(source,old/'migrations'/source.name)
             dbpath=folder/'pilot.sqlite3'
             with patch('backend.database.BACKEND',old):initialize(dbpath)

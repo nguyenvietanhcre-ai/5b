@@ -10,8 +10,9 @@ class RuntimeWalletContainerTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'explicit isolated QA'):factory('never.sqlite3','missing','missing','missing',bind_host='0.0.0.0')
         self.assertFalse(Path('never.sqlite3').exists())
     def test_strict_container_fixture_contains_only_ten_question_identities(self):
-        if not os.environ.get('FIVEBMATH_QA_TYPED_INPUT_DIR'):self.skipTest('Private wallet fixture; run the local release gate')
-        folder=Path(os.environ['FIVEBMATH_QA_TYPED_INPUT_DIR']);Path('work').mkdir(exist_ok=True)
+        source=os.environ.get('FIVEBMATH_QA_TYPED_INPUT_DIR')
+        if not source:self.skipTest('Private typed wallet release fixture is not available in public CI')
+        folder=Path(source);Path('work').mkdir(exist_ok=True)
         with tempfile.TemporaryDirectory(dir='work') as tmp:
             server=create_server(Path(tmp)/'strict.sqlite3',*(folder/f for f in ('questions-typed.json','sample-sets-typed.json','sources.json')),seed_learning=False)
             try:

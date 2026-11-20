@@ -21,6 +21,8 @@ class PilotConfig:
     response_mode: str = 'choice'
     batch_set_key: str = ''
     internal_unlimited: bool = False
+    vip_cycle_start: str = ''
+    vip_cycle_end: str = ''
 
 
 SCHEMA = """
@@ -60,7 +62,7 @@ def active(handler, db, session):
         raise api.APIError('Pilot requires an isolated synthetic QA database.', 503)
     if db.execute('SELECT label FROM pilot_environment WHERE id=1').fetchone()[0] != 'synthetic-only-v1':
         raise api.APIError('Invalid QA environment.', 503)
-    grade = max(1, min(5, api.academic()[0] - session['birth_year'] - 5))
+    grade = api.grade_for_student(db, session['student_id'], session['birth_year'])
     if grade != config.grade or membership(db, session) == 'SVip':
         return None
     cohort = db.execute('SELECT mode FROM pilot_cohorts WHERE account_id=?', (session['account_id'],)).fetchone()
@@ -101,6 +103,10 @@ def metadata(db, session, config):
 
 def version_allowed(db, version_id, status):
     if status == 'published': return True
+    if status == 'draft':
+        from .curriculum_samples import registered
+        sample=registered(db,version_id)
+        if sample is not None:return bool(sample)
     if status != 'draft' or not db.execute("SELECT 1 FROM sqlite_master WHERE name='mcq_versions'").fetchone():
         return False
     row=db.execute('SELECT metadata_json FROM mcq_versions WHERE version_id=?',(version_id,)).fetchone()

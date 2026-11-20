@@ -2,6 +2,7 @@ FROM node:24-slim AS public-html
 WORKDIR /build
 COPY frontend ./frontend
 COPY scripts/build-pages.cjs ./scripts/build-pages.cjs
+COPY scripts/site-shell.cjs ./scripts/site-shell.cjs
 RUN node scripts/build-pages.cjs /built-public python
 
 FROM python:3.12-slim AS runtime

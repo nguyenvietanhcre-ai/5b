@@ -1,0 +1,36 @@
+.game-allowance-count {
+    align-self: start;
+    justify-self: end;
+    color: var(--green, #1f6248);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 650;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.game-allowance-count[data-exhausted="true"] { color: #79431b; }
+.game-allowance-count:not([data-game-allowance-state="ready"]) { color: var(--muted, #526a5c); }
+
+.game-allowance-feedback {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+}
+
+.game-allowance-feedback p {
+    margin: 0;
+    color: var(--ink, #203a32);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.game-allowance-feedback button { min-height: 44px; }
+.game-allowance-feedback[hidden], .game-allowance-feedback [hidden] { display: none; }
+
+.game-allowance-dialog-message { color: #633815; font-size: 13px; }
+.game-allowance-dialog-message:empty { margin: 0; }
+
+[data-game-admission]:disabled { cursor: not-allowed; }

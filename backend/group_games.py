@@ -23,6 +23,7 @@ ROUND_MS = 60_000
 BREAK_MS = 3_000
 TARGET = 5
 PLAYERS = 5
+WAITING_MS = 300_000
 
 
 def fail(message, status=400):
@@ -46,6 +47,8 @@ class QuestionSource:
         seen = set()
         for raw in questions:
             q = deepcopy(raw)
+            if not qa_only and (q.get('tier') != 'free' or q.get('reviewStatus') != 'approved'):
+                raise ValueError('Public group games require explicit reviewed Free content')
             if q.get('purpose') != 'group-games' or type(q.get('grade')) is not int or q.get('grade') not in range(1, 6):
                 raise ValueError('Separate group-games purpose and grade required')
             if not isinstance(q.get('id'), str) or not q['id'] or type(q.get('revision')) is not int or q['revision'] < 1:
@@ -72,8 +75,14 @@ class QuestionSource:
             q['modes'] = q.get('modes', list(MODES))
             self.questions.append(q)
             seen.add(identity)
+        self._content_hash = self._fingerprint()
+
+    def _fingerprint(self):
+        return hashlib.sha256(json.dumps(self.questions,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
 
     def select(self, grade, mode):
+        if not hmac.compare_digest(self._content_hash,self._fingerprint()):
+            fail('Phiên bản nguồn game đã thay đổi, cần duyệt lại trước khi cấp trận.',503)
         result = [deepcopy(q) for q in self.questions if q['grade'] == grade and mode in q['modes']]
         if len(result) < TARGET:
             fail('Chưa đủ nguồn câu riêng đã được duyệt cho game này.', 503)
@@ -182,7 +191,7 @@ class GroupGames:
                            (result['points'], result['studentId']))
 
     def _tick(self, db, room, now):
-        if room['status'] == 'waiting' and now - room['createdAt'] >= 300_000:
+        if room['status'] == 'waiting' and now >= room['createdAt'] + WAITING_MS:
             room.update(status='cancelled', endReason='waiting_expired', winnerId=None)
         # Advance from server boundaries, never from a poll-dependent new clock.
         while True:
@@ -313,6 +322,8 @@ class GroupGames:
     def view(room, sid, now):
         public = {k: deepcopy(room.get(k)) for k in ('id', 'code', 'mode', 'grade', 'status', 'createdAt', 'mapIndex', 'round', 'deadline', 'nextAt', 'target', 'winnerId', 'endReason', 'rankings')}
         public['serverTime'] = now
+        public['waitingExpiresAt'] = room['createdAt'] + WAITING_MS
+        public['public'] = room.get('public', True) is True and room.get('playMode', 'human') == 'human'
         public['meStudentId'] = sid
         # Project rank without changing seat order, engine state or rewards.
         # Match the existing final comparator; a finished winner retains its
@@ -382,8 +393,7 @@ def dispatch(handler, method, path, body):
         from .system_settings import require_feature
         require_feature(db, 'leaderboard_open' if path == BASE + '/leaderboard' else 'arena_open')
         service = getattr(handler.server, 'group_games', None) or GroupGames()
-        grade = api.academic()[0] - session['birth_year'] - 5
-        grade = max(1, min(5, grade))
+        grade = api.grade_for_student(db, session['student_id'], session['birth_year'])
         query = parse_qs(urlsplit(handler.path).query)
         local_runtime=getattr(handler.server,'local_test_games',None)
         if local_runtime is not None and path!=BASE+'/leaderboard':
@@ -405,9 +415,9 @@ def dispatch(handler, method, path, body):
                 fail('Game không hợp lệ.')
             rooms = []
             for row in db.execute("SELECT payload_json FROM group_game_rooms WHERE mode=? AND grade=? AND status='waiting'", (mode, grade)).fetchall():
-                room = json.loads(row[0]); service._tick(db, room, service.clock())
+                room = json.loads(row[0]); service._tick(db, room, service.clock()); claims.sync_group(db, room)
                 if (room['status'] == 'waiting' and room.get('public',True) and room.get('playMode','human')=='human'
-                        and room.get('sourcePool',claims.pool(handler,db))==claims.pool(handler,db) and room['sourceRevision']==service.source.revision
+                        and room.get('sourcePool',claims.pool(handler,db))==claims.pool(handler,db) and room['sourceRevision'] in getattr(service,'accepted_source_revisions',{service.source.revision})
                         and not any(p['studentId'] == session['student_id'] and not p.get('forfeited',False) for p in room['players'])):
                     rooms.append({k: room[k] for k in ('id', 'code', 'mode', 'status', 'grade')} | {'playerCount': len(room['players'])})
             return {'rooms': rooms}, 200

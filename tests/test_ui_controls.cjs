@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('node:assert/strict');
+const controls=require('../frontend/ui-controls.js');
+const html=controls.markup('Nộp <b> & "',{kind:'dark',actionAttribute:'data-learning',action:'submit"x',icon:'<svg aria-hidden="true"></svg>',extra:'disabled'});
+assert(html.includes('Nộp &lt;b&gt; &amp; &quot;'));
+assert(html.includes('data-learning="submit&quot;x"'));
+assert(html.includes(' disabled>'));
+assert.throws(()=>controls.markup('X',{actionAttribute:'onclick'}),TypeError);
+const listeners=[];
+const document={createElement:tag=>({tag,addEventListener:(...event)=>listeners.push(event)})};
+const fn=()=>{};
+const button=controls.create(document,'<img src=x>',{className:'secondary',type:'submit',onClick:fn});
+assert.equal(button.textContent,'<img src=x>');
+assert.equal(button.className,'btn secondary');
+assert.equal(button.type,'submit');
+assert.deepEqual(listeners,[['click',fn]]);
+console.log('PASS shared controls: escaped labels/actions, explicit action attributes, DOM text, submit type and events');

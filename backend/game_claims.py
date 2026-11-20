@@ -42,10 +42,19 @@ def public(handler,db,row):
         'sourcePool':row['source_pool'],'sourceAvailable':accessible,'expiresAt':row['expires_at'],
         'resumeUrl':value['resumeUrl'],'checkpointRevision':value.get('checkpointRevision',0)}
     if value.get('code'):result['code']=value['code']
+    result['serverTime']=now(handler)
+    if row['game']!='duel':
+        from .group_games import WAITING_MS
+        record=db.execute('SELECT payload_json FROM group_game_rooms WHERE id=?',(row['room_id'],)).fetchone()
+        if record:
+            room=json.loads(record[0]);result['roomStatus']=room['status']
+            result['waitingExpiresAt']=room['createdAt']+WAITING_MS
+            result['serverTime']=_group_service(handler).clock()
     if accessible and row['game']=='duel' and row['play_mode']=='human':
         with handler.server.arena.lock:
             room=next((r for r in handler.server.arena.rooms.values() if r['id']==row['room_id']),None)
             if room:
+                result['roomStatus']=room['status']
                 token=next((t for t,p in room['players'].items() if p['accountId']==row['account_id']),None)
                 if token:result['credentials']={'code':room['code'],'token':token}
     if accessible and row['game']=='duel' and row['play_mode']=='bot':
@@ -135,9 +144,12 @@ def begin(handler,db,session,game,action,body):
     return nonce,sig,None
 
 def remember(handler,db,session,nonce,sig,row,result):
+    from .game_limits import require_new_admission
+    clock=now(handler)
+    require_new_admission(db,session['student_id'],row['game'],row['room_id'],clock)
     stored=deepcopy(result);stored.pop('token',None);stored.pop('gameClaim',None)
     db.execute('INSERT INTO game_claim_requests VALUES (?,?,?,?,?,?,?,?,?)',
-        (session['student_id'],nonce,sig,row['claim_id'],row['game'],row['room_id'],'active',api.packed(stored),now(handler)))
+        (session['student_id'],nonce,sig,row['claim_id'],row['game'],row['room_id'],'active',api.packed(stored),clock))
     result['gameClaim']=public(handler,db,row);return result
 
 def guard_generation(handler,db,session,body,room_id):
@@ -177,7 +189,7 @@ def group_admission(handler,db,session,service,body,action,grade):
         for record in db.execute("SELECT payload_json FROM group_game_rooms WHERE mode=? AND grade=? AND status='waiting'",(mode,grade)).fetchall():
             room=json.loads(record[0]);service._tick(db,room,service.clock());sync_group(db,room)
             if (room['status']=='waiting' and room.get('public',True) and room.get('playMode','human')=='human' and len(room['players'])<5
-                    and room.get('sourcePool',source)==source and room['sourceRevision']==service.source.revision
+                    and room.get('sourcePool',source)==source and room['sourceRevision'] in getattr(service,'accepted_source_revisions',{service.source.revision})
                     and occupants_available(handler,db,mode,room['id'],[p['studentId'] for p in room['players']])):choices.append(room)
         candidate=min(choices,key=lambda room:(-len(room['players']),room['createdAt'],room['id'])) if choices else None
     elif action=='join':
@@ -208,7 +220,7 @@ def bot_start(handler,db,session,body,questions,source_metadata=None):
     from .learning_update import consume
     from .arena import question_seconds
     consume(db,session,'bot',nonce)
-    clock=now(handler);grade=api.academic()[0]-session['birth_year']-5
+    clock=now(handler);grade=api.grade_for_student(db,session['student_id'],session['birth_year'])
     grace=max(question_seconds(grade,q['difficulty']) for q in bank)*1000+60000
     hard=clock+5000+sum(question_seconds(grade,q['difficulty'])*1000+3000 for q in bank)+grace
     room_id=secrets.token_hex(16);initial={'grade':grade,'questions':bank,'index':0,'hp':100,'opponentHp':100,'opponent':'BOT',

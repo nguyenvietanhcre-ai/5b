@@ -39,3 +39,7 @@ Thumbs.db
 /cloudflare/learning-seed.sql
 /cloudflare/.venv-workers/
 /content/lesson-library/
+/backend/curriculum-samples.json
+/backend/website-cutover-state.json
+/cloudflare/release-content.json
+/cloudflare/wrangler.production-local.jsonc

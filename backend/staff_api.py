@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from http.cookies import SimpleCookie
 from urllib.parse import parse_qs, urlsplit
 from .platform_api import (APIError, DEFAULT_THEME, MASCOT_NAMES, MASCOT_DISPLAY_NAMES, VN, academic, connect, limit_auth, mascot_code, now, packed,
-                           ensure_grade, nickname_field, password_hash, stamp,
+                           ensure_grade, grade_for_student, nickname_field, password_hash, stamp,
                            text_field, verify_password, same_origin, session_cookie,
                            prepare_login, verified_login)
 from .system_settings import settings
@@ -372,14 +372,18 @@ def accounts(db, handler):
     if status not in ('all', 'active', 'suspended', 'deleted'):
         raise APIError('Bộ lọc trạng thái không hợp lệ.')
     year = academic()[0]
-    clause = ('WHERE (?=0 OR min(5,max(1,?-a.birth_year-5))=?) '
+    grade_sql = ('min(5,max(1,?+coalesce((SELECT fc.declared_grade-fc.grade_academic_year '
+                 'FROM family_children fc WHERE fc.student_id=s.id),-a.birth_year-5)))'
+                 if db.execute("SELECT 1 FROM sqlite_master WHERE name='family_children'").fetchone()
+                 else 'min(5,max(1,?-a.birth_year-5))')
+    clause = ('WHERE (?=0 OR '+grade_sql+'=?) '
               'AND (instr(lower(s.full_name),lower(?))>0 OR instr(lower(a.login_identifier),lower(?))>0) '
               'AND ((?=\'deleted\' AND a.deleted_at IS NOT NULL) '
               'OR (?<>\'deleted\' AND a.deleted_at IS NULL AND (?=\'all\' OR a.status=?)))')
     values = (grade, year, grade, search, search, status, status, status, status)
     total = db.execute('SELECT count(*) FROM accounts a JOIN students s ON s.account_id=a.id ' + clause, values).fetchone()[0]
     rows = db.execute('SELECT a.id,a.login_identifier,a.birth_year,a.status,a.vip_expires_at,a.is_demo,a.revision,a.deleted_at,'
-                      's.id student_id,s.full_name,min(5,max(1,?-a.birth_year-5)) grade_level,'
+                      's.id student_id,s.full_name,'+grade_sql+' grade_level,'
                       "(SELECT c.name FROM online_classes c JOIN class_enrollments e ON e.class_id=c.id WHERE e.student_id=s.id AND e.left_at IS NULL LIMIT 1) class_name,"
                       "CASE WHEN EXISTS(SELECT 1 FROM access_entitlements x WHERE x.account_id=a.id AND x.starts_at<=? AND (x.ends_at IS NULL OR x.ends_at>?)) THEN 'SVip' "
                       "WHEN a.vip_expires_at>? THEN 'VIP' ELSE 'Free' END membership "
@@ -405,7 +409,7 @@ def account_profile(db, row):
     companion = db.execute('SELECT m.name,c.xp FROM student_companions c JOIN mascots m ON m.id=c.mascot_id '
                            'WHERE c.student_id=?', (row['student_id'],)).fetchone()
     return {**dict(row), 'full_name': safe_nickname(row['full_name']),
-            'grade_level': max(1, min(5, academic()[0]-row['birth_year']-5)),
+            'grade_level': grade_for_student(db,row['student_id'],row['birth_year']),
             'membership': membership, 'membership_expires_at': expiry,
             'mascot': mascot_code(companion['name'] if companion else None), 'points': companion['xp'] if companion else 0}
 
@@ -695,11 +699,18 @@ def content_list(db, handler):
                 presentation = json.loads(row['presentation_json'])
             except (ValueError, TypeError):
                 presentation = {}
+            if not isinstance(presentation, dict):
+                presentation = {}
             example = presentation.get('example') if isinstance(presentation, dict) else None
             row['exampleText'] = example.get('text', '') if isinstance(example, dict) else ''
             steps = example.get('steps', []) if isinstance(example, dict) else []
             row['exampleSteps'] = '\n'.join(step for step in steps if isinstance(step, str)) if isinstance(steps, list) else ''
             row['videoUrl'] = row['video_ref'] or ''
+            from .lesson_resources import project_materials, public_examples, video_preview, staff_bunny_video
+            row['materials'] = project_materials(presentation.get('materials', []), 'main', row['client_key'], row['revision'], admin=True)
+            row['examples'] = public_examples(presentation)
+            row['videoPreview'] = video_preview(row['videoUrl'])
+            row['bunnyVideo'] = staff_bunny_video(db, presentation, 'main', row['client_key'])
     elif kind == 'questions':
         clause = 'WHERE v.revision=(SELECT max(x.revision) FROM question_versions x WHERE x.question_id=q.id) AND (?=0 OR q.grade_id=?) AND (instr(lower(v.prompt_json),lower(?))>0 OR instr(lower(q.question_code),lower(?))>0)'
         values = (grade, grade, search, search)
@@ -744,7 +755,7 @@ def save_topic(db, user, body):
     return {'saved': True, 'id': identity}
 
 
-def save_lesson(db, user, body):
+def save_lesson(db, user, body, server):
     identity = body.get('id')
     old = get_row(db, 'lessons', identity) if identity else None
     if old:
@@ -756,7 +767,8 @@ def save_lesson(db, user, body):
     if old and old['grade_id'] != grade and db.execute('SELECT 1 FROM lesson_progress WHERE lesson_id=?', (identity,)).fetchone():
         raise APIError('Bài đã có tiến độ học. Tạo bài mới khi chuyển khối.')
     title, intro = text_field(body, 'title', 180), text_field(body, 'intro', 20000)
-    week, video = number(body, 'week', 1, 53), url_field(body, 'videoUrl')
+    from .lesson_resources import save_lesson_video, normalize_examples, normalize_materials, bind_materials
+    week = number(body, 'week', 1, 53)
     kind, status = body.get('kind'), body.get('status')
     if kind not in ('weekly', 'topic') or status not in ('draft', 'published'):
         raise APIError('Loại bài hoặc trạng thái phát hành không hợp lệ.')
@@ -767,7 +779,12 @@ def save_lesson(db, user, body):
         presentation = {}
     if not isinstance(presentation, dict):
         presentation = {}
-    if 'exampleText' in body or 'exampleSteps' in body:
+    video = save_lesson_video(db, server, user, body, presentation, 'main', key,
+                              'videoUrl', (old['video_ref'] or '') if old else '', publishing=status == 'published')
+    if 'examples' in body:
+        presentation['examples'] = normalize_examples(body['examples'])
+        presentation['example'] = presentation['examples'][0] if presentation['examples'] else None
+    elif 'exampleText' in body or 'exampleSteps' in body:
         old_example = presentation.get('example') if isinstance(presentation.get('example'), dict) else {}
         example_text = text_field(body, 'exampleText', 20000, 0) if 'exampleText' in body else old_example.get('text', '')
         steps = body.get('exampleSteps', old_example.get('steps', []))
@@ -779,8 +796,11 @@ def save_lesson(db, user, body):
         if steps and not example_text:
             raise APIError('Điền đề bài ví dụ trước khi nhập các bước giải.')
         presentation['example'] = {'text': example_text, 'steps': steps} if example_text else None
+        presentation['examples'] = [presentation['example']] if presentation['example'] else []
     elif not old:
         presentation['example'] = None
+    if 'materials' in body:
+        presentation['materials'] = normalize_materials(db, body['materials'], 'main', key)
     presentation.update(id=key, grade=grade, topic=topic['client_key'], title=title, week=week,
                         theory=intro, description=intro[:160], symbol=presentation.get('symbol', '+'))
     blocks = replace_intro(old['body_json'], intro) if old else [{'type': 'text', 'text': intro}]
@@ -789,6 +809,7 @@ def save_lesson(db, user, body):
         db.execute('UPDATE lessons SET grade_id=?,topic_id=?,kind=?,week_no=?,title=?,body_json=?,video_ref=?,client_key=?,presentation_json=?,publication_status=?,revision=revision+1 WHERE id=?', (*values, identity))
     else:
         identity = db.execute('INSERT INTO lessons(grade_id,topic_id,kind,week_no,title,body_json,video_ref,client_key,presentation_json,publication_status) VALUES (?,?,?,?,?,?,?,?,?,?)', values).lastrowid
+    bind_materials(db, presentation.get('materials', []), 'main', key, old['revision'] + 1 if old else 1, grade, status == 'published')
     audit(db, user, 'save', 'lesson', identity, title + ' · ' + status)
     return {'saved': True, 'id': identity}
 
@@ -864,11 +885,13 @@ def save_question(db, user, body):
 
 def payment_list(db, handler):
     from .learning_update import membership
+    from .family_cart import order_view as family_order_view
     search, _, page = page_query(handler)
     referrer_search = parse_qs(urlsplit(handler.path).query).get('referrer', [''])[0][:100].strip()
     clause = ('WHERE (instr(lower(o.reference),lower(?))>0 OR instr(lower(a.login_identifier),lower(?))>0 '
               'OR instr(lower(s.full_name),lower(?))>0 OR instr(lower(ra.login_identifier),lower(?))>0 '
-              'OR instr(lower(rs.full_name),lower(?))>0)')
+              'OR instr(lower(rs.full_name),lower(?))>0) AND o.family_cart_order_id IS NULL '
+              'AND o.family_cart_product_line_id IS NULL')
     values = (search,) * 5
     if referrer_search:
         clause += ' AND (instr(lower(ra.login_identifier),lower(?))>0 OR instr(lower(rs.full_name),lower(?))>0)'
@@ -879,7 +902,28 @@ def payment_list(db, handler):
               'LEFT JOIN referral_reward_confirmations rc ON rc.referral_id=r.id '
               'LEFT JOIN accounts ra ON ra.id=r.inviter_account_id '
               'LEFT JOIN students rs ON rs.account_id=ra.id ')
-    total = db.execute('SELECT count(*) ' + source + clause, values).fetchone()[0]
+    family_source = ('FROM family_cart_orders o JOIN family_accounts f ON f.id=o.family_id '
+                     'WHERE (instr(lower(o.reference),lower(?))>0 OR instr(lower(f.email),lower(?))>0 '
+                     "OR instr(lower(json_extract(o.purchaser_json,'$.name')),lower(?))>0 "
+                     'OR EXISTS(SELECT 1 FROM family_cart_order_items i WHERE i.order_id=o.id '
+                     "AND instr(lower(json_extract(i.item_json,'$.studentName')),lower(?))>0) "
+                     'OR EXISTS(SELECT 1 FROM family_cart_product_order_items i WHERE i.order_id=o.id '
+                     "AND instr(lower(json_extract(i.item_json,'$.studentName')),lower(?))>0))")
+    family_values = (search,) * 5
+    if referrer_search:
+        family_source += (' AND EXISTS(SELECT 1 FROM family_cart_order_items i JOIN students s ON s.id=i.referrer_student_id '
+                          'JOIN accounts a ON a.id=s.account_id WHERE i.order_id=o.id '
+                          'AND (instr(lower(a.login_identifier),lower(?))>0 OR instr(lower(s.full_name),lower(?))>0))')
+        family_values += (referrer_search,) * 2
+    # Keep one chronological and searchable payment list. Child grant records
+    # are entitlement evidence and would double-count the transfer here.
+    matches = ('SELECT o.id AS id,o.created_at AS created_at,0 AS family_order ' + source + clause +
+               ' UNION ALL SELECT o.id,o.created_at,1 ' + family_source)
+    total = db.execute('SELECT count(*) FROM (' + matches + ')', (*values, *family_values)).fetchone()[0]
+    keys = db.execute(matches + ' ORDER BY created_at DESC,family_order DESC,id DESC LIMIT 25 OFFSET ?',
+                      (*values, *family_values, (page - 1) * 25)).fetchall()
+    legacy = [key['id'] for key in keys if not key['family_order']]
+    legacy_placeholders = ','.join('?' for _ in legacy) or 'NULL'
     rows = [dict(row) for row in db.execute('SELECT o.*,a.login_identifier,s.full_name,f.month,c.name class_name,'
             'ra.id referrer_account_id,ra.login_identifier referrer_login,rs.full_name referrer_name,'
             'r.id referrer_referral_id,ra.deleted_at referrer_deleted_at,'
@@ -888,8 +932,8 @@ def payment_list(db, handler):
             'rc.confirmed_at referrer_support_confirmed_at,rc.confirmed_by referrer_support_confirmed_by,'
             'r.reward_status referrer_reward_status,r.reward_granted_at referrer_reward_granted_at,'
             'r.reward_vip_expires_at referrer_reward_vip_expires_at ' + source +
-            'LEFT JOIN class_fees f ON f.id=o.fee_id LEFT JOIN online_classes c ON c.id=f.class_id ' + clause +
-            ' ORDER BY o.id DESC LIMIT 25 OFFSET ?', (*values, (page-1)*25))]
+            'LEFT JOIN class_fees f ON f.id=o.fee_id LEFT JOIN online_classes c ON c.id=f.class_id '
+            f'WHERE o.id IN ({legacy_placeholders})', legacy)]
     for row in rows:
         row['full_name'] = safe_nickname(row['full_name'])
         referrer = {'accountId': row.pop('referrer_account_id'), 'login': row.pop('referrer_login'),
@@ -909,16 +953,33 @@ def payment_list(db, handler):
             row['referrer'] = referrer
         else:
             row['referrer'] = None
-    return {'rows': rows, 'total': total, 'page': page, 'pageSize': 25}
+    by_id = {row['id']: row for row in rows}
+    result = []
+    for key in keys:
+        if not key['family_order']:
+            result.append(by_id[key['id']])
+            continue
+        order = db.execute('SELECT o.*,f.email FROM family_cart_orders o JOIN family_accounts f ON f.id=o.family_id '
+                           'WHERE o.id=?', (key['id'],)).fetchone()
+        public = family_order_view(db, order)
+        result.append({**{field: public[field] for field in ('id', 'reference', 'amount', 'status', 'created_at', 'paid_at',
+                                                               'fulfillmentStatus', 'receivedAmount', 'reviewReason',
+                                                               'checkoutBlocked', 'items')},
+                       'isFamilyOrder': True, 'login_identifier': order['email'],
+                       'full_name': json.loads(order['purchaser_json'])['name']})
+    return {'rows': result, 'total': total, 'page': page, 'pageSize': 25}
 
 
-def confirm_payment(db, user, identity, body):
+def confirm_payment(db, user, identity, body, *, family_order=False):
     from .payments import settle_order
-    order = get_row(db, 'payment_orders', identity)
+    order = get_row(db, 'family_cart_orders' if family_order else 'payment_orders', identity)
+    if not family_order and (order['family_cart_order_id'] is not None or order['family_cart_product_line_id'] is not None):
+        raise APIError('Không tìm thấy dữ liệu.', 404)
     if body.get('reference') != order['reference'] or type(body.get('amount')) is not int or body['amount'] != order['amount']:
         raise APIError('Đối chiếu chính xác mã đơn và số tiền đã nhận.')
     if settle_order(db, order, 'staff'):
-        audit(db, user, 'confirm', 'payment', identity, order['reference'] + ' · ' + str(order['amount']) + ' đồng')
+        audit(db, user, 'confirm', 'family_payment' if family_order else 'payment', identity,
+              order['reference'] + ' · ' + str(order['amount']) + ' đồng')
     return {'saved': True}
 
 
@@ -1067,12 +1128,15 @@ def dispatch(handler, method, path, body=None):
             fn = save_assignment if match[2] == 'assignments' else save_records
             return fn(db, user, int(match[1]), body), 200
         require_admin(user)
+        if path.startswith('/api/staff/bunny-stream/'):
+            from .bunny_stream import staff_dispatch as bunny_dispatch
+            return bunny_dispatch(handler.server, db, user, method, path, body), 200
         if path.startswith('/api/staff/catalogue/') or path == '/api/staff/management':
             from .admin_catalogue import dispatch as catalogue_dispatch
             return catalogue_dispatch(handler,db,user,method,path,body)
         if path.startswith('/api/staff/native-lessons'):
             from .admin_native import dispatch as native_dispatch
-            return native_dispatch(handler,user,method,path,body,parse_qs(urlsplit(handler.path).query))
+            return native_dispatch(handler,user,method,path,body,parse_qs(urlsplit(handler.path).query),db)
         if path == '/api/staff/admissions' and method == 'GET':
             from .admissions import list_registrations
             query, _, page = page_query(handler)
@@ -1088,7 +1152,9 @@ def dispatch(handler, method, path, body=None):
                       for name, table in [('students', 'students'), ('classes', 'online_classes'), ('lessons', 'lessons'), ('questions', 'questions')]}
             counts['students'] = db.execute('SELECT count(*) FROM students s LEFT JOIN accounts a ON a.id=s.account_id '
                                            'WHERE a.deleted_at IS NULL').fetchone()[0]
-            counts['pendingPayments'] = db.execute("SELECT count(*) FROM payment_orders WHERE status='pending'").fetchone()[0]
+            counts['pendingPayments'] = db.execute("SELECT (SELECT count(*) FROM payment_orders WHERE status='pending' "
+                                                  "AND family_cart_order_id IS NULL)+(SELECT count(*) FROM family_cart_orders "
+                                                  "WHERE status='pending')").fetchone()[0]
             return {'counts': counts}, 200
         if path == '/api/staff/accounts':
             if method == 'GET':
@@ -1107,8 +1173,10 @@ def dispatch(handler, method, path, body=None):
                 return save_staff(db, user, body, credential), 200
         if path == '/api/staff/content' and method == 'GET':
             return content_list(db, handler), 200
-        if path in ('/api/staff/topics', '/api/staff/lessons', '/api/staff/questions') and method == 'POST':
-            fn = {'topics': save_topic, 'lessons': save_lesson, 'questions': save_question}[path.rsplit('/', 1)[1]]
+        if path == '/api/staff/lessons' and method == 'POST':
+            return save_lesson(db, user, body, handler.server), 200
+        if path in ('/api/staff/topics', '/api/staff/questions') and method == 'POST':
+            fn = {'topics': save_topic, 'questions': save_question}[path.rsplit('/', 1)[1]]
             return fn(db, user, body), 200
         if path == '/api/staff/payments' and method == 'GET':
             return payment_list(db, handler), 200
@@ -1119,9 +1187,11 @@ def dispatch(handler, method, path, body=None):
         if referral_support and method == 'POST':
             from .referral_support import confirm_support
             return confirm_support(db, user, int(referral_support[1]), body), 200
-        match = re.fullmatch(r'/api/staff/payments/(\d+)/confirm', path)
+        match = re.fullmatch(r'/api/staff/(payments|family-payments)/([1-9][0-9]{0,18})/confirm', path)
         if match and method == 'POST':
-            return confirm_payment(db, user, int(match[1]), body), 200
+            if int(match[2]) >= 2**63:
+                raise APIError('Không tìm thấy dữ liệu.', 404)
+            return confirm_payment(db, user, int(match[2]), body, family_order=match[1] == 'family-payments'), 200
         if path == '/api/staff/settings':
             if method == 'GET':
                 return {'settings': settings(db)}, 200

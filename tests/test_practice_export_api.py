@@ -12,7 +12,7 @@ from test_arena_penalties import Client
 CREDENTIAL=api.password_hash('export-native-qa-only')
 class PracticeExportGateTests(unittest.TestCase):
     def setUp(self):
-        root=Path(__file__).resolve().parents[1]/'work';root.mkdir(exist_ok=True)
+        root=Path(__file__).resolve().parents[2]/'test-tmp';root.mkdir(exist_ok=True)
         self.tmp=tempfile.TemporaryDirectory(dir=root);self.path=Path(self.tmp.name)/'fresh.sqlite3'
         initialize(self.path);api.initialize_catalog(self.path)
         self.server=object.__new__(HTTPServer);self.server.database_path=self.path;self.server.review_upgrades=False;self.server.arena=Arena()

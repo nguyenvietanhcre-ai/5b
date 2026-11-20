@@ -53,8 +53,11 @@ class OwlMascotTests(unittest.TestCase):
 
     def test_old_catalog_adds_owl_without_changing_existing_companion(self):
         client, _, _ = self.user()
-        client.call('mascot', {'mascot': 'fox'})
+        account_id = client.call('session')['account']['id']
         with connect(self.path, True) as db:
+            # Existing initial choice, not a user reselect.
+            db.execute('UPDATE student_companions SET mascot_id=(SELECT id FROM mascots WHERE name=?) '
+                       'WHERE student_id=(SELECT id FROM students WHERE account_id=?)', ('Cáo Nâu', account_id))
             before = tuple(db.execute('SELECT student_id,mascot_id,xp FROM student_companions').fetchone())
             db.execute('DELETE FROM mascots WHERE name=?', ('Cú mèo',))
         seed_catalog(self.path)

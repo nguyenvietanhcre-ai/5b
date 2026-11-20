@@ -35,10 +35,8 @@ CREATE TABLE bots_new (
 INSERT INTO bots_new SELECT id,kind,display_name,skill_level,active,MAX(0,xp-1000) FROM bots;
 DROP TABLE bots;
 ALTER TABLE bots_new RENAME TO bots;
--- Verify actual constraints before clearing SQLite's deferred DROP/RENAME
--- bookkeeping. The guard exists only inside this atomic migration; Durable
--- Object SQLite rejects TEMP tables, so use a regular table and drop it here.
-CREATE TABLE mascot_rank_fk_check (violations INTEGER CHECK (violations=0));
+-- Never clear deferred enforcement until the replacement schema is valid.
+CREATE TEMP TABLE mascot_rank_fk_check (violations INTEGER CHECK (violations=0));
 INSERT INTO mascot_rank_fk_check SELECT COUNT(*) FROM pragma_foreign_key_check;
 DROP TABLE mascot_rank_fk_check;
 PRAGMA defer_foreign_keys = OFF;

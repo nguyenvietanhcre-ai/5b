@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { pages, esc } = require('../frontend/app.js');
 const { manifest } = require('../frontend/runtime-assets.js');
+const siteShell=require('./site-shell.cjs');
 
 const site = 'https://5bmath.vn/';
 const frontend = path.resolve(__dirname, '../frontend');
@@ -43,7 +44,7 @@ for (const [id, page] of Object.entries(pages)) {
             page.render() + '</main>');
     const folder = path.join(output, page.path);
     fs.mkdirSync(folder, { recursive: true });
-    fs.writeFileSync(path.join(folder, 'index.html'), html.replace(/[ \t]+$/gm, ''));
+    fs.writeFileSync(path.join(folder, 'index.html'), (target==='python'?html:siteShell.rebase(siteShell.shell(html),target)).replace(/[ \t]+$/gm, ''));
     if (!page.noindex) sitemap.push(canonical);
 }
 
@@ -60,6 +61,7 @@ for (const asset of new Set([...core, ...manifest.files])) {
 for (const directory of ['arena-art', 'theme-art']) {
     fs.cpSync(path.join(frontend, directory), path.join(output, directory), {recursive: true});
 }
+siteShell.copyExtra(frontend,output,target);
 }
 const root = target === 'github' ? '/5b/' : '/';
 fs.writeFileSync(path.join(output, '404.html'), `<!doctype html>

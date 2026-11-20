@@ -46,7 +46,7 @@ const ThemeManager = (() => {
         if(binding) updateSettings();
     }
     function renderSettings() {
-        return `<section class="card card-pad theme-settings" id="appearance" aria-labelledby="appearance-title"><div class="theme-settings-heading"><div><span class="eyebrow">KHU VƯỜN CỦA EM</span><h2 id="appearance-title">Giao diện của em</h2><p id="appearance-help">Chọn phong cách em thích để xem trước, rồi bấm Áp dụng.</p></div><span class="tag sage">5 phong cách</span></div><form id="appearance-form"><fieldset class="theme-fieldset" aria-describedby="appearance-help"><legend>Chọn giao diện</legend><div class="theme-options">${options.map(option => `<label class="theme-option"><input type="radio" name="appearance-theme" value="${option.id}" ${savedTheme === option.id ? 'checked' : ''}><span class="theme-preview" data-preview-theme="${option.id}" aria-hidden="true"><span class="theme-preview-bar"><i></i><i></i><i></i></span><span class="theme-preview-hero"><span class="theme-preview-heading">Học vui mỗi ngày</span><span class="theme-preview-actions"><i></i><b></b></span></span><span class="theme-preview-cards"><i></i><i></i><i></i></span></span><span class="theme-option-copy"><strong>${option.number} · ${option.name}</strong><span>${option.description}</span>${option.id === defaultTheme ? '<small>Mặc định của 5BMath</small>' : ''}</span><span class="theme-option-check" aria-hidden="true"></span></label>`).join('')}</div></fieldset><p class="theme-settings-status" id="appearance-status" role="status" aria-live="polite">Đang dùng ${label(savedTheme)}.</p><div class="actions theme-settings-actions"><button class="btn dark" type="submit" disabled>Áp dụng</button><button class="btn outline" id="appearance-cancel" type="button" disabled>Hủy xem trước</button><button class="btn outline" id="appearance-default" type="button">Mặc định: ${label(defaultTheme)}</button></div><p class="learning-notice">${owner === null ? 'Lựa chọn được lưu trong trình duyệt này.' : 'Lựa chọn được lưu theo tài khoản để dùng lại trên thiết bị khác.'}</p></form></section>`;
+        return `<section class="card card-pad theme-settings theme-settings-compact" id="appearance" aria-labelledby="appearance-title"><h2 id="appearance-title">Giao diện của em</h2><p id="appearance-help">Chọn một nét riêng cho góc học, rồi bấm Áp dụng.</p><form id="appearance-form"><fieldset class="theme-fieldset" aria-describedby="appearance-help"><legend>Chọn giao diện</legend><div class="theme-options">${options.map(option=>`<label class="theme-option"><input type="radio" name="appearance-theme" value="${option.id}" ${savedTheme===option.id?'checked':''}><span class="theme-preview" data-preview-theme="${option.id}" aria-hidden="true"><span class="theme-sample">✿</span></span><span class="theme-option-copy"><strong>${option.name}</strong><span>${option.description}</span></span><span class="theme-option-check" aria-hidden="true"></span></label>`).join('')}</div></fieldset><p id="appearance-status" class="theme-settings-status" role="status" aria-live="polite">Đang dùng ${label(savedTheme)}.</p><button class="btn dark" type="submit" disabled>Áp dụng</button><p class="learning-notice">${owner===null?'Lưu trong trình duyệt này.':'Giao diện được lưu riêng theo hồ sơ của em để dùng trên thiết bị khác.'}</p></form></section>`;
     }
     function updateSettings(message) {
         const context = binding;
@@ -57,8 +57,6 @@ const ThemeManager = (() => {
             input.disabled = context.busy;
         });
         context.form.querySelector('[type="submit"]').disabled = context.busy || !dirty;
-        context.form.querySelector('#appearance-cancel').disabled = context.busy || !dirty;
-        context.form.querySelector('#appearance-default').disabled = context.busy || context.draft === defaultTheme;
         context.form.setAttribute('aria-busy',String(context.busy));
         const status = context.form.querySelector('#appearance-status');
         status.textContent = message || (context.busy ? 'Đang lưu giao diện…' : dirty ? `Đang xem trước ${label(context.draft)}. Bấm Áp dụng để lưu.` : `Đang dùng ${label(savedTheme)}.`);
@@ -122,8 +120,6 @@ const ThemeManager = (() => {
         };
         form.addEventListener('change',context.change);
         form.addEventListener('submit',context.submit);
-        form.querySelector('#appearance-cancel').addEventListener('click',context.cancel);
-        form.querySelector('#appearance-default').addEventListener('click',context.reset);
         updateSettings();
     }
     function unmountSettings() {

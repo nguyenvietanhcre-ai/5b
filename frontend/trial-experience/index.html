@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <base href="/">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#1f6248">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Khám phá cách học Toán lớp 1–5 cùng 5BMath: đọc bài, làm bài ngắn, xem lời giải và thử cùng máy trên dữ liệu mẫu riêng.">
+  <title>Trải nghiệm Toán lớp 1–5 cùng Mầm Sách | 5BMath</title>
+  <link rel="icon" type="image/svg+xml" href="/5bmath-icon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/trial-experience.css">
+  <script src="/arena-art/badge-mascots/data.js" defer></script>
+  <script src="/arena-art/badge-mascots/runtime.js" defer></script>
+  <script src="/solution-view.js" defer></script>
+<script src="/question-frame.js" defer></script>
+<script src="/trial-experience.js" defer></script>
+</head>
+<body class="trial-page">
+  <a class="trial-skip" href="/trai-nghiem/#trial-main">Đến nội dung trải nghiệm</a>
+  <header class="trial-header">
+    <a class="trial-brand" href="/"><img src="/5bmath-logo.svg" width="628" height="168" alt="5BMath — Gieo Mầm Toán"></a>
+    <span class="trial-pill">Dữ liệu mẫu · Giữ tạm</span>
+    <a class="trial-button trial-button-light" href="/gia-dinh/">Đăng nhập gia đình</a>
+  </header>
+  <main id="trial-main" class="trial-layout">
+    <div class="trial-alert" id="trial-message" role="status" aria-live="polite" hidden></div>
+    <aside class="trial-warning" id="trial-idle" role="alert" hidden>
+      <div><strong>Em còn muốn khám phá tiếp không?</strong><p id="trial-idle-text">Phiên sắp hết hạn vì chưa có thao tác.</p></div>
+      <div class="trial-actions"><button class="trial-button" type="button" data-action="continue">Tiếp tục học</button><button class="trial-button trial-button-light" type="button" data-action="end">Kết thúc</button></div>
+    </aside>
+    <section class="trial-hero" aria-labelledby="trial-heading">
+      <div class="trial-hero-copy">
+        <p class="trial-eyebrow">MỘT VÒNG KHÁM PHÁ VƯỜN TOÁN</p>
+        <h1 id="trial-heading">Học một chút.<br>Hiểu thêm thật nhiều.</h1>
+        <p>Chọn lớp từ 1 đến 5, đọc một ý nhỏ, tự làm bài ngắn rồi xem cách giải cùng Mầm Sách. Em có thể bắt đầu ngay, chưa cần tài khoản.</p>
+        <div class="trial-actions"><button type="button" class="trial-button" data-action="start" id="trial-start">Trải nghiệm ngay <span aria-hidden="true">↗</span></button><button type="button" class="trial-button trial-button-light" data-action="guide">Xem 3 bước</button></div>
+        <p class="trial-small">Bộ câu mẫu cố định · Không tính điểm thi hay XP thật</p>
+      </div>
+      <div class="trial-hero-art" aria-hidden="true"><span class="trial-art-sun"></span><canvas width="260" height="300" data-mascot="sprout"></canvas><span class="trial-art-note">Mỗi bước nhỏ,<br>một mầm tự tin!</span></div>
+    </section>
+    <section class="trial-guide" id="trial-guide" aria-labelledby="trial-guide-heading">
+      <div class="trial-section-line"><div><p class="trial-eyebrow">BẮT ĐẦU THẬT NHẸ NHÀNG</p><h2 id="trial-guide-heading">3 bước, em tự khám phá</h2></div><button type="button" class="trial-text-button" data-action="skip-guide">Bỏ qua hướng dẫn</button></div>
+      <ol class="trial-steps">
+        <li><span>1</span><div><strong>Chọn lớp của em</strong><p>Bộ mẫu riêng cho lớp 1, 2, 3, 4 và 5; câu hỏi Trải nghiệm lấy từ nguồn Free.</p></div></li>
+        <li><span>2</span><div><strong>Đọc rồi tự làm</strong><p>Học một ý nhỏ, ghi nháp và gửi đáp án của em.</p></div></li>
+        <li><span>3</span><div><strong>Hiểu qua lời giải</strong><p>Xem kết quả, đọc lời giải rồi thử một trong ba trò chơi mẫu.</p></div></li>
+      </ol>
+    </section>
+    <section class="trial-workspace" id="trial-workspace" aria-labelledby="trial-workspace-heading" hidden>
+      <label class="field" for="trial-grade"><span>Chọn lớp trải nghiệm</span><select id="trial-grade" disabled><option value="1">Lớp 1</option><option value="2">Lớp 2</option><option value="3">Lớp 3</option><option value="4">Lớp 4</option><option value="5" selected>Lớp 5</option></select></label><p class="trial-small">Đổi lớp để mở bộ mẫu riêng; bài và nháp của lớp trước được giữ trong phiên này.</p><div class="trial-section-line"><div><p class="trial-eyebrow">GÓC KHÁM PHÁ CỦA EM</p><h2 id="trial-workspace-heading">Toán 5 · Học thử cùng Mầm Sách</h2></div><span class="trial-pill" id="trial-session-label">Phiên mẫu đang hoạt động</span></div>
+      <nav class="trial-tabs" aria-label="Nội dung trải nghiệm">
+        <button type="button" data-tab="learn" aria-current="page"><span aria-hidden="true">▤</span> Học & luyện</button>
+        <button type="button" data-tab="bot"><span aria-hidden="true">✦</span> Thử với BOT</button>
+        <button type="button" data-tab="family"><span aria-hidden="true">⌂</span> Gia đình mẫu</button>
+      </nav>
+      <div class="trial-panel" id="trial-panel-learn" data-panel="learn">
+        <div class="trial-learn-grid"><article class="trial-card trial-lesson" id="trial-lesson"><h3>Bài học đang được chuẩn bị</h3><p>Nội dung được tải từ bộ mẫu riêng trên máy chủ.</p></article><aside class="trial-card trial-practice-intro"><span class="trial-card-symbol" aria-hidden="true">✎</span><h3>Đến lượt em thử sức</h3><p>Làm một bài ngắn. Em có thể ghi nháp trước khi gửi và xem cách giải sau mỗi câu.</p><button class="trial-button" type="button" data-action="practice">Làm bài ngắn</button><p class="trial-small">Mỗi câu chỉ gửi đáp án một lần</p></aside></div>
+        <div id="trial-practice" class="trial-card trial-question-card" hidden></div>
+      </div>
+      <div class="trial-panel" id="trial-panel-bot" data-panel="bot" hidden><div id="trial-bot-lobby" class="trial-card"></div><div id="trial-bot" class="trial-card trial-question-card" hidden></div></div>
+      <div class="trial-panel" id="trial-panel-family" data-panel="family" hidden><div id="trial-family"></div></div>
+      <details class="trial-preferences trial-card"><summary>Linh vật & màu vườn của em <span class="trial-small">Chỉ áp dụng trong trải nghiệm</span></summary><div id="trial-preferences"></div></details>
+      <div class="trial-session-bar"><p id="trial-time-note">Tự hết hạn sau 30 phút không hoạt động, tối đa 24 giờ.</p><div class="trial-actions"><button class="trial-text-button" type="button" data-action="guide">Xem lại hướng dẫn</button><button class="trial-text-button" type="button" data-action="reset">Bắt đầu lại</button><button class="trial-text-button" type="button" data-action="end">Kết thúc</button></div></div>
+    </section>
+    <section class="trial-card trial-ended" id="trial-ended" hidden><h2>Hẹn em ở vòng khám phá tiếp theo</h2><p id="trial-ended-note">Phiên trải nghiệm đã kết thúc. Em có thể bắt đầu lại để khám phá bộ mẫu.</p><div class="trial-actions"><button type="button" class="trial-button" data-action="start">Bắt đầu phiên mới</button></div></section>
+    <noscript><section class="trial-card"><h2>Học thử Toán lớp 1–5 trên dữ liệu mẫu</h2><p>Bật JavaScript để bắt đầu phiên học, gửi đáp án và xem lời giải. Phiên trải nghiệm dùng bộ câu riêng, giữ tạm tối đa 24 giờ và không tạo tài khoản hay đơn thanh toán thật.</p><p><a href="/bai-hoc-toan-lop-5/">Đọc các bài học công khai</a> hoặc <a href="/gia-dinh/">mở tài khoản gia đình</a>.</p></section></noscript>
+  </main>
+  <footer class="trial-footer"><a href="/">5BMath · Gieo Mầm Toán</a><p>Đây là không gian trải nghiệm. Gia đình, lớp học, lịch và đơn trong trang này đều là minh họa.</p></footer>
+  <dialog id="trial-confirm" class="trial-dialog"><form method="dialog"><h2 id="trial-confirm-title">Bắt đầu lại?</h2><p id="trial-confirm-copy"></p><div class="trial-actions"><button class="trial-button trial-button-light" value="cancel">Quay lại học</button><button class="trial-button" id="trial-confirm-ok" value="confirm">Đồng ý</button></div></form></dialog>
+  <dialog id="trial-challenge" class="trial-dialog"><form method="dialog"><h2>Kiểm tra mẫu localhost</h2><p>Phiên đã được bắt đầu lại nhiều lần. Đây là bước kiểm tra minh họa cục bộ, chưa phải cơ chế chống bot cho website công khai.</p><label for="trial-challenge-answer">Nhập <strong>5BMath</strong> để tiếp tục</label><input id="trial-challenge-answer" class="trial-challenge-input" autocomplete="off" maxlength="30"><div class="trial-actions" style="margin-top:20px"><button class="trial-button trial-button-light" value="cancel">Để sau</button><button class="trial-button" value="confirm">Kiểm tra và tiếp tục</button></div></form></dialog>
+</body>
+</html>

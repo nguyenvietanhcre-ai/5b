@@ -14,7 +14,7 @@ const serverGrading = browser && !offline && document.documentElement.dataset.gr
 let data={name:'',completed:[],attempts:[],homework:null};
 const publicLessonIds = {decimal:'public-decimal',percent:'public-percent'};
 function applyAccount(snapshot) {
-    data.name = snapshot.name ? nicknamePolicy.safe(snapshot.name) : '';
+    data.name = !snapshot.familyParent&&snapshot.name ? nicknamePolicy.safe(snapshot.name) : '';
     data.completed = Object.entries(publicLessonIds).filter(([,key])=>snapshot.state?.completed?.[key]).map(([id])=>id);
     data.attempts = [];
 }
@@ -22,7 +22,7 @@ function configureLearning() {
     learning?.configure({progress:data,saveProgress:save,toast,showModal,redraw:()=>render()});
 }
 async function ensureLearning() {
-    if(!learning){await RuntimeAssets.ensureLearning();learning=LearningApp;configureLearning();}
+    if(!learning){await RuntimeAssets.ensureLearningCore();learning=LearningApp;configureLearning();}
     return learning;
 }
 async function ensureRoute(route) {
@@ -72,8 +72,19 @@ function passwordFields(root) {
     });
 }
 function showModal(html){$('#modal-body').innerHTML=html;passwordFields($('#modal-body'));if(!modal.open)modal.showModal();}
-function updateAccount(){$('#account').innerHTML=data.name?(learning?.avatar()||'<span class="avatar" aria-hidden="true">🌱</span>')+'<span>Góc học tập ↗</span>':'Đăng nhập';}
-async function account(next){if(liveBackend){if(data.name){if(next)next();else location.assign(pageHref('dashboard'));}else realAccount(next);return;}try{await ensureLearning();}catch(error){toast(error.message);return;}if(data.name){if(next)next();else location.assign(pageHref('dashboard'));return;}
+function updateAccount(){
+    const family=liveBackend?PlatformAPI.familyState:null;
+    document.documentElement.classList.toggle('user-signed-in',Boolean(family||data.name));
+    if(family){
+        const parent=family.activeProfile?.type==='parent',target=parent?'Góc Phụ Huynh':family.activeProfile?.type==='child'?'Góc Học Tập':'Chọn hồ sơ';
+        const avatar=window.FamilyProfiles?.avatar?.(),label=document.createElement('span');label.textContent=target;
+        if(avatar instanceof Node)$('#account').replaceChildren(avatar,label);
+        else $('#account').innerHTML=(parent?'<img class="family-parent-icon" src="/family-parent.svg" width="30" height="30" alt="">':'<span class="avatar" aria-hidden="true">🌱</span>')+'<span>'+target+'</span>';
+        document.querySelectorAll('.site-header [data-family-profile-menu]').forEach(host=>host.remove());
+        document.querySelectorAll('a[href]').forEach(a=>{try{if(new URL(a.href,location.href).pathname==='/trai-nghiem/')a.hidden=true;}catch{}});
+    }else $('#account').innerHTML=data.name?(learning?.avatar()||'<span class="avatar" aria-hidden="true">🌱</span>')+'<span>Góc học tập ↗</span>':'Đăng nhập';
+}
+async function account(next){if(liveBackend){if(!next&&PlatformAPI.familyState){const family=PlatformAPI.familyState;location.assign(window.FamilyProfiles?.destination(family)||(family.activeProfile?.type==='parent'?'/gia-dinh/?view=parent':family.activeProfile?.type==='child'?'/tai-khoan/':'/gia-dinh/'));return;}if(data.name){if(next)next();else location.assign(pageHref('dashboard'));}else realAccount(next);return;}try{await ensureLearning();}catch(error){toast(error.message);return;}if(data.name){if(next)next();else location.assign(pageHref('dashboard'));return;}
 if(liveBackend){realAccount(next);return;}
 showModal('<div class="modal-mark" aria-hidden="true">🌱</div><span class="eyebrow">GÓC HỌC TẬP CỦA EM</span><h2 class="modal-title">Chào em, nhà thám hiểm!</h2><p class="modal-copy">Đặt biệt danh để trải nghiệm lớp học 5BMath.</p><form id="name-form"><label for="student-name">Biệt danh của em</label><input class="name-input" id="student-name" placeholder="Ví dụ: Mầm Xanh" minlength="2" maxlength="40" autocomplete="nickname" aria-describedby="nickname-help" required><p class="modal-copy" id="nickname-help">'+esc(nicknamePolicy.help)+'</p><button class="btn dark" type="submit">Bắt đầu trải nghiệm ↗</button></form><p class="modal-note">TÀI KHOẢN MINH HỌA • Không có mật khẩu. Tên và tiến độ chỉ lưu trong trình duyệt này. Chưa có đăng nhập thật hoặc phân quyền bảo vệ tài liệu.</p>');
 const year = document.createElement('label');
@@ -83,16 +94,21 @@ $('#name-form button').before(year);
 $('#name-form').onsubmit=e=>{e.preventDefault();const input=$('#student-name'),error=nicknamePolicy.error(input.value);if(error){input.setCustomValidity(error);input.reportValidity();return;}const name=nicknamePolicy.normalize(input.value);try{learning.setBirthYear($('#student-birth-year').value);}catch(error){toast(error.message);return;}data.name=name;save();updateAccount();modal.close();if(next)next();else location.assign(pageHref('dashboard'));};$('#student-name').oninput=e=>e.target.setCustomValidity('');
 }
 function realAccount(next, kind='login') {
+    if(liveBackend && (kind==='register'||!new URLSearchParams(location.search).has('legacy_login'))){
+        const target=new URL('/gia-dinh/',location.origin);target.searchParams.set('mode',kind);
+        if(next)target.searchParams.set('next',location.pathname+location.search);
+        location.assign(target.href);return;
+    }
     const register = kind === 'register';
     const invite = new URLSearchParams(location.search).get('invite') || '';
-    showModal(`<div class="modal-mark" aria-hidden="true">🌱</div><h2 class="modal-title">${register?'Tạo tài khoản 5BMath':'Đăng nhập 5BMath'}</h2><p>Tiến độ và bài làm được lưu trong database của máy chủ.</p><form id="auth-form"><label class="field"><span>Tên đăng nhập</span><input class="name-input" name="login" autocomplete="username" minlength="3" maxlength="100" required></label><label class="field"><span>Mật khẩu${register?' (ít nhất 6 ký tự)':''}</span><input class="name-input" name="password" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="${register?6:1}" maxlength="128" required></label>${register?`<label class="field"><span>Biệt danh của học sinh</span><input class="name-input" name="name" minlength="2" maxlength="40" autocomplete="nickname" aria-describedby="nickname-help auth-error" required></label><p class="modal-copy" id="nickname-help">${esc(nicknamePolicy.help)}</p><label class="field"><span>Năm sinh (cố định sau đăng ký)</span><input class="name-input" name="birthYear" type="number" required></label><label class="field"><span>Mã giới thiệu (nếu có)</span><input class="name-input" name="inviteCode" maxlength="30" value="${esc(invite)}"></label><p class="learning-notice">Một tài khoản dành cho một học sinh. Khối học được tính từ năm sinh.</p>`:''}<p id="auth-error" role="alert"></p><button class="btn dark" type="submit">${register?'Tạo tài khoản':'Đăng nhập'}</button></form><button class="btn outline" id="auth-switch" type="button">${register?'Đã có tài khoản? Đăng nhập':'Chưa có tài khoản? Đăng ký'}</button>`);
+    showModal(`<div class="modal-mark" aria-hidden="true">🌱</div><h2 class="modal-title">${register?'Tạo tài khoản 5BMath':'Đăng nhập 5BMath'}</h2><p>Tiến độ và bài làm được lưu trong database của máy chủ.</p><form id="auth-form"><label class="field"><span>Tên đăng nhập</span><input class="name-input" name="login" autocomplete="username" minlength="3" maxlength="100" required></label><label class="field"><span>Mật khẩu${register?' (ít nhất 6 ký tự)':''}</span><input class="name-input" name="password" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="${register?6:1}" maxlength="128" required></label>${register?`<label class="field"><span>Biệt danh của học sinh</span><input class="name-input" name="name" minlength="2" maxlength="40" autocomplete="nickname" aria-describedby="nickname-help auth-error" required></label><p class="modal-copy" id="nickname-help">${esc(nicknamePolicy.help)}</p><label class="field"><span>Năm sinh (cố định sau đăng ký)</span><input class="name-input" name="birthYear" type="number" required></label><label class="field"><span>Mã giới thiệu (nếu có)</span><input class="name-input" name="inviteCode" maxlength="30" value="${esc(invite)}"></label><fieldset class="website-representative"><legend>Người đại diện của học sinh</legend><p class="website-draft-note">Phụ huynh/người đại diện điền phần này. Đây là thông tin tự khai, chưa xác minh danh tính hoặc quan hệ giám hộ.</p><label class="field"><span>Họ tên người đại diện</span><input class="name-input" name="representativeName" maxlength="120" minlength="2" autocomplete="name" required></label><label class="field"><span>Email hoặc số điện thoại người đại diện</span><input class="name-input" name="representativeContact" maxlength="180" minlength="2" required></label><label class="field"><span>Vai trò</span><select name="representativeRole" required><option value="parent">Phụ huynh</option><option value="guardian">Người đại diện theo pháp luật</option></select></label><label class="website-consent"><input name="legalAccepted" type="checkbox" required><span>Tôi xác nhận vai trò đã khai, đã đọc và đồng ý <a href="/dieu-khoan/" target="_blank" rel="noopener">Điều khoản</a> và <a href="/bao-ve-du-lieu/" target="_blank" rel="noopener">Thông báo bảo vệ dữ liệu</a> cho việc tạo hồ sơ học sinh trong bản thử nghiệm.</span></label><p class="website-draft-note">Phiên bản 2026-11-17-draft1 · Chờ chủ quản duyệt. Không đăng ký nhận quảng cáo.</p></fieldset><p class="learning-notice">Một tài khoản dành cho một học sinh. Khối học được tính từ năm sinh.</p>`:''}<p id="auth-error" role="alert"></p><button class="btn dark" type="submit">${register?'Tạo tài khoản':'Đăng nhập'}</button></form><button class="btn outline" id="auth-switch" type="button">${register?'Đã có tài khoản? Đăng nhập':'Chưa có tài khoản? Đăng ký'}</button>`);
     $('#auth-form [name=name]')?.addEventListener('input',event=>{event.target.removeAttribute('aria-invalid');$('#auth-error').textContent='';});
     $('#auth-switch').onclick=()=>realAccount(next,register?'login':'register');
     $('#auth-form').onsubmit=async event=>{
         event.preventDefault();
         const form=event.currentTarget, button=form.querySelector('button[type=submit]');
         const values=Object.fromEntries(new FormData(form));
-        if(register){const error=nicknamePolicy.error(values.name);if(error){$('#auth-error').textContent=error;const input=form.elements.name;input.setAttribute('aria-invalid','true');input.focus();return;}values.name=nicknamePolicy.normalize(values.name);values.birthYear=Number(values.birthYear);}
+        if(register){const error=nicknamePolicy.error(values.name);if(error){$('#auth-error').textContent=error;const input=form.elements.name;input.setAttribute('aria-invalid','true');input.focus();return;}values.name=nicknamePolicy.normalize(values.name);values.birthYear=Number(values.birthYear);values.legalConsent={accepted:values.legalAccepted==='on',version:'2026-11-17-draft1',name:values.representativeName,contact:values.representativeContact,role:values.representativeRole};for(const key of ['legalAccepted','representativeName','representativeContact','representativeRole'])delete values[key];}
         if(button.disabled)return;
         button.disabled=true;button.textContent=register?'Đang tạo tài khoản…':'Đang đăng nhập…';
         form.setAttribute('aria-busy','true');
@@ -144,7 +160,8 @@ function home(){
           <h1 id="home-heading">Học Toán lớp 5,<br><em>tự tin vào lớp 6.</em></h1>
           <p>Học chắc kiến thức, vui luyện tư duy và tự tin bước vào lớp 6.</p>
           <div class="actions">
-            <a class="btn dark" href="${pageHref('courses')}">Khám phá bài học <span aria-hidden="true">→</span></a>
+            <a class="btn dark" href="trai-nghiem/">Trải nghiệm ngay <span aria-hidden="true">→</span></a>
+            <a class="btn outline" href="${pageHref('courses')}">Khám phá bài học <span aria-hidden="true">→</span></a>
             <a class="btn outline" href="${pageHref('exam')}">Thử sức 15 phút <span aria-hidden="true">→</span></a>
           </div>
         </div>
@@ -384,8 +401,17 @@ async function render(route = renderedRoute) {
     learning?.unmount();
     clearInterval(clock);
     document.body.classList.toggle('learning-mode', route === 'dashboard' || route.startsWith('learn-'));
+    if(!(route==='dashboard'||route.startsWith('learn-'))||(liveBackend&&PlatformAPI.familyState?.activeProfile?.type==='parent'))window.GameSession?.unmountGlobal();
     document.body.classList.toggle('staff-mode',route.startsWith('staff-'));
     $('#app').innerHTML = pages[route].render();
+    if(liveBackend&&route==='learn-payment'&&PlatformAPI.familyState?.activeProfile?.type==='parent'){
+        const family=PlatformAPI.familyState,child=family.children?.find(c=>String(c.id)===String(family.selectedChildId));
+        if(child){const banner=document.createElement('section');banner.className='family-beneficiary';
+            const label=document.createElement('strong');label.textContent='Gói học cho '+(child.nickname||child.name)+' · Lớp '+child.grade;
+            const back=document.createElement('a');back.href='/gia-dinh/?view=parent';back.textContent='Về Góc Phụ Huynh';banner.append(label,back);
+            ($('#app .content')||$('#app')).prepend(banner);
+        }
+    }
     document.title = route==='home' ? pages[route].title : pages[route].title + ' | 5BMath';
     document.querySelector('meta[name="description"]')?.setAttribute('content',pages[route].description);
     const robots=document.querySelector('meta[name="robots"]');
@@ -397,6 +423,7 @@ async function render(route = renderedRoute) {
     if (route === renderedRoute && !battleScroll) window.scrollTo({ top: 0, behavior: 'instant' });
     renderedRoute = route;
     updateAccount();
+    window.AppShell?.sync();
     bind(route);
     if (route === 'dashboard' || route.startsWith('learn-')) learning.mount(route === 'dashboard' ? 'dashboard' : route.slice(6));
     if (route.startsWith('staff-')) staff.mount(route.slice(6),{showModal,toast,passwordFields});
@@ -431,7 +458,7 @@ async function navigate(focusAnchor = false) {
 async function start() {
     const entry=document.documentElement.dataset.page||'home';
     const privateRoute=entry==='dashboard'||entry.startsWith('learn-')||entry.startsWith('staff-');
-    if(liveBackend)initialSession=PlatformAPI.refresh({compact:!privateRoute}).then(snapshot=>{applyAccount(snapshot);}).catch(error=>{if(error.name!=='AbortError')toast('Chưa thể kiểm tra phiên. Em có thể thử đăng nhập lại.');});
+    if(liveBackend)initialSession=Promise.resolve(window.FamilyProfiles?.init?.()).then(()=>PlatformAPI.refresh({compact:!privateRoute})).then(snapshot=>{applyAccount(snapshot);}).catch(error=>{if(error.name!=='AbortError')toast('Chưa thể kiểm tra phiên. Em có thể thử đăng nhập lại.');});
     loadProgress();
     configureLearning();
     modal = $('#modal');
@@ -484,6 +511,17 @@ async function start() {
     // Public controls/rendering never wait for the session network request.
     if(!privateRoute){await navigate();window.PageLoading?.finish();}
     await initialSession;
+    if(liveBackend&&PlatformAPI.familyState&&entry==='home'&&location.pathname==='/'&&!location.hash&&!new URLSearchParams(location.search).has('home')){
+        location.replace(window.FamilyProfiles.destination(PlatformAPI.familyState));return;
+    }
+    if(liveBackend&&PlatformAPI.familyState&&privateRoute&&!entry.startsWith('staff-')){
+        const family=PlatformAPI.familyState,commerce=/^\/(?:nang-cap|thanh-toan)\/$/.test(location.pathname);
+        if(commerce&&family.activeProfile?.type==='parent'&&family.scope!=='parent_full'){PlatformAPI.unlockParentHere(family);return;}
+        if(entry==='learn-payment'&&family.activeProfile?.type==='parent'){const params=new URLSearchParams(location.search),requested=params.get('childId');if(requested&&requested!==String(family.selectedChildId||'')){const next=new URLSearchParams({childId:requested}),period=params.get('period');if(['month','year'].includes(period))next.set('period',period);location.replace('/nang-cap/?'+next);return;}}
+        if(family.activeProfile?.type!=='child'&&!commerce){location.replace(family.activeProfile?.type==='parent'?'/gia-dinh/?view=parent':'/gia-dinh/?view=profiles');return;}
+        if(family.onboarding?.needsChild){location.replace('/gia-dinh/?view=create-child');return;}
+    }
+    if(new URLSearchParams(location.search).has('legacy_login'))realAccount(undefined,'login');
     if(data.name)await ensureLearning();
     configureLearning();updateAccount();
     if(privateRoute)await navigate();
@@ -554,5 +592,8 @@ function bindContact() {
     };
 }
 
-if (browser) start().catch(error=>toast(error.message)).finally(()=>window.PageLoading?.finish());
+if (browser) {
+    window.addEventListener('family-state-updated',()=>{if(document.querySelector('#account'))updateAccount();});
+    start().catch(error=>toast(error.message)).finally(()=>window.PageLoading?.finish());
+}
 else module.exports = { pages, esc };

@@ -17,7 +17,7 @@ from test_free_vip_pilot import Client
 class LocalPilotTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        if not Path('pilot-inputs/manifest.json').is_file():raise unittest.SkipTest('Private learning sources: covered by the separate local release gate, never published in GitHub')
+        if not Path('pilot-inputs/manifest.json').is_file():raise unittest.SkipTest('Private sealed learning inputs; mandatory local release gate covers this suite')
         Path('work').mkdir(exist_ok=True);cls.folder=tempfile.TemporaryDirectory(dir='work');cls.base=Path(cls.folder.name)/'main-base.sqlite3';initialize(cls.base);api.initialize_catalog(cls.base)
         cls.inputs=Path('pilot-inputs');cls.pbase=Path(cls.folder.name)/'pilot-base.sqlite3';LocalPilot(cls.base,cls.pbase,cls.inputs)
     @classmethod

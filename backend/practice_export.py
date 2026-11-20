@@ -56,8 +56,11 @@ def snapshot_item(db,attempt,row,provider,frontend):
     if exists(db,'local_lesson_pins'):
         lesson=db.execute('SELECT v.payload_json FROM local_lesson_pins p JOIN local_lesson_versions v ON v.content_key=p.content_key AND v.revision=p.lesson_revision WHERE p.version_id=?',(row['id'],)).fetchone()
         if lesson:payload['lesson']=json.loads(lesson[0])
+    from .curriculum_samples import export_lesson,export_asset
+    if payload['lesson'] is None:payload['lesson']=export_lesson(db,row['id'])
     for sha in media_keys([prompt,steps,hints,payload['lesson']]):
         asset=db.execute('SELECT mime,payload FROM local_lesson_assets WHERE sha256=?',(sha,)).fetchone() if exists(db,'local_lesson_assets') else None
+        if not asset:asset=export_asset(db,row['id'],sha)
         if not asset:raise api.APIError('Thiếu hình của đúng phiên bản câu hỏi; chưa thể tạo PDF đầy đủ.',503)
         payload['assets'][sha]={'mime':asset['mime'],'data':base64.b64encode(bytes(asset['payload'])).decode()}
     # Legacy media is read only from the allowlisted frontend tree, never URL fetched.

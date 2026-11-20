@@ -6,11 +6,11 @@ for(const actual of ['',null,'1/0','NaN','Infinity','1+1','1 2','0.50000000001',
 assert(content.matches('2;1/2','0,5;2','unordered'));assert(!content.matches('2;1/2','0,5;2','ordered'));
 assert(!content.matches('0.5','0,5','text'));assert(content.matches(' < ','<'));
 // Exercise the actual bot state machine with a deterministic clock and schedule.
-const source=fs.readFileSync('frontend/learning.js','utf8');
-const slice=source.slice(source.indexOf('    function settleBotAttack('),source.indexOf('    function nextBot()'));
+const source=fs.readFileSync('frontend/learning-modules/arena.js','utf8');
+const slice=source.slice(source.indexOf('function settleBotAttack('),source.indexOf('function nextBot('));
 let now=1000;
-const sandbox={Date:{now:()=>now},live:false,botLeaseReady:true,document:{hidden:false},currentBattle:null,content,ArenaAudio:{effect(){}},persistBot(){},updateBattleVisuals(){},nextBot(){},recordBotAttack(b,attacker){b.lastAttack={attacker};},isCorrect:(q,a)=>content.matches(a,q.answer)};
-vm.createContext(sandbox);vm.runInContext(slice,sandbox);
+const sandbox={Date:{now:()=>now},currentBattle:null,content,ArenaAudio:{effect(){}},persistBot(){},updateBattleVisuals(){},nextBot(){},recordBotAttack(b,attacker){b.lastAttack={attacker};},isCorrect:(q,a)=>content.matches(a,q.answer)};
+sandbox.ctx=sandbox;vm.createContext(sandbox);vm.runInContext(slice,sandbox);
 const fresh=(botAt=90000)=>sandbox.currentBattle={id:'qa',mode:'bot',index:0,questions:[{answer:'1/2',difficulty:0}],botLevel:0,botAt,deadline:100000,readyAt:0,answer:null,resolved:false,correct:0,hp:100,opponentHp:100};
 let b=fresh();sandbox.answerBot('0,5');assert.equal(b.opponentHp,100);assert.equal(b.defenseUntil,4000);
 now=3999;sandbox.tickBot();assert.equal(b.opponentHp,100);now=4000;sandbox.tickBot();assert.equal(b.opponentHp,80);

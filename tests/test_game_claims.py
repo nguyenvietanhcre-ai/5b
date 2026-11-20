@@ -11,6 +11,23 @@ class GameClaimTests(unittest.TestCase):
     def bot(self,c,key=None):return c.call('bot/start',{'scope':'all','requestKey':key or secrets.token_hex(12)})
     def quick(self,c,key=None):return c.call('arena',{'action':'quick','scope':'all','requestKey':key or secrets.token_hex(12)})
     def leave(self,c,claim):return c.call('game-claim',{'action':'leave','claimId':claim['claimId']})
+    def test_group_visibility_projection_private_code_join_and_nonce_intent(self):
+        a,b,outsider,bot=[self.actor() for _ in range(4)]
+        public=a.call('group-games/rooms',{'mode':'capture_flag','public':True,'requestKey':'public-room-qa'})['room']
+        private=b.call('group-games/rooms',{'mode':'capture_flag','public':False,'requestKey':'private-room-qa'})['room']
+        self.assertIs(public['public'],True);self.assertIs(private['public'],False)
+        replay=b.call('group-games/rooms',{'mode':'capture_flag','public':False,'requestKey':'private-room-qa'})['room']
+        self.assertEqual(replay['id'],private['id']);self.assertIs(replay['public'],False)
+        with self.assertRaises(api.APIError) as caught:b.call('group-games/rooms',{'mode':'capture_flag','public':True,'requestKey':'private-room-qa'})
+        self.assertEqual(caught.exception.status,409)
+        listed=outsider.call('group-games/rooms?mode=capture_flag')['rooms']
+        self.assertIn(public['id'],{row['id'] for row in listed});self.assertNotIn(private['id'],{row['id'] for row in listed})
+        with self.assertRaises(api.APIError) as caught:outsider.call('group-games/rooms/'+private['id'])
+        self.assertEqual(caught.exception.status,403)
+        joined=outsider.call('group-games/join',{'code':private['code'],'requestKey':'private-code-join'})['room']
+        self.assertIs(joined['public'],False);self.assertEqual(len(joined['players']),2)
+        practice=bot.call('group-games/rooms',{'mode':'animal_race','playMode':'bot','public':True,'requestKey':'bot-private-qa'})['room']
+        self.assertIs(practice['public'],False)
     def test_public_auto_private_accept(self):
         a,b=self.actor(),self.actor();x=self.quick(a);y=self.quick(b)
         self.assertEqual(x['code'],y['code']);room=self.server.arena.rooms[x['code']];self.assertEqual(room['status'],'preparing')

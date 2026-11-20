@@ -1,0 +1,47 @@
+:root{--app-nav-height:64px}
+.family-beneficiary{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 20px;margin-bottom:22px;border:1px solid var(--line,#d9e2cf);border-radius:16px;background:#edf3e5;overflow-wrap:anywhere}.family-beneficiary a{color:var(--green,#1F6248);min-height:44px;display:inline-flex;align-items:center}
+.app-shell-private .site-header,.app-shell-private .family-header,.app-shell-private .site-footer,.app-shell-private .family-footer,.app-shell-private .website-footer,.app-shell-private [data-website-footer]{display:none!important}
+body.app-shell-private{padding-top:0}
+body.app-shell-with-nav{padding-bottom:calc(var(--app-nav-height) + env(safe-area-inset-bottom,0px) + 18px)}
+html.app-shell-with-nav{scroll-padding-bottom:calc(var(--app-nav-height) + env(safe-area-inset-bottom,0px) + 18px)}
+.app-bottom-nav{
+  --nav-content-width:var(--family-content-width,1040px);
+  --nav-content-inset:var(--family-content-inset,14px);
+  --nav-side-space:max(calc(var(--nav-content-inset) + var(--nav-frame-inset,0px)),calc((100% - var(--nav-content-width))/2 + var(--nav-content-inset)),env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));
+  position:fixed;z-index:90;bottom:0;left:0;right:0;display:flex;width:100%;min-height:var(--app-nav-height);
+  padding:0 var(--nav-side-space) env(safe-area-inset-bottom,0px);box-sizing:border-box;
+  background:#fffdf7;border:0;border-top:1px solid var(--line,#d9e2cf);box-shadow:0 -3px 16px #203a3208;color:var(--ink,#203A32)
+}
+body.learning-mode{--learning-content-width:1330px;--learning-content-inset:clamp(20px,4vw,55px)}
+/* Keep the prerendered learning column and the nav aligned before learning.css loads. */
+body.learning-mode.app-shell-private .student-shell-content .content{width:100%;max-width:var(--learning-content-width);margin-inline:auto;padding-inline:var(--learning-content-inset)}
+.learning-mode .app-bottom-nav{--nav-content-width:var(--learning-content-width);--nav-content-inset:var(--learning-content-inset);--nav-frame-inset:var(--learning-frame-inset,0px)}
+@media(max-width:860px){body.learning-mode{--learning-content-inset:17px}}
+@media(max-width:620px){body.learning-mode{--learning-content-inset:16px}}
+/* The learning frame includes the theme's outer margin and border. */
+html[data-theme=clay-sprout] body.learning-mode{--learning-frame-inset:19px}
+html[data-theme=crayon-workshop] body.learning-mode{--learning-frame-inset:14px}
+@media(max-width:640px){
+  html[data-theme=clay-sprout] body.learning-mode{--learning-frame-inset:10px;--learning-content-inset:12px}
+  html[data-theme=crayon-workshop] body.learning-mode{--learning-frame-inset:8px;--learning-content-inset:12px}
+}
+.app-bottom-tab,.app-bottom-profile{flex:1;min-width:0;position:relative;border-radius:0;display:flex;align-items:stretch;justify-content:center}
+.app-bottom-tab{flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;text-decoration:none;color:inherit;padding:5px 2px;font-size:12px;line-height:1.2;font-weight:600;min-height:var(--app-nav-height);box-sizing:border-box;overflow-wrap:anywhere}
+.app-bottom-tab>.app-bottom-label{min-height:28px;line-height:14px;display:flex;align-items:center;justify-content:center}
+.app-bottom-tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app-bottom-cart-icon{position:relative;display:flex;color:var(--green,#1F6248)}
+.app-bottom-cart-icon [data-cart-badge]{position:absolute;top:-5px;left:calc(100% - 7px);display:grid;place-items:center;box-sizing:border-box;min-width:17px;height:17px;padding:0 3px;border:1px solid #fffdf7;border-radius:999px;background:var(--orange,#FFBE73);color:var(--ink,#203A32);font-size:10px;font-weight:800;white-space:nowrap;line-height:1;font-variant-numeric:tabular-nums}
+.app-bottom-cart-icon [data-cart-badge][hidden]{display:none}
+.app-bottom-tab[aria-current=page]{color:var(--green,#1F6248);background:#edf3e5;font-weight:800}
+.app-bottom-tab[aria-current=page]:before{content:'';position:absolute;top:0;left:calc(50% - 16px);width:32px;height:3px;border-radius:0 0 4px 4px;background:var(--green,#1F6248)}
+.app-bottom-profile .family-profile-trigger{border:0;border-radius:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;padding:5px 2px;min-height:var(--app-nav-height);font-size:12px;text-align:center;font-weight:600;box-sizing:border-box}
+.app-bottom-profile .family-profile-trigger .family-profile-avatar{width:24px;height:24px;padding:0;background:transparent}
+.app-bottom-profile .family-profile-switch-cue{width:15px;height:15px;right:-6px;bottom:-1px;padding:1px;border-radius:5px}
+.app-bottom-profile .family-profile-trigger>span:not(.family-profile-chevron){max-width:100%;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block}
+.app-bottom-profile .family-profile-trigger>span:not(.family-profile-portrait){min-height:28px;line-height:28px}
+.app-bottom-profile .family-profile-chevron{display:none}
+.app-bottom-tab:focus-visible,.app-bottom-profile .family-profile-trigger:focus-visible{outline:3px solid var(--orange,#FFBE73);outline-offset:-4px;border-radius:10px}
+@media(hover:hover){.app-bottom-tab:hover,.app-bottom-profile .family-profile-trigger:hover{background:#f0f5e9}}
+@media(max-width:359px){.app-bottom-nav[data-role=parent] .app-bottom-tab,.app-bottom-nav[data-role=parent] .app-bottom-profile .family-profile-trigger{font-size:11px}}
+@media(min-width:760px){:root{--app-nav-height:60px}.app-bottom-tab,.app-bottom-profile .family-profile-trigger{font-size:14px}.app-bottom-tab>.app-bottom-label{min-height:18px;line-height:18px}.app-bottom-profile .family-profile-trigger>span:not(.family-profile-portrait){min-height:18px;line-height:18px}}
+@media(max-height:480px){:root{--app-nav-height:54px}.app-bottom-tab,.app-bottom-profile .family-profile-trigger{padding-top:4px;padding-bottom:4px;gap:2px}.app-bottom-tab svg{width:20px;height:20px}.app-bottom-profile .family-profile-trigger .family-profile-avatar{width:22px;height:22px}.app-bottom-tab>.app-bottom-label{min-height:18px;line-height:18px}.app-bottom-profile .family-profile-trigger>span:not(.family-profile-portrait){min-height:18px;line-height:18px}}

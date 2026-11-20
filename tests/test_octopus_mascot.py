@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import test_platform_api as platform_tests
 from backend.arena import Arena
 from backend.database import initialize
-from backend.platform_api import APIError, connect, seed_catalog
+from backend.platform_api import APIError, MASCOT_NAMES, connect, seed_catalog
 
 
 class OctopusMascotTests(unittest.TestCase):
@@ -53,8 +53,15 @@ class OctopusMascotTests(unittest.TestCase):
         self.assertEqual(resumed['state']['mascot'], 'octopus')
 
     def test_seed_preserves_existing_choices_and_rejects_invalid_values(self):
-        client, _, _, _ = self.user()
+        client, initial, _, _ = self.user()
         for code in ('sprout', 'fox', 'rabbit', 'octopus'):
+            # Seed initial fixture choices without spending the one reselect.
+            # Only the final target below changes the saved value through API.
+            if code != 'octopus':
+                with connect(self.path, True) as db:
+                    db.execute('UPDATE student_companions SET mascot_id=(SELECT id FROM mascots WHERE name=?) '
+                               'WHERE student_id=(SELECT id FROM students WHERE account_id=?)',
+                               (MASCOT_NAMES[code], initial['account']['id']))
             self.assertEqual(client.call('mascot', {'mascot': code})['state']['mascot'], code)
         for value in ('bach-tuoc', 'unknown', '', None, [], {}):
             with self.subTest(value=value), self.assertRaises(APIError) as caught:

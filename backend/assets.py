@@ -13,7 +13,11 @@ def public_assets():
     source = (FRONTEND / 'runtime-assets.js').read_text(encoding='utf-8')
     manifest = json.loads(source.split('/* RUNTIME_MANIFEST_START */', 1)[1]
                           .split('/* RUNTIME_MANIFEST_END */', 1)[0])
-    files = set(CORE) | set(manifest['files'])
+    files = set(CORE) | set(manifest['files']) | set(('ui-review/index.html', 'ui-review/demo-1.html', 'ui-review/demo-2.html', 'ui-review/demo-3.html', 'ui-review/common.css', 'ui-review/common.js', 'ui-review/demo-1.css', 'ui-review/demo-1.js', 'ui-review/demo-2.css', 'ui-review/demo-2.js', 'ui-review/demo-3.css', 'ui-review/demo-3.js', 'ui-review/assets/logo.svg', 'ui-review/assets/mascot.webp'))
+    files.update(('legal.css','legal.js','website-shell.css','support-center.js','support-center.css','checkout-readiness.css'))
+    files.update(('family-app.js','family-app.css','trial-experience.js','trial-experience.css',
+                  'question-access-admin.js','question-access-admin.css','question-access-page.js'))
+    files.update(('family-profiles.js', 'family-profiles.css', 'family-parent.svg','app-shell.js','app-shell.css'))
     for folder in ('arena-art', 'theme-art'):
         for item in (FRONTEND / folder).rglob('*'):
             if item.is_file() and item.suffix in ('.webp', '.png', '.svg', '.json', '.js'):

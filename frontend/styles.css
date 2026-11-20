@@ -49,6 +49,8 @@
     --shadow: 0 12px 30px #203a3210;
     --radius-card: 22px;
     --radius-control: 13px;
+    --control-height: 48px;
+    --control-font-size: 14px;
     --gutter: clamp(16px, 4.5vw, 64px);
     --header-height: 78px;
 }
@@ -94,26 +96,43 @@ button:disabled { cursor: default; }
 #primary-nav a { display: flex; align-items: center; min-height: 44px; padding: 5px clamp(7px, .7vw, 11px); border-radius: 999px; }
 #primary-nav a:hover, #primary-nav a[aria-current] { color: var(--green); background: var(--leaf); }
 #account { display: inline-flex; gap: 7px; max-width: 200px; min-height: 44px; overflow: hidden; white-space: nowrap; }
+.family-signed-in a[href="/trai-nghiem/"],.family-signed-in a[href="trai-nghiem/"],.user-signed-in a[href="/trai-nghiem/"],.user-signed-in a[href="trai-nghiem/"]{display:none!important}
+.site-family-profile{min-width:0;max-width:190px}.site-family-profile button{max-width:100%}
+#account>img{width:30px;height:30px;object-fit:contain;flex:none}
+#account>.family-profile-avatar{width:30px;height:30px;flex:none}
+.learning-family-profile{max-width:220px;min-width:0}.learning-family-profile button{max-width:100%}
+.family-locked-shell{max-width:620px;margin:40px auto}
+@media(max-width:760px){
+ .site-header .header-inner:has(.site-family-profile){display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 12px}
+ .site-header .header-inner:has(.site-family-profile)>.brand{grid-column:1;grid-row:1}
+ .site-header .header-inner:has(.site-family-profile)>#menu{grid-column:2;grid-row:1;justify-self:end}
+ .site-header .site-family-profile{grid-column:1;grid-row:2;max-width:100%}
+ .site-header .site-family-profile+#account{grid-column:2;grid-row:2;max-width:180px;font-size:12px}
+ .learning-family-profile{max-width:min(200px,48vw)}
+}
 #account > span:last-child:not(.mascot-avatar) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .mascot-avatar { display: inline-grid; place-items: center; flex: none; width: 34px; height: 34px; padding: 3px; border-radius: 50%; background: var(--garden); }
 .mascot-avatar > img, .mascot-avatar > svg { display: block; width: 100%; height: 100%; object-fit: contain; overflow: hidden; }
 #menu { display: none; border: 1px solid var(--edge); border-radius: var(--radius-control); background: var(--paper); font-size: 22px; }
 .wrap { max-width: 1440px; padding-inline: var(--gutter); margin-inline: auto; }
-.btn {
+.btn, :where(.family-page button) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    min-height: 46px;
+    min-height: var(--control-height);
     padding: 10px 17px;
     border: 1px solid transparent;
     border-radius: var(--radius-control);
-    font-size: 14px;
+    font-size: var(--control-font-size);
     font-weight: 700;
     line-height: 1.4;
     text-align: center;
     transition: background-color .18s, border-color .18s;
 }
+.btn:disabled, :where(.family-page button):disabled { opacity: .6; cursor: default; }
+.btn[aria-busy="true"], :where(.family-page button)[aria-busy="true"] { cursor: wait; }
+.btn:focus-visible, :where(.family-page button):focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
 .dark { background: var(--green); color: #fff; }
 .dark:hover { background: var(--green-hover); }
 .orange { background: var(--orange); color: var(--ink); }

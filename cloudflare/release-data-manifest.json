@@ -1,0 +1,19 @@
+{
+  "learningSourceSha256": "e0c2109b4397c929060543b04ea3b4d5270e8a8457940c32f4f937a35c43df7c",
+  "counts": {
+    "native": {
+      "knowledge_lessons": 26,
+      "knowledge_assets": 4,
+      "lesson_material_files": 0,
+      "lesson_material_bindings": 0
+    },
+    "main": {
+      "bunny_stream_uploads": 2,
+      "lesson_material_files": 0,
+      "lesson_material_bindings": 0
+    }
+  },
+  "containsAccounts": false,
+  "containsSessions": false,
+  "packageHash": "abe626cb15d17ddea410de225802f9eab2d39167df44dcb433ea1ad468115382"
+}

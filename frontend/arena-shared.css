@@ -1,0 +1,34 @@
+/* One lobby card and illustration layout for all three games. */
+body.learning-mode .arena-player.arena-shared-player {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    min-width: 0;
+}
+
+.arena-player-overview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.arena-player-overview .arena-player-pet > div { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+body.learning-mode .arena-lobby > .arena-player-usage { max-width: none; text-align: left; }
+.arena-lobby > .arena-player-usage:empty { display: none; }
+.arena-lobby > .arena-player-usage .btn { min-height: 44px; }
+.arena-lobby > .arena-player-usage .arena-usage-policy { display: block; margin-top: 5px; font-size: 12px; line-height: 1.5; }
+.arena-shared-player [data-game-session-inline][hidden] { display: none; }
+
+@media(max-width:600px) {
+    body.learning-mode .arena-player-overview .arena-player-pet .mascot-art { width: 46px; height: 56px; }
+}
+
+.arena-shared-showcase{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,230px);gap:10px;align-items:center;min-height:184px;padding:18px 22px;border:1px solid #b5ca9a;border-radius:24px;background:linear-gradient(125deg,#eef4d9,#d2e8bf);overflow:hidden;box-shadow:0 4px 0 #b1c69b;color:#203a32}
+.arena-shared-showcase.group-lobby-showcase-animal_race{background:linear-gradient(125deg,#f7efcf,#d3e9d5);border-color:#c7d1a6}
+.arena-shared-showcase .group-showcase-label{display:block;color:#457150;font-size:12px;font-weight:800;margin-bottom:8px}
+.arena-shared-showcase h2{font-size:clamp(20px,2.5vw,27px)!important;line-height:1.3!important;color:#1f6248;margin:0}
+.arena-shared-showcase p{font-size:13px;line-height:1.6;margin:8px 0 0!important}
+.arena-shared-showcase .group-lobby-illustration{display:block;width:100%;height:auto;max-height:165px}
+@media(max-width:600px){.arena-shared-showcase{grid-template-columns:minmax(0,1fr) 128px;min-height:170px;padding:16px;gap:5px}.arena-shared-showcase h2{font-size:20px!important}.arena-shared-showcase p{font-size:12px}.arena-shared-showcase .group-lobby-illustration{width:148px;max-width:none;transform:translateX(-4px)}.arena-shared-showcase .group-showcase-label{font-size:10px;line-height:1.5}}
+@media(max-width:360px){.arena-shared-showcase{grid-template-columns:1fr}.arena-shared-showcase .group-lobby-illustration{width:200px;max-height:112px;justify-self:center;transform:none}}

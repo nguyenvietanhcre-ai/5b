@@ -21,6 +21,13 @@ class NeedsTransaction(BaseException):
 class CommitBoundary(BaseException):
     pass
 
+class NeedsExternal(BaseException):
+    def __init__(self,key,perform):
+        self.key,self.perform=key,perform
+
+class CommitRejection(BaseException):
+    def __init__(self,error):self.error=error
+
 
 @dataclass
 class RequestScope:
@@ -145,6 +152,11 @@ class Connection:
         if re.match(r'(?is)^PRAGMA\s+journal_mode\b', clean):
             return Cursor(['journal_mode'], [('wal',)])
         sql, values = bind_parameters(statement, parameters)
+        # Durable Object SQL has no temporary database. This migration's
+        # constraint probe is created and dropped in the same transaction;
+        # retain its CHECK enforcement in the main database instead.
+        sql = re.sub(r'(?i)\bCREATE\s+TEMP\s+TABLE\s+(?=(?:native_learning_)?mascot_rank_fk_check\b)',
+                     'CREATE TABLE ', sql)
         try:
             cursor = self.database.storage.sql.exec(sql, *values)
             names = list(cursor.columnNames)
@@ -179,6 +191,15 @@ class Connection:
         if REQUEST_SCOPE.get() and REQUEST_SCOPE.get().transaction:
             raise CommitBoundary()
 
+    def commit_and_raise(self,error):
+        raise CommitRejection(error)
+
+    def prepare_verification(self,password,credential):
+        scope=REQUEST_SCOPE.get();key=('verify',password,credential)
+        if scope and key not in scope.crypto:
+            from backend import platform_api
+            raise NeedsExternal(key,lambda:platform_api.verify_password(password,credential))
+
     def rollback(self):
         raise sqlite3.OperationalError('Rollback is owned by the transaction callback')
 
@@ -209,6 +230,8 @@ class StorageDatabase:
             scope.transaction = True
             try:
                 outcome['result'] = callback()
+            except CommitRejection as rejection:
+                outcome['committedError']=rejection.error
             except CommitBoundary:
                 if not allow_commit_boundary:
                     outcome['error'] = sqlite3.OperationalError('Unexpected commit boundary')
@@ -283,13 +306,16 @@ class StorageDatabase:
                 # Preflight itself stops before business SQL/Arena mutations;
                 # natural Arena timeout cleanup is settled in the next segment.
                 pass
+            except NeedsExternal as operation:
+                self._restore(original)
+                REQUEST_SCOPE.get().crypto[operation.key]=operation.perform()
             for _ in range(8):
                 original = self._snapshot()
 
                 def write():
                     try:
                         result = callback()
-                    except CommitBoundary:
+                    except (CommitBoundary,CommitRejection):
                         self.persist_arena()
                         raise
                     self.persist_arena()
@@ -297,9 +323,14 @@ class StorageDatabase:
 
                 try:
                     outcome = self.transaction(write, allow_commit_boundary=True)
+                except NeedsExternal as operation:
+                    self._restore(original)
+                    REQUEST_SCOPE.get().crypto[operation.key]=operation.perform()
+                    continue
                 except BaseException:
                     self._restore(original)
                     raise
+                if outcome.get('committedError') is not None:raise outcome['committedError']
                 if not outcome.get('boundary'):
                     return outcome.get('result')
             raise sqlite3.OperationalError('Too many explicit transaction boundaries')

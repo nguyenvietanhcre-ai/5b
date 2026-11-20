@@ -1200,3 +1200,12 @@ html[data-theme="clay-sprout"] body.learning-mode .garden-tip mark { display: in
 
 /* Only the clay theme renders the bitmap icon; preserve the other four SVG designs. */
 html:not([data-theme="clay-sprout"]) body.learning-mode .garden-shortcut .garden-activity-art > img.clay-activity-icon { display: none !important; }
+
+.theme-settings-compact .theme-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:10px; }
+.theme-settings-compact .theme-option { padding:12px; min-width:0; }
+.theme-settings-compact .theme-preview { height:58px; min-height:58px; display:grid; place-items:center; padding:6px; }
+.theme-settings-compact .theme-sample { font-size:23px; font-weight:800; }
+.theme-settings-compact .theme-option-copy { padding:8px 0 0; }
+.theme-settings-compact .theme-option-copy strong { font-size:14px; }
+.theme-settings-compact .theme-option-copy>span { font-size:12px; }
+@media(max-width:480px){.theme-settings-compact .theme-options { grid-template-columns:1fr; }.theme-settings-compact .theme-option { display:grid; grid-template-columns:64px minmax(0,1fr); gap:10px; align-items:center; }.theme-settings-compact .theme-option-copy { padding:0; }}

@@ -12,13 +12,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / 'cloudflare' / 'runtime'
-MODULES = ('backend_worker.py', 'sqlite_storage.py', 'crypto_compat.py', 'pbkdf2_fallback.py', 'transfer.py', 'learning_storage.py', 'native_learning.py')
-BACKEND_MODULES = ('__init__.py', 'site_visibility.py', 'admissions.py', 'answers.py', 'arena.py', 'content.py', 'database.py',
-                   'group_games.py', 'group_game_bots.py', 'game_claims.py', 'content_retirement.py',
-                   'learning_update.py', 'nickname_policy.py', 'notifications.py', 'payments.py',
-                   'platform_api.py', 'scratchpads.py', 'premium_content.py', 'exam_commerce.py', 'question_bank.py', 'referral_support.py', 'rich_content.py',
-                   'staff_api.py', 'local_pilot.py', 'wallet_qa.py', 'free_vip_pilot.py', 'content_batch_qa.py', 'mcq_import.py', 'practice_catalogue.py', 'knowledge_catalogue.py', 'practice_export.py', 'practice_export_api.py', 'practice_pdf.py', 'svg_pdf.py', 'assets.py', 'arena_qa_source.py', 'group_games_qa.py', 'local_test_games.py', 'admin_catalogue.py', 'admin_native.py', 'system_settings.py', 'tuition.py', 'zoom_classroom.py')
+MODULES = ('backend_worker.py', 'sqlite_storage.py', 'crypto_compat.py', 'pbkdf2_fallback.py', 'transfer.py', 'learning_storage.py', 'native_learning.py', 'release_bridge.py', 'release_audit.py')
+BACKEND_MODULES = ('__init__.py', 'site_visibility.py', 'admissions.py', 'answers.py', 'arena.py', 'content.py', 'database.py', 'group_games.py', 'group_game_bots.py', 'game_claims.py', 'content_retirement.py', 'learning_update.py', 'nickname_policy.py', 'notifications.py', 'payments.py', 'platform_api.py', 'scratchpads.py', 'premium_content.py', 'exam_commerce.py', 'question_bank.py', 'referral_support.py', 'rich_content.py', 'staff_api.py', 'local_pilot.py', 'wallet_qa.py', 'free_vip_pilot.py', 'content_batch_qa.py', 'mcq_import.py', 'practice_catalogue.py', 'knowledge_catalogue.py', 'practice_export.py', 'practice_export_api.py', 'practice_pdf.py', 'svg_pdf.py', 'assets.py', 'arena_qa_source.py', 'group_games_qa.py', 'local_test_games.py', 'admin_catalogue.py', 'admin_native.py', 'system_settings.py', 'tuition.py', 'zoom_classroom.py', 'bunny_stream.py', 'curriculum_samples.py', 'family_accounts.py', 'family_cart.py', 'family_features.py', 'family_personal.py', 'game_limits.py', 'lesson_library.py', 'lesson_resources.py', 'membership.py', 'purchased_credits.py', 'question_access.py', 'study_retake.py', 'trial_experience.py', 'website_legal.py', 'website_support.py')
 
+
+BACKEND_MODULES += ('subscriptions.py',)
 
 def vendor_sdk():
     distribution = importlib.metadata.distribution('workers-runtime-sdk')
@@ -135,13 +133,24 @@ def build(include_sdk=False):
     backend.mkdir(exist_ok=True)
     for name in BACKEND_MODULES:
         shutil.copy2(ROOT / 'backend' / name, backend / name)
-    for name in ('learning-catalog.json', 'nickname-policy.json'):
+    for name in ('learning-catalog.json', 'nickname-policy.json', 'trial-content.json'):
         shutil.copy2(ROOT / 'backend' / name, backend / name)
+    private = ROOT/'backend/curriculum-samples.json'
+    if private.exists():
+        expected=json.loads((ROOT/'cloudflare/release-data-manifest.json').read_text(encoding='utf-8'))['packageHash']
+        canonical=json.dumps(json.loads(private.read_text(encoding='utf-8')),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()
+        if hashlib.sha256(canonical).hexdigest()!=expected:raise ValueError('Private curriculum identity changed')
+        shutil.copy2(private,backend/private.name)
     (backend / 'migrations').mkdir(exist_ok=True)
     for path in (ROOT / 'backend' / 'migrations').glob('*.sql'):
         shutil.copy2(path, backend / 'migrations' / path.name)
     for name in ('learning-names.json',):
         shutil.copy2(ROOT / 'cloudflare' / name, TARGET / name)
+    source=ROOT/'cloudflare/release-content.json'
+    if source.exists():
+        manifest=json.loads((ROOT/'cloudflare/release-data-manifest.json').read_text(encoding='utf-8'))
+        if hashlib.sha256(source.read_bytes()).hexdigest()!=manifest['learningSourceSha256']:raise ValueError('Release lesson source changed')
+        shutil.copy2(source,TARGET/source.name)
     if (ROOT/'cloudflare/learning-seed.sql').exists():
         verify_learning_seal()
         shutil.copy2(ROOT/'cloudflare/learning-seed.sql',TARGET/'learning-seed.sql')
@@ -150,6 +159,7 @@ def build(include_sdk=False):
     else:
         print('Private learning inputs absent: base-runtime CI only; native release requires private-data QA.')
     (TARGET / 'frontend').mkdir(exist_ok=True)
+    shutil.copytree(ROOT/'frontend/legal',TARGET/'frontend/legal')
     shutil.copytree(ROOT / 'frontend/print-art',TARGET / 'frontend/print-art')
     shutil.copy2(ROOT / 'frontend/5bmath-logo.svg',TARGET / 'frontend/5bmath-logo.svg')
     shutil.copy2(ROOT / 'frontend' / 'demo-rectangle.svg', TARGET / 'frontend' / 'demo-rectangle.svg')

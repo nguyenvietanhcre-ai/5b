@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import test_platform_api as platform_tests
 from backend.arena import Arena
 from backend.database import initialize
-from backend.platform_api import APIError, connect, seed_catalog
+from backend.platform_api import APIError, MASCOT_NAMES, connect, seed_catalog
 
 
 class HorseMascotTests(unittest.TestCase):
@@ -88,6 +88,13 @@ class HorseMascotTests(unittest.TestCase):
             db.execute('UPDATE student_companions SET xp=1240 WHERE student_id='
                        '(SELECT id FROM students WHERE account_id=?)', (account_id,))
         for code in ('sprout', 'fox', 'horse'):
+            # Seed initial fixture choices without spending the one reselect.
+            # Only the final target below changes the saved value through API.
+            if code != 'horse':
+                with connect(self.path, True) as db:
+                    db.execute('UPDATE student_companions SET mascot_id=(SELECT id FROM mascots WHERE name=?) '
+                               'WHERE student_id=(SELECT id FROM students WHERE account_id=?)',
+                               (MASCOT_NAMES[code], initial['account']['id']))
             state = client.call('mascot', {'mascot': code})['state']
             self.assertEqual((state['mascot'], state['points']), (code, 1240))
         saved = self.companion(account_id)

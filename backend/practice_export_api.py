@@ -8,8 +8,7 @@ from . import platform_api as api
 def available(handler):
     server=handler.server
     if getattr(server,'cloud_pdf_enabled',False) is True:
-        provider=getattr(server,'cloud_learning_provider',None)
-        return bool(provider is not None and type(provider).__module__=='native_learning' and type(provider).__name__=='CloudLearning' and provider is getattr(server,'local_pilot',None) and api.same_origin(handler))
+        return bool(getattr(server,'cloud_learning_provider',None) is getattr(server,'local_pilot',None) and api.same_origin(handler))
     if not isinstance(server,HTTPServer) or getattr(server,'native_python_backend',False) is not True or getattr(server,'practice_export_enabled',False) is not True:return False
     try:
         host=urlsplit('//'+handler.headers.get('Host',''))

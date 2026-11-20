@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import test_platform_api as platform_tests
 from backend.arena import Arena
 from backend.database import initialize
-from backend.platform_api import APIError, connect, seed_catalog
+from backend.platform_api import APIError, MASCOT_NAMES, connect, seed_catalog
 
 
 class SharkMascotTests(unittest.TestCase):
@@ -89,6 +89,12 @@ class SharkMascotTests(unittest.TestCase):
                        '(SELECT id FROM students WHERE account_id=?)', (account_id,))
         # Default companions still round-trip before the newly added choice.
         for code in ('sprout', 'fox', 'ca-map'):
+            # Initial profile fixtures do not spend the single user reselect.
+            if code != 'ca-map':
+                with connect(self.path, True) as db:
+                    db.execute('UPDATE student_companions SET mascot_id=(SELECT id FROM mascots WHERE name=?) '
+                               'WHERE student_id=(SELECT id FROM students WHERE account_id=?)',
+                               (MASCOT_NAMES[code], account_id))
             state = client.call('mascot', {'mascot': code})['state']
             self.assertEqual(state['mascot'], code)
             self.assertEqual(state['points'], 1240)

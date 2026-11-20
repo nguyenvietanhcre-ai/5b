@@ -135,7 +135,7 @@ def render_pdf(document,*,include_solutions,frontend):
         for label,url in contacts:
             canvas.drawString(x,36,label);w=pdfmetrics.stringWidth(label,'5BPrint',6.8);canvas.linkURL(url,(x,34,x+w,44),relative=0);x+=w+15
         canvas.setFont('5BPrint',7);canvas.drawString(36,23,'5BMath - Gieo Mầm Toán | Mã câu giữ đúng phiên bản đã nhận.');canvas.drawRightString(width-36,23,'Trang '+str(doc.page));canvas.restoreState()
-    story.extend([para(document['title'],heading),para('Mã đề: '+str(document['examCode'])+' | '+str(len(document['questions']))+' câu',small),para('Mã câu tra cứu tại bản 5BMath đã tạo đề, gắn với tài khoản và phiên bản đã nhận.',small),Spacer(1,8)])
+    story.extend([para(document['title'],heading),para('Mã đề: '+str(document['examCode'])+' | '+str(len(document['questions']))+' câu',small),para('Mã câu tra cứu trên bản 5BMath cục bộ đã tạo đề; chưa đồng bộ mã lên website.',small),Spacer(1,8)])
     for n,item in enumerate(document['questions'],1):
         question_start=len(story)
         q=item['payload'];topic=q['topicTitle'];topic='' if re.fullmatch(r'[a-z0-9_.-]+',topic) else topic

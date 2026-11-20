@@ -76,6 +76,8 @@ class HTTPClient:
             self.last_status, content = response.code, response.read()
             self.last_headers = {key.lower(): value for key, value in response.headers.items()}
         if self.last_status != expected:
+            diagnostic=json.loads(content).get('diagnostic',{}) if content.startswith(b'{') else {}
+            if diagnostic:raise AssertionError('Runtime QA diagnostic: '+json.dumps(diagnostic))
             raise AssertionError('Runtime HTTP status mismatch for ' + path + ': got ' + str(self.last_status) + ', expected ' + str(expected) + ' ' + content.decode('utf-8',errors='replace')[:240])
         if raw:
             return content
@@ -156,22 +158,24 @@ def transfer_payload(source, directory):
 
 
 class LocalWorker:
-    def __init__(self, directory, port, operator_token, webhook_secret, native_features=False):
+    def __init__(self, directory, port, operator_token, webhook_secret, native_features=False, modern_features=False):
         self.directory, self.port = directory, port
         self.origin = 'http://127.0.0.1:' + str(port)
         self.project = directory / 'worker-project'
-        self.project.mkdir()
+        self.project.mkdir(exist_ok=True)
         source = ROOT / 'cloudflare'
         if not (source / 'runtime' / 'backend_worker.py').is_file() or not (source / 'python_modules' / 'workers').is_dir():
             raise RuntimeError('Stage the pinned SDK and Worker first: python cloudflare/build_worker.py --vendor-sdk')
-        shutil.copytree(source / 'runtime', self.project / 'runtime', ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
-        shutil.copytree(source / 'python_modules', self.project / 'python_modules', ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        shutil.copytree(source / 'runtime', self.project / 'runtime', dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        shutil.copytree(source / 'python_modules', self.project / 'python_modules', dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
         config = json.loads((source / 'wrangler.jsonc').read_text(encoding='utf-8'))
         config.pop('build', None)
         config.pop('env', None)
         config['name'] = 'fivebmath-isolated-runtime-qa'
         config['vars'] = {'PUBLIC_ORIGIN': self.origin, 'TENANT_KEY': 'runtime-qa', 'TRANSFER_ENABLED': 'true'}
         config['vars'].update(NATIVE_LEARNING_ENABLED=str(native_features).lower(),DEMO_GAMES_ENABLED=str(native_features).lower())
+        if not modern_features:config['vars']['QA_LEGACY_CONTRACT']='1'
+        config['vars']['MAM_TOAN_CURRICULUM_SAMPLES']='1' if modern_features and native_features else '0'
         config['dev'] = {'ip': '127.0.0.1', 'port': port, 'inspector_port': port + 500}
         (self.project / 'wrangler.jsonc').write_text(json.dumps(config), encoding='utf-8')
         values = {'PUBLIC_ORIGIN': self.origin, 'TENANT_KEY': 'runtime-qa', 'TRANSFER_ENABLED': 'true',

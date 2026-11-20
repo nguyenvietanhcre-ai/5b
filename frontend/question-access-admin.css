@@ -1,0 +1,47 @@
+.question-access-admin { color:var(--ink,#203a32); max-width:100%; }
+.question-access-admin * { box-sizing:border-box; }
+.question-access-admin h2 { margin:0 0 .6rem; }
+.question-access-admin h3 { margin:0 0 .5rem; font-size:1rem; overflow-wrap:anywhere; }
+.question-access-admin p { line-height:1.6; }
+.qa-description { max-width:80ch; }
+.qa-policy { padding:1rem; border-left:4px solid var(--green,#1f6248); border-radius:.6rem; background:var(--cream,#fff9ed); overflow-wrap:anywhere; }
+.qa-counts,.qa-tags,.qa-actions,.qa-pager { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+.qa-count { padding:.4rem .7rem; background:#edf4e8; border-radius:999px; font-size:.85rem; }
+.qa-filters { display:flex; flex-wrap:wrap; gap:.8rem; align-items:end; margin:1.25rem 0 .5rem; }
+.qa-field { display:grid; gap:.35rem; min-width:0; font-size:.9rem; font-weight:600; }
+.qa-filters .qa-field { flex:1 1 10rem; }
+.question-access-admin select,.question-access-admin textarea { width:100%; min-width:0; padding:.7rem; min-height:44px; border:1px solid #a5b9ac; border-radius:.6rem; background:#fff; color:var(--ink,#203a32); font:inherit; font-weight:400; }
+.question-access-admin textarea { resize:vertical; }
+.question-access-admin :focus-visible { outline:3px solid #df8a30; outline-offset:3px; }
+.qa-button { min-height:44px; padding:.65rem 1rem; border:1px solid var(--green,#1f6248); border-radius:.65rem; font:inherit; font-weight:700; color:#fff; background:var(--green,#1f6248); cursor:pointer; }
+.qa-button:hover { background:var(--green-hover,#184f3b); }
+.qa-button.qa-secondary { color:var(--green,#1f6248); background:#fff; }
+.qa-button.qa-secondary:hover { background:#edf4e8; }
+.qa-button:disabled { opacity:.55; cursor:default; }
+.qa-status { min-height:1.6em; font-size:.9rem; overflow-wrap:anywhere; }
+.qa-status.qa-error { color:#9d2c20; padding:.6rem .8rem; background:#fff0e9; border-radius:.5rem; }
+.qa-content { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:1.25rem; align-items:start; }
+.qa-list-pane,.qa-editor { min-width:0; }
+.qa-list { display:grid; gap:.8rem; }
+.qa-item,.qa-edit-form { border:1px solid #cfdbcc; border-radius:.9rem; padding:1rem; background:#fff; min-width:0; }
+.qa-item p { margin:.4rem 0; }
+.qa-meta,.qa-hint { font-size:.82rem; color:#4d6557; overflow-wrap:anywhere; }
+.qa-tag { display:inline-block; padding:.2rem .55rem; border-radius:999px; background:#edf4e8; color:var(--green,#1f6248); font-size:.78rem; font-weight:700; }
+.qa-review-draft { background:#ffecd1; color:#754714; }
+.qa-review-rejected { background:#f9e4dd; color:#8b3027; }
+.qa-excerpt,.qa-prompt { white-space:pre-wrap; overflow-wrap:anywhere; }
+.qa-excerpt { font-size:.9rem; }
+.qa-edit-form { display:grid; gap:.85rem; border-top:4px solid var(--orange,#ffbe73); }
+.qa-edit-form p { margin:0; }
+.qa-prompt { max-height:18rem; overflow:auto; padding:.8rem; border-radius:.6rem; background:var(--cream,#fff9ed); font-size:.92rem; line-height:1.6; }
+.qa-purposes { margin:0; padding:.65rem .8rem; border:1px solid #cfdbcc; border-radius:.6rem; }
+.qa-purposes legend { padding:0 .3rem; font-size:.9rem; font-weight:600; }
+.qa-check { display:flex; align-items:flex-start; gap:.65rem; padding:.45rem 0; line-height:1.5; font-size:.9rem; cursor:pointer; }
+.qa-check input { flex:none; width:20px; height:20px; margin:.1rem 0 0; accent-color:var(--green,#1f6248); }
+.qa-attestation { padding:.8rem; border-radius:.6rem; background:#fff5e8; }
+.qa-actions .qa-button { flex:1 1 auto; }
+.qa-pager { justify-content:space-between; margin:1rem 0; }
+.qa-pager span { font-size:.85rem; }
+.qa-empty { padding:1rem; border:1px dashed #a5b9ac; border-radius:.8rem; background:var(--cream,#fff9ed); color:#4d6557; }
+@media(max-width:800px) { .qa-content { grid-template-columns:minmax(0,1fr); } .qa-editor { grid-row:1; } .qa-editor:has(.qa-empty) { grid-row:auto; } }
+@media(max-width:450px) { .qa-filters .qa-field { flex-basis:100%; } .qa-filters>.qa-button { width:100%; } .qa-item,.qa-edit-form { padding:.85rem; } .qa-pager { justify-content:center; } .qa-pager span { flex-basis:100%; text-align:center; order:-1; } .qa-pager .qa-button { flex:1; } }

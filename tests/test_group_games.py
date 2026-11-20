@@ -13,7 +13,7 @@ SYNTHETIC_CREDENTIAL = api.password_hash('syntheticpassword123')
 
 class GroupGamesTests(unittest.TestCase):
     def setUp(self):
-        folder = Path(__file__).resolve().parents[1] / 'work/test-runs'
+        folder = Path(__file__).resolve().parents[2] / 'test-runs'
         folder.mkdir(parents=True, exist_ok=True)
         self.tmp = tempfile.TemporaryDirectory(dir=str(folder))
         self.path = Path(self.tmp.name) / 'new-synthetic.sqlite3'

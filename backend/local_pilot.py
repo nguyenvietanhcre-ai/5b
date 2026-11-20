@@ -1,5 +1,6 @@
 """Local-only native learning provider. Main sessions authenticate; every write goes to pilot DB."""
 from base64 import b64decode
+from contextlib import ExitStack
 from copy import deepcopy
 from dataclasses import replace
 from datetime import datetime,timedelta
@@ -7,7 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import hashlib,hmac,json,re,secrets,threading,ipaddress
 import xml.etree.ElementTree as ET
-from . import platform_api as api,wallet_qa as wallet
+from . import platform_api as api,wallet_qa as wallet,purchased_credits as credits
 from .free_vip_pilot import PilotConfig,clock_window,create_exam
 from .content_batch_qa import import_batch
 from .mcq_import import load_json,digest,require_qa
@@ -43,7 +44,7 @@ def migrate_pilot_premium(path):
     """Extend the dedicated learning store without importing main-only game schema."""
     from .database import execute_sql
     with api.connect(path, True) as db:
-        for name in ('0024_vip_plus.sql', '0025_exam_commerce.sql', '0027_premium_admin.sql', '0028_native_admin.sql'):
+        for name in ('0024_vip_plus.sql', '0025_exam_commerce.sql', '0027_premium_admin.sql', '0028_native_admin.sql', '0036_local_pilot_family_grades.sql', '0043_purchased_credits.sql'):
             if not db.execute('SELECT 1 FROM schema_migrations WHERE name=?', (name,)).fetchone():
                 execute_sql(db, (Path(__file__).with_name('migrations') / name).read_text(encoding='utf-8'))
                 db.execute('INSERT INTO schema_migrations(name) VALUES (?)', (name,))
@@ -92,6 +93,9 @@ class LocalPilot:
             with api.connect(self.path,True) as db:initialize(db)
             from .knowledge_catalogue import Knowledge
             self.knowledge=Knowledge(self,Path(restructure_inputs))
+            from .curriculum_samples import activate_provider
+            self.practice=activate_provider(self,self.practice)
+            if hasattr(self.practice,'supports_grade'):self.choice_required.update(self.practice.questions)
 
     def ensure_week(self):
         with self.lock:
@@ -112,14 +116,39 @@ class LocalPilot:
             config=PilotConfig(wallet=True,batch_set_key=sk);self.week_cache=(start,config,m)
             return config,m
 
-    def principal(self,db,main,role):
+    def principal(self,db,main,role,grade=None):
         row=db.execute('SELECT * FROM local_principals WHERE main_account_id=?',(main['account_id'],)).fetchone()
         if row and row['main_student_id']!=main['student_id']:raise api.APIError('Mapping học sinh cần được rà lại.',409)
         if not row:
-            fake=SimpleNamespace(server=SimpleNamespace(),headers={},api_headers={})
-            session=api.register(fake,db,{'login':'local-pilot-'+str(main['account_id'])+'-'+secrets.token_hex(5),'password':secrets.token_urlsafe(32),'name':'Học sinh thí điểm','birthYear':main['birth_year']},credential=getattr(self,'mirror_credential',None))
+            if isinstance(main,dict) and 'family_id' in main:
+                # Trusted main session supplies identity/grade. A technical child
+                # mirror must not pass the old age-based public signup validator.
+                trusted_grade=grade if grade is not None else main.get('grade')
+                if type(trusted_grade) is not int or not 1<=trusted_grade<=5:raise api.APIError('Chưa xác định được khối học của con.',409)
+                code=secrets.token_hex(16)
+                aid=db.execute('INSERT INTO accounts(account_code,login_identifier,birth_year,invite_code,created_at,password_hash) VALUES(?,?,?,?,?,NULL)',
+                               ('LFP-'+code,'local-pilot-'+str(main['account_id'])+'-'+code,main['birth_year'],'5B'+code[:16].upper(),api.stamp())).lastrowid
+                sid=db.execute('INSERT INTO students(student_code,full_name,grade_level,account_id) VALUES(?,?,?,?)',
+                               ('LFP-'+code,'Học sinh thí điểm',trusted_grade,aid)).lastrowid
+                db.execute("INSERT INTO student_companions(student_id,mascot_id) SELECT ?,id FROM mascots WHERE name='Mầm Sách'",(sid,))
+                db.execute('INSERT INTO learning_preferences(student_id,theme) VALUES(?,?)',(sid,api.DEFAULT_THEME))
+                session={'account_id':aid,'student_id':sid}
+            else:
+                fake=SimpleNamespace(server=SimpleNamespace(),headers={},api_headers={})
+                session=api.register(fake,db,{'login':'local-pilot-'+str(main['account_id'])+'-'+secrets.token_hex(5),'password':secrets.token_urlsafe(32),'name':'Học sinh thí điểm','birthYear':main['birth_year']},credential=getattr(self,'mirror_credential',None))
             db.execute('INSERT INTO local_principals VALUES (?,?,?,?,?)',(main['account_id'],main['student_id'],session['account_id'],session['student_id'],api.stamp()))
             db.execute('DELETE FROM auth_sessions WHERE account_id=?',(session['account_id'],));row=db.execute('SELECT * FROM local_principals WHERE main_account_id=?',(main['account_id'],)).fetchone()
+        if isinstance(main,dict) and 'family_id' in main:
+            trusted_grade=grade if grade is not None else main.get('grade')
+            if type(trusted_grade) is not int or not 1<=trusted_grade<=5:raise api.APIError('Chưa xác định được khối học của con.',409)
+            db.execute('INSERT INTO local_pilot_family_grades VALUES(?,?,?,?,?,?) ON CONFLICT(pilot_student_id) DO UPDATE SET '
+                       'main_family_id=excluded.main_family_id,main_student_id=excluded.main_student_id,declared_grade=excluded.declared_grade,'
+                       'grade_academic_year=excluded.grade_academic_year,updated_at=excluded.updated_at',
+                       (row['pilot_student_id'],main['family_id'],main['student_id'],trusted_grade,api.academic()[0],api.stamp()))
+            # Correct older technical mirror grade history, never its true birth.
+            _,ayid=api.ensure_grade(db,row['pilot_student_id'],main['birth_year'])
+            db.execute('UPDATE student_grades SET grade_id=? WHERE student_id=? AND academic_year_id=?',(trusted_grade,row['pilot_student_id'],ayid))
+            db.execute('UPDATE students SET grade_level=? WHERE id=?',(trusted_grade,row['pilot_student_id']))
         expiry=main['vip_expires_at'] if role in ('VIP','VIP+') else None
         db.execute('UPDATE accounts SET vip_expires_at=? WHERE id=?',(expiry,row['pilot_account_id']))
         db.execute('UPDATE accounts SET vip_plus_expires_at=? WHERE id=?',(main['vip_plus_expires_at'] if role=='VIP+' else None,row['pilot_account_id']))
@@ -130,8 +159,8 @@ class LocalPilot:
         eligible=self.typed_eligible
         history=[{'id':str(r['exam_id']),'submitted':r['status']=='submitted','mode':r['response_mode']} for r in db.execute('SELECT a.exam_id,a.status,e.response_mode FROM exam_attempts a JOIN exams e ON e.id=a.exam_id WHERE a.student_id=? ORDER BY a.id DESC LIMIT 60',(session['student_id'],))]
         rows=[{'contentKey':q['contentKey'],'title':self.lessons[q['contentKey']]['title'],'access':q['proposedAccess'],'typed':q['contentKey'] in eligible,'choiceRequired':q['contentKey'] in self.choice_required,'skillKey':q['skillKey']} for q in self.choice['questions']]
-        result={'localPilot':True,'notice':'Thí điểm cục bộ lớp 5 · học liệu tự biên soạn, chờ giáo viên rà · ví/điểm riêng, không đổi VIP hoặc XP tài khoản chính','role':role,'internalUnlimited':role=='SVip','windowStart':m['windowStart'],'windowEnd':m['windowEnd'],'sets':m['freeSets'],'questions':rows,'typedEligible':sorted(eligible),'responsePolicy':'single-or-complete-choice-v1','wallet':wallet.balance(db,session,config),'history':history,'cycleNotice':'Chu kỳ ví thí điểm 30 ngày từ lần đầu sử dụng với quyền VIP; không thay kỳ thanh toán gói chính.'}
-        if self.practice:
+        result={'localPilot':True,'notice':'Thí điểm cục bộ lớp 5 · học liệu tự biên soạn, chờ giáo viên rà · ví/điểm riêng, không đổi VIP hoặc XP tài khoản chính','role':role,'internalUnlimited':role=='SVip','windowStart':m['windowStart'],'windowEnd':m['windowEnd'],'sets':m['freeSets'],'questions':rows,'typedEligible':sorted(eligible),'responsePolicy':'single-or-complete-choice-v1','wallet':wallet.balance(db,session,config),'history':history,'cycleNotice':('Gói năm: 30 câu mới/ngày, tối đa 3.600 câu cho toàn bộ kỳ 12 tháng; không đặt lại mỗi tháng.' if config.vip_cycle_start else 'Chu kỳ ví thí điểm 30 ngày từ lần đầu sử dụng với quyền VIP; không thay kỳ thanh toán gói chính.')}
+        if self.practice and not hasattr(self.practice,'catalogue'):
             from .free_vip_pilot import clock_window
             _,start,end=clock_window()
             available={r[0] for r in db.execute('SELECT i.content_key FROM pilot_set_items i JOIN pilot_sets s ON s.set_key=i.set_key WHERE s.grade=5 AND s.window_start=? AND s.window_end=?',(start,end))}
@@ -142,7 +171,16 @@ class LocalPilot:
             for q in result['questions']:
                 entry=eligible_by_key.get(q['contentKey']);q.update(eligible=entry is not None,cost=entry['cost'] if entry else None)
                 q.update(topicKey=self.practice.mapping[q['contentKey']]['proposedTopicKey'],responseMode='typed' if q['contentKey'] in self.typed_eligible else 'choice',difficulty=min(4,(self.practice.original[q['contentKey']]['difficultyOriginal']['value']-1)//3+1))
+        if hasattr(self.practice,'catalogue'):
+            result.update(restructureEnabled=True,knowledge=self.knowledge.catalogue(db,session) if config.grade==5 else {'topics':[],'lessons':[]},
+                          practiceCounts=[1,2,3,5,10],schoolReady=False,schoolAccess=role in ('VIP+','SVip'),
+                          advancedAccess=role in ('VIP+','SVip'),weekReady=False)
+            result=self.practice.catalogue(db,session,config,result)
         return result
+
+    def paid_inventory(self,db,grade=5):
+        if db is None or self.practice is None:return 0,0
+        return self.practice.paid_inventory(db,replace(self.week_cache[1],grade=grade))
 
     def lesson(self,db,session,eid,ck):
         attempt=api.owned_attempt(db,session,eid)
@@ -162,37 +200,80 @@ class LocalPilot:
             private=any(address in ipaddress.ip_network(network) for network in ('10.0.0.0/8','172.16.0.0/12','192.168.0.0/16'))
             lan=private and parsed.port in ports and not(parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment) and getattr(handler.server,'native_python_backend',False) is True
         except (ValueError,TypeError):pass
-        resume=bool(re.fullmatch(r'exams/[1-9][0-9]*(?:/(?:scratch|answers|submit|review|receipt|lesson|asset))?',path))
+        resume=bool(re.fullmatch(r'exams/[1-9][0-9]*(?:/(?:scratch|answers|submit|review|receipt|lesson|asset|retake))?',path))
         read=method=='GET' and (path in ('catalogue','history') or resume)
-        edit=method=='POST' and bool(re.fullmatch(r'exams/[1-9][0-9]*/(?:scratch|answers|submit)',path))
+        edit=method=='POST' and bool(re.fullmatch(r'exams/[1-9][0-9]*/(?:scratch|answers|submit|retake)',path))
         cloud=self is getattr(handler.server,'cloud_learning_provider',None)
         if cloud and (not api.same_origin(handler) or (method=='POST' and not handler.headers.get('Origin'))):raise api.APIError('Yêu cầu học tập phải cùng origin.',403)
         if not cloud and host not in expected and not(lan and (read or edit)):raise api.APIError('Tạo đề và thao tác kho thí điểm chỉ mở trên localhost. Em có thể mở bài đã có và tiếp tục làm qua LAN.',403)
         if not cloud and method=='POST' and handler.headers.get('Origin')!='http://'+host:raise api.APIError('Yêu cầu thí điểm phải cùng origin.',403)
+        allocated=method=='POST' and path in ('practice/quote','practice/exams')
+        sku=credits.funding(body) if allocated else None
+        if sku and (self.practice is None or cloud and not getattr(handler.server,'cloud_paid_credits_enabled',False)):credits.unavailable()
+        paid_create=bool(sku and path=='practice/exams')
         with api.connect(handler.server.database_path) as main_db:
             main=api.read_session(handler,main_db)
-            if not main:raise api.APIError('Em hãy đăng nhập tài khoản chính trước.',401)
+            if not main:
+                error=api.APIError('Em hãy đăng nhập tài khoản chính trước.',401)
+                from .family_accounts import family_present
+                if family_present(handler):error.familyAccessChanged=True
+                raise error
             if method=='POST' and not hmac.compare_digest(handler.headers.get('X-CSRF-Token',''),main['csrf_token']):raise api.APIError('Phiên đăng nhập cần tải lại.',403)
             if method=='POST' and path in ('quote','exams','practice/quote','practice/exams'):
                 from .system_settings import require_feature
                 require_feature(main_db,'practice_open')
-            grade=max(1,min(5,api.academic()[0]-main['birth_year']-5));role=membership(main_db,main)
+            grade=api.grade_for_student(main_db,main['student_id'],main['birth_year']);role=membership(main_db,main)
+            from .family_personal import effective_dates
+            # Trusted derived capabilities only; never change main paid columns.
+            main={**dict(main),**effective_dates(main_db,main['account_id'])}
+            from .subscriptions import active_annual_cycle
+            annual=active_annual_cycle(main_db,main) if role in ('VIP','VIP+') else None
             if method=='POST' and path in ('practice/quote','practice/exams') and body.get('category')=='school':
                 from .premium_content import require_plus
                 require_plus(main_db,main)
-            if method=='GET' and path.startswith('knowledge/'):
+            if path.startswith('knowledge/'):
                 from .system_settings import require_feature
                 require_feature(main_db,'learning_open')
             main_history=[]
             if self.practice and method=='GET' and path=='history':
                 from .practice_catalogue import history
                 main_history=history(main_db,main['student_id'],'main')
-        if grade!=5:raise api.APIError('Bộ thí điểm này dành cho lớp 5. Khối học và quyền tài khoản của em được giữ nguyên; không trừ lượt.',403)
-        config,m=self.ensure_week();config=replace(config,internal_unlimited=role=='SVip')
+        sample_grade=bool(hasattr(self.practice,'supports_grade') and self.practice.supports_grade(grade))
+        if grade!=5 and not sample_grade:raise api.APIError('Bộ thí điểm này dành cho lớp 5. Khối học và quyền tài khoản của em được giữ nguyên; không trừ lượt.',403)
+        if grade!=5 and path.startswith('knowledge/'):raise api.APIError('Bài giảng này thuộc khối 5.',403)
+        if grade!=5 and path in ('quote','exams','orders','mock-confirm','mock-fail'):raise api.APIError('Nguồn cũ này dành cho khối 5; hãy dùng bộ mẫu đúng lớp.',403)
+        config,m=self.ensure_week();config=replace(config,grade=grade,internal_unlimited=role=='SVip')
+        if annual:config=replace(config,vip_daily=30,vip_cycle=annual['limit'],vip_cycle_start=annual['start'],vip_cycle_end=annual['end'])
         from .database import initialize as initialize_database
         initialize_database(self.path)
-        with api.connect(self.path,True) as db:
-            require_qa(db);session=self.principal(db,main,role)
+        if paid_create:
+            with api.connect(self.path) as source:
+                key=credits.store_key(source)
+            credits.bind_native(handler.server.database_path,main['student_id'],key)
+        purchased_catalogue=(not cloud or getattr(handler.server,'cloud_paid_credits_enabled',False)) and self.practice and method=='GET' and path=='catalogue'
+        sample_free_create=bool(sample_grade and role=='Free' and not sku and method=='POST' and path=='practice/exams')
+        with ExitStack() as stack:
+            # Hold the canonical writer from before the pilot BEGIN until after
+            # its commit. The creation writes only the attempt store.
+            bank=stack.enter_context(api.connect(handler.server.database_path,paid_create or sample_free_create)) if sku or purchased_catalogue or sample_free_create else None
+            if paid_create or sample_free_create:
+                current=api.read_session(handler,bank)
+                if (not current or current['account_id']!=main['account_id'] or current['student_id']!=main['student_id']
+                        or not hmac.compare_digest(handler.headers.get('X-CSRF-Token',''),current['csrf_token'])):
+                    raise api.APIError('Phiên đăng nhập cần được tải lại.',403)
+                from .system_settings import require_feature
+                require_feature(bank,'practice_open')
+                if api.grade_for_student(bank,current['student_id'],current['birth_year'])!=grade:
+                    raise api.APIError('Hồ sơ không còn thuộc khối học này.',409)
+            db=stack.enter_context(api.connect(self.path,True))
+            require_qa(db);session=self.principal(db,main,role,grade)
+            if isinstance(main,dict) and 'family_id' in main and method=='POST' and path in ('exams','practice/exams'):
+                # The pilot store alone owns these attempt IDs and ledgers. Main
+                # attempt IDs can coincide; never compare unqualified IDs/stores.
+                key=body.get('requestKey')
+                previous=db.execute('SELECT 1 FROM pilot_requests WHERE student_id=? AND request_key=?',(session['student_id'],key)).fetchone() if isinstance(key,str) else None
+                if not previous and db.execute("SELECT 1 FROM exam_attempts WHERE student_id=? AND status='in_progress' AND due_at>? LIMIT 1",(session['student_id'],api.stamp())).fetchone():
+                    raise api.APIError('Con còn bài thí điểm đang làm. Hãy tiếp tục hoặc nộp bài trước khi mở lượt mới.',409)
             if (method=='POST' and path=='practice/export') or (method=='GET' and path=='practice/lookup'):
                 from .practice_export_api import available
                 if not available(handler):raise api.APIError('PDF và tra cứu mã chỉ mở trên localhost đã cấu hình.',503)
@@ -208,8 +289,18 @@ class LocalPilot:
                 if not prior and any(key in self.choice_required for key in keys if isinstance(key,str)):
                     raise api.APIError('Câu có nhiều ý hoặc nhiều đối tượng cần đáp số: em hãy chọn dạng trắc nghiệm đầy đủ.',409)
             if self.practice:
-                if method=='POST' and path=='practice/quote':return self.practice.quote(db,session,body,config)
-                if method=='POST' and path=='practice/exams':return {'exam':self.practice.create(db,session,body,config)}
+                if allocated:
+                    balances=credits.balance(bank,main['student_id'],db) if sku else None
+                    if path=='practice/quote':return self.practice.quote(db,session,body,config,balances=balances)
+                    result=self.practice.create(db,session,body,config,balances=balances,
+                                                bank_db=bank,bank_student_id=main['student_id'])
+                    if sample_free_create:
+                        from .learning_update import consume
+                        receipt=wallet.attempt_receipt(db,session,int(result['id']))
+                        category=receipt['allocation'].get('criteria',{}).get('category')
+                        if category not in ('content','combined'):raise api.APIError('Chưa xác định được hạn mức của đề.',503)
+                        consume(bank,current,category,body['requestKey'])
+                    return {'exam':result}
                 if method=='GET' and path=='history':
                     from .practice_catalogue import history
                     items=main_history+history(db,session['student_id'],'pilot');items.sort(key=lambda x:(x['startedAt'],x['reference']),reverse=True)
@@ -221,24 +312,36 @@ class LocalPilot:
                         if rev is not None and (not isinstance(rev,str) or not rev.isdigit()):raise api.APIError('Phiên bản không hợp lệ.')
                         return self.knowledge.lesson(db,session,parts[1],int(rev) if rev else None)
                     if len(parts)==3 and parts[2]=='check' and method=='POST':return self.knowledge.check(db,session,parts[1],body)
+                    if len(parts)==3 and parts[2]=='complete' and method=='POST':return self.knowledge.complete(db,session,parts[1],body)
                     if len(parts)==3 and parts[2]=='asset' and method=='GET':
                         rev=query.get('revision',[''])[0]
                         if not isinstance(rev,str) or not rev.isdigit():raise api.APIError('Cần phiên bản bài học cho tài sản.')
                         return self.knowledge.asset(db,session,parts[1],query.get('sha',[''])[0],int(rev))
                     raise api.APIError('Không có thao tác bài kiến thức này.',404)
-            if method=='GET' and path=='catalogue':return self.catalogue(db,session,config,m,role)
+            if method=='GET' and path=='catalogue':
+                result=self.catalogue(db,session,config,m,role)
+                if purchased_catalogue:
+                    balance=credits.catalogue(bank,main,self,native_db=db)
+                    result.update(purchasedCredits=balance,purchasedPractice=self.practice.paid_metadata(db,session,config,balance))
+                return result
             if method=='GET' and path=='wallet':return wallet.balance(db,session,config)
             if method=='POST' and path=='quote':return wallet.quote(db,session,body,config)
             if method=='POST' and path=='exams':return {'exam':create_exam(db,session,body,config)}
             if method=='POST' and path=='orders':return wallet.create_order(db,session,body)
             if method=='POST' and path in ('mock-confirm','mock-fail'):return wallet.mock_event(db,session,body,confirm=path=='mock-confirm')
-            found=re.fullmatch(r'exams/(\d+)(?:/(answers|submit|review|receipt|lesson|asset|scratch))?',path)
+            found=re.fullmatch(r'exams/(\d+)(?:/(answers|submit|review|receipt|lesson|asset|scratch|retake))?',path)
             if not found:raise api.APIError('Không có đường thí điểm này.',404)
             eid=int(found[1]);action=found[2];attempt=api.owned_attempt(db,session,eid)
+            if action=='retake' and method=='POST':
+                from .study_retake import retake
+                return retake(db,session,eid,body)
             if action=='scratch':
                 from .scratchpads import access
                 return access(db,session,eid,method,body,query)
-            if method=='GET' and action=='receipt':return wallet.attempt_receipt(db,session,eid)
+            if method=='GET' and action=='receipt':
+                bought=credits.receipt(db,session['student_id'],eid)
+                if bought:return {'examId':str(eid),'purchasedCredits':bought,'qaOnly':False}
+                return wallet.attempt_receipt(db,session,eid)
             if method=='GET' and action in ('lesson','asset'):
                 ck=query.get('contentKey',[''])[0];lesson=self.lesson(db,session,eid,ck)
                 if action=='lesson':return {'lesson':lesson,'examId':str(eid),'contentKey':ck}
@@ -249,18 +352,25 @@ class LocalPilot:
                 return {'_local_binary':bytes(row['payload']),'mime':row['mime']}
             if action=='review' and method=='GET':
                 if attempt['status']!='submitted':raise api.APIError('Chỉ xem lời giải sau khi nộp.',403)
-                return {'exam':api.exam_view(db,attempt),'contentKeys':[r[0] for r in db.execute('SELECT c.content_key FROM exam_items i JOIN question_versions v ON v.id=i.question_version_id JOIN pilot_content c ON c.question_id=v.question_id WHERE i.exam_id=? ORDER BY i.position',(eid,))]}
+                from .study_retake import annotate
+                return {'exam':annotate(db,session,api.exam_view(db,attempt),'pilot'),'contentKeys':[r[0] for r in db.execute('SELECT c.content_key FROM exam_items i JOIN question_versions v ON v.id=i.question_version_id JOIN pilot_content c ON c.question_id=v.question_id WHERE i.exam_id=? ORDER BY i.position',(eid,))]}
             if method not in ('GET','POST') or (method=='GET' and action) or (method=='POST' and action not in ('answers','submit')):raise api.APIError('Phương thức không hợp lệ.',405)
             if attempt['status']!='submitted' and api.stamp()>=attempt['due_at']:api.submit(db,attempt);attempt=api.owned_attempt(db,session,eid)
             if method=='POST' and action=='answers':
-                if set(body)!={'position','answer'} or type(body['position']) is not int or not isinstance(body['answer'],str) or len(body['answer'])>500:raise api.APIError('Câu trả lời không hợp lệ.')
+                family=isinstance(main,dict) and 'family_id' in main
+                if family and attempt['status']!='submitted':
+                    revision=db.execute('SELECT revision FROM family_exam_revisions WHERE attempt_id=?',(attempt['id'],)).fetchone()
+                    if type(body.get('revision')) is not int or body['revision']!=(revision[0] if revision else 0):raise api.APIError('Bài làm vừa được lưu trên thiết bị khác. Hãy tải lại và xem đáp án trước khi ghi tiếp.',409)
+                if set(body)!=({'position','answer','revision'} if family else {'position','answer'}) or type(body['position']) is not int or not isinstance(body['answer'],str) or len(body['answer'])>500:raise api.APIError('Câu trả lời không hợp lệ.')
                 if not db.execute('SELECT 1 FROM exam_items WHERE exam_id=? AND position=?',(eid,body['position'])).fetchone():raise api.APIError('Vị trí câu không hợp lệ.')
                 item=db.execute('SELECT options_json FROM exam_items WHERE exam_id=? AND position=?',(eid,body['position'])).fetchone()
                 from .practice_catalogue import item_pin
                 pin=item_pin(db,eid,body['position'])
                 mode=pin['response_mode'] if pin else attempt['response_mode']
                 if mode=='choice' and body['answer']!='' and body['answer'] not in json.loads(item[0]):raise api.APIError('Đáp án không thuộc lựa chọn của câu.')
-                if attempt['status']!='submitted':db.execute('INSERT INTO exam_draft_answers VALUES (?,?,?,?,?) ON CONFLICT(attempt_id,position) DO UPDATE SET answer=excluded.answer,saved_at=excluded.saved_at',(attempt['id'],eid,body['position'],body['answer'],api.stamp()))
+                if attempt['status']!='submitted':
+                    db.execute('INSERT INTO exam_draft_answers VALUES (?,?,?,?,?) ON CONFLICT(attempt_id,position) DO UPDATE SET answer=excluded.answer,saved_at=excluded.saved_at',(attempt['id'],eid,body['position'],body['answer'],api.stamp()))
+                    if family:db.execute('INSERT INTO family_exam_revisions(attempt_id,revision) VALUES(?,1) ON CONFLICT(attempt_id) DO UPDATE SET revision=revision+1',(attempt['id'],))
             elif method=='POST' and action=='submit':
                 if body:raise api.APIError('Nộp bài không nhận đáp án/điểm từ client.')
                 api.submit(db,attempt)

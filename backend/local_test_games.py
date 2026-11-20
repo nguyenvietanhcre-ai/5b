@@ -54,6 +54,10 @@ class NativeLocalTestGames:
 
     def metadata(self,kind):
         source=self.bot if kind=='bot' else self.arena
+        if getattr(self,'curriculum_samples',False):
+            return {**source.metadata(),'qaOnly':False,'localTest':True,'status':'local-sample','sample':True,
+                    'label':'Mẫu tự biên soạn · câu Free đúng lớp · chờ giáo viên duyệt',
+                    'policyStatus':'existing-game-limits-unchanged'}
         label=('Luyện với bot · Dữ liệu test cục bộ · Không tính kinh nghiệm/xếp hạng' if kind=='bot'
                else 'Bộ câu test riêng cho Đấu trí · Thử cục bộ · Chưa duyệt học liệu')
         return {**source.metadata(),'qaOnly':False,'localTest':True,'status':'local-test','label':label,
