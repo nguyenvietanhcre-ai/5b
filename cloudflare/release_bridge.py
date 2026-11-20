@@ -69,13 +69,56 @@ def install_release(database,learning,body):
     extras=json.loads(source.read_text(encoding='utf-8')) if source.exists() else None
     expected={'packageHash':digest,'batchId':BATCH}
     if extras:expected['learningHash']=hashlib.sha256(source.read_bytes()).hexdigest()
-    if not isinstance(body,dict) or body!=expected:raise APIError('Release identity mismatch.',409)
+    if not isinstance(body,dict):raise APIError('Release identity mismatch.',409)
+    segment=body.get('segment')
+    identity={k:v for k,v in body.items() if k!='segment'}
+    if identity!=expected:raise APIError('Release identity mismatch.',409)
+    if segment is not None:
+        if not isinstance(segment,dict) or set(segment)!={'store','offset'} or segment['store'] not in ('main','native','lessons') or type(segment['offset']) is not int:raise APIError('Invalid release segment.',409)
+        store,offset=segment['store'],segment['offset']
+        if store=='lessons':
+            if offset!=0:raise APIError('Invalid release segment.',409)
+            def finish_lessons():
+                for path,count in ((database,1500),(learning.path,2475)):
+                    with api.connect(path) as db:
+                        actual=db.execute('SELECT count(*) FROM curriculum_sample_versions WHERE batch_id=?',(BATCH,)).fetchone()[0]
+                        if actual!=count:raise APIError('Complete every source segment before importing lessons.',409)
+                lessons=install_lessons(database,learning,extras) if extras else {}
+                record_complete(database,digest,expected.get('learningHash',''))
+                return {'status':'passed','segment':segment,'lessons':lessons,'accountDataImported':False}
+            return database.run(finish_lessons)
+        eligible=[q for q in package['questions'] if store=='native' or q['access']=='free']
+        if offset<0 or offset>=len(eligible) or offset%250:raise APIError('Invalid release segment.',409)
+        selected=frozenset(q['id'] for q in eligible[offset:offset+250])
+        def apply_segment():
+            with api.connect(learning.path if store=='native' else database,True) as db:
+                result=install(db,package,pilot=store=='native',question_keys=selected)
+            return {'status':'passed','segment':segment,'result':result,'selected':len(selected),'accountDataImported':False}
+        return database.run(apply_segment)
     def apply():
         with api.connect(database,True) as main:main_result=install(main,package,pilot=False)
         with api.connect(learning.path,True) as native:native_result=install(native,package,pilot=True)
         extra_result=install_lessons(database,learning,extras) if extras else {}
+        record_complete(database,digest,expected.get('learningHash',''))
         return {'status':'passed','packageHash':digest,'main':main_result,'native':native_result,'lessons':extra_result,'accountDataImported':False}
     return database.run(apply)
+
+def record_complete(database,package_hash,learning_hash):
+    from sqlite_storage import Connection
+    db=Connection(database)
+    db.execute('CREATE TABLE IF NOT EXISTS release_source_installations(package_hash TEXT NOT NULL,learning_hash TEXT NOT NULL,PRIMARY KEY(package_hash,learning_hash))')
+    db.execute('INSERT OR IGNORE INTO release_source_installations VALUES(?,?)',(package_hash,learning_hash))
+
+def require_complete(database):
+    from backend.curriculum_samples import loaded_package,digest
+    from sqlite_storage import Connection
+    source=Path(__file__).with_name('release-content.json')
+    package=loaded_package()
+    learning_hash=hashlib.sha256(source.read_bytes()).hexdigest() if source.exists() else ''
+    with database.connect() as db:
+        present=db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='release_source_installations'").fetchone()
+        if not present or not package or not db.execute('SELECT 1 FROM release_source_installations WHERE package_hash=? AND learning_hash=?',(digest(package),learning_hash)).fetchone():
+            raise APIError('Complete the sealed source installation before opening the release.',409)
 
 def install_lessons(database,learning,source):
     from base64 import b64decode

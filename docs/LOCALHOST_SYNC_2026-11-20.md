@@ -8,4 +8,6 @@ Trước migration, máy chủ tạm ngừng API ghi và lưu mốc Cloudflare P
 
 Adapter Cloudflare tính hash PIN và gọi Bunny ngoài giao dịch SQL, lưu kết quả theo request để phát lại an toàn. Tạo video bị lặp không tạo thêm video; cài lại danh mục giữ metadata mới từ nhà cung cấp. Không tạo video hoặc chuyển khoản thật trong kiểm thử phát hành.
 
-Kiểm thử cục bộ gồm 822 kiểm thử Python trong Docker với đầu vào học liệu riêng, 38 kiểm thử adapter, actual workerd cho Family/Free/Paid/Trial và video hiện có; Chrome và Edge mỗi trình duyệt 48 tổ hợp trang/vai trò/kích thước. CI công khai bỏ qua rõ các trường hợp cần đầu vào riêng; cổng phát hành riêng vẫn chạy đủ. Điện thoại dùng viewport mô phỏng; chưa kiểm điện thoại vật lý hoặc Safari.
+Học liệu được cài theo các đợt tối đa 250 câu để giữ giới hạn CPU của gói Cloudflare hiện có. Mỗi đợt có giao dịch riêng và có thể gọi lại an toàn. Máy chủ từ chối mở bản mới cho đến khi cả hai kho đủ câu, bài giảng đã cài xong và đối chiếu dữ liệu cũ đạt.
+
+Kiểm thử cục bộ gồm 822 kiểm thử Python trong Docker với đầu vào học liệu riêng, 42 kiểm thử adapter, actual workerd cho Family/Free/Paid/Trial và video hiện có; Chrome và Edge mỗi trình duyệt 48 tổ hợp trang/vai trò/kích thước. CI công khai bỏ qua rõ các trường hợp cần đầu vào riêng; cổng phát hành riêng vẫn chạy đủ. Điện thoại dùng viewport mô phỏng; chưa kiểm điện thoại vật lý hoặc Safari.

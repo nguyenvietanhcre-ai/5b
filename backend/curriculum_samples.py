@@ -80,7 +80,7 @@ def validate_package(package):
     return digest(package)
 
 
-def install(db,package,*,pilot):
+def install(db,package,*,pilot,question_keys=None):
     """Caller supplies a writable transaction and backup; no old rows updated."""
     from .database import execute_sql
     from .question_access import digest as pin_digest,version
@@ -93,6 +93,7 @@ def install(db,package,*,pilot):
                (BATCH,package_hash,packed(package['authorization']),api.stamp()))
     topics={t['id']:t for t in package['topics']};inserted=0
     for q in package['questions']:
+        if question_keys is not None and q['id'] not in question_keys:continue
         # Main game selectors receive only Free items. Paid contents stay in the
         # native attempt store, behind its existing quote/grant/wallet controls.
         if not pilot and q['access']!='free':continue

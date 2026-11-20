@@ -14,7 +14,7 @@ from sqlite_storage import StorageDatabase
 import crypto_compat
 import transfer
 import release_audit
-from release_bridge import website_request,bunny_transport,bunny_lifecycle,install_release
+from release_bridge import website_request,bunny_transport,bunny_lifecycle,install_release,require_complete
 
 
 def api_path(path):
@@ -122,6 +122,7 @@ class SchoolBackend(DurableObject):
                 elif path == '/__ops/release-finalize' and method == 'POST':
                     raw=await bounded_body(request,4096)
                     if json.loads(raw)!={'releaseId':release_id}:raise APIError('Release identity mismatch.',409)
+                    require_complete(self.database)
                     payload=release_audit.finalize(self.database,release_id)
                 elif path == '/__ops/status' and method == 'GET':
                     payload = transfer.status(self.database)
